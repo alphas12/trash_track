@@ -63,7 +63,38 @@ A mobile application for tracking waste management.
    git push origin feature/your-feature-name
    ```
 
+### Project Structure
+
+The project follows a standard Flutter project structure:
+
+```dart
+lib/               # Main source code directory
+├── main.dart      # Application entry point (This is where your app starts!)
+├── screens/       # UI screens/pages
+├── widgets/       # Reusable widgets
+├── models/        # Data models
+├── services/      # Business logic and services
+├── utils/         # Utility functions and constants
+└── providers/     # State management providers
+
+test/             # Test files
+├── unit/         # Unit tests
+└── widget/       # Widget tests
+```
+
+When creating new files:
+1. All Dart source code files go under the `lib/` directory
+2. Create appropriate subdirectories based on the file's purpose:
+   - UI screens go in `lib/screens/`
+   - Reusable widgets go in `lib/widgets/`
+   - Data models go in `lib/models/`
+   - Services and APIs go in `lib/services/`
+   - Helper functions go in `lib/utils/`
+3. Tests should be placed in the `test/` directory
+
+
 ### Code Style Guidelines
+
 - Follow the [Dart Style Guide](https://dart.dev/guides/language/effective-dart/style)
 - Use meaningful variable and function names
 - Add comments for complex logic
