@@ -1,16 +1,81 @@
 # trash_track
 
-A new project
+A mobile application for tracking waste management.
 
-## Getting Started
+## Development Setup Guide
 
-This project is a starting point for a Flutter application.
+### Prerequisites
+1. Install the following software:
+   - [Android Studio](https://developer.android.com/studio)
+   - [Flutter SDK](https://flutter.dev/docs/get-started/install)
+   - [Git](https://git-scm.com/downloads)
 
-A few resources to get you started if this is your first Flutter project:
+### Setting up the Project in Android Studio
+1. **Install Flutter and Dart plugins**
+   - Open Android Studio
+   - Navigate to `Plugins`
+   - Search for "Flutter" and install it (this will also install the Dart plugin)
+   - Restart Android Studio
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+2. **Clone the Repository**
+   ```bash
+   git clone https://github.com/alphas12/trash_track.git
+   ```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+3. **Open the Project**
+   - Open Android Studio
+   - Click on `File > Open`
+   - Navigate to the cloned `trash_track` directory
+   - Click `Open`
+   - Wait for Android Studio to detect Flutter framework and download dependencies
+
+4. **Get Dependencies**
+   - Open the terminal in Android Studio (`View > Tool Windows > Terminal`)
+   - Run: `flutter pub get`
+
+5. **Set up an Emulator**
+   - Go to `Tools > Device Manager`
+   - Click on `Create Device`
+   - Select a phone model (e.g., Pixel 4)
+   - Download and select a system image (recommend: API 35 )
+   - Complete the emulator setup with default settings
+
+### Running the Project
+1. Select your emulator from the device dropdown menu
+2. Click the 'Run' button (green play button) or press `^ R` (Mac) / `Shift+F10` (Windows)
+
+### Development Workflow
+1. Create a new branch for your feature/fix:
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+
+2. Make your changes and test them thoroughly
+
+3. Commit your changes:
+   ```bash
+   git add .
+   git commit -m "Description of your changes"
+   ```
+
+4. Push your branch and create a pull request:
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+
+### Code Style Guidelines
+- Follow the [Dart Style Guide](https://dart.dev/guides/language/effective-dart/style)
+- Use meaningful variable and function names
+- Add comments for complex logic
+- Write unit tests for new features
+
+### Useful Resources
+- [Flutter Documentation](https://docs.flutter.dev/)
+- [Dart Programming Language](https://dart.dev/)
+- [Flutter Packages](https://pub.dev/)
+- [Android Studio Documentation](https://developer.android.com/studio/intro)
+
+### Need Help?
+- Check the [Flutter GitHub Issues](https://github.com/flutter/flutter/issues)
+- Join the [Flutter Discord Community](https://discord.gg/flutter)
+- Stack Overflow tags: [flutter](https://stackoverflow.com/questions/tagged/flutter), [dart](https://stackoverflow.com/questions/tagged/dart)
