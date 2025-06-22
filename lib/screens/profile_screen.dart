@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/custom_bottom_nav_bar.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -8,6 +9,15 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  int _selectedIndex = 4; // Set to 4 since Profile/Settings is the last tab
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+      // TODO: Add navigation logic here when other screens are ready
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,6 +58,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ],
         ),
+      ),
+      bottomNavigationBar: CustomBottomNavBar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
       ),
     );
   }
