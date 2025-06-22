@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'screens/profile_screen.dart';
+import 'screens/login_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,7 +18,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
       // This is equivalent to setting the LAUNCHER activity in AndroidManifest.xml
-      home: const ProfileScreen(), // This screen will launch first
+        home: const LoginPage(), // This screen will launch first
     );
   }
 }
