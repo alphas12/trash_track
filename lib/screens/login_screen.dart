@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:trash_track/screens/signup_page.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
@@ -23,16 +24,11 @@ class LoginPage extends StatelessWidget {
                   children: [
                     IconButton(
                       icon: const Icon(Icons.arrow_back_ios_new),
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
                     ),
-                    const SizedBox(height: 10),
-                    const Center(
-                      child: Text(
-                        'Login',
-                        style: TextStyle(fontSize: 14, color: Colors.black45),
-                      ),
-                    ),
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 50),
                     Text(
                       'Welcome\nback!',
                       style: TextStyle(
@@ -95,6 +91,19 @@ class LoginPage extends StatelessWidget {
                           'Login',
                           style: TextStyle(fontSize: 16, letterSpacing: 1.2, color: Colors.white),
                         ),
+                      ),
+                    ),
+                    const SizedBox(height: 1),
+                    Align(
+                      alignment: Alignment.center,
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const SignUpPage()),
+                          );
+                        },
+                        child: const Text("Don't have an account?"),
                       ),
                     ),
                   ],
