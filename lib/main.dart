@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'screens/dashboard_screen.dart';
+import 'screens/intro_screen.dart';
+import 'screens/welcome_screen.dart';
+import 'screens/login_screen.dart';
+import 'screens/signup_options.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,7 +17,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
 
-      home: const DashboardScreen(),
+      initialRoute: '/intro',
+      routes: {
+        '/intro': (context) => const IntroScreen(),
+        '/welcome': (context) => const WelcomeScreen(),
+        '/signup': (context) => const SignUpOptionsPage(),
+        '/login': (context) => const LoginPage(),
+        '/dashboard': (context) => const DashboardScreen(),
+      },
     );
   }
 }
