@@ -77,7 +77,7 @@ flutter:
     - assets/icons/settings_active.png
     - assets/images/intro_screen.gif
     - assets/images/welcome_screen.png
-
+>>>>>>> main
 
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a

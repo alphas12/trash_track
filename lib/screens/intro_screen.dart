@@ -21,11 +21,11 @@ class _IntroScreenState extends State<IntroScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF576334), // example hex background
+      backgroundColor: const Color(0xFF576334),
       body: Center(
         child: Image.asset(
           'assets/images/intro_screen.gif',
-          height: 250, // Increased size
+          height: 250,
           width: 250,
         ),
       ),
