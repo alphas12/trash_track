@@ -13,51 +13,69 @@ class CustomBottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.white,
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(24), // Top corners only
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black12,
             blurRadius: 10,
-            offset: const Offset(0, -5),
+            offset: Offset(0, -3),
           ),
         ],
       ),
-      child: BottomNavigationBar(
-        currentIndex: currentIndex,
-        onTap: onTap,
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.white,
-        selectedItemColor: const Color(0xFF4A5F44),
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.map_outlined),
-            activeIcon: Icon(Icons.map),
-            label: 'Map',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.list_alt_outlined),
-            activeIcon: Icon(Icons.list_alt),
-            label: 'Services',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.notifications_outlined),
-            activeIcon: Icon(Icons.notifications),
-            label: 'Notifications',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings_outlined),
-            activeIcon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: List.generate(_navIcons.length, (index) {
+          final isSelected = index == currentIndex;
+
+          return GestureDetector(
+            onTap: () => onTap(index),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: isSelected ? const Color(0xFF4A5F44).withOpacity(0.1) : Colors.transparent,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Image.asset(
+                isSelected
+                    ? _navIcons[index]['active']!
+                    : _navIcons[index]['default']!,
+                width: 25,
+                height: 25,
+              ),
+            ),
+          );
+        }),
       ),
     );
   }
 }
+
+// 🧩 Swap in your actual image asset paths here
+final List<Map<String, String>> _navIcons = [
+  {
+    'default': 'assets/icons/home.png',
+    'active': 'assets/icons/home_active.png',
+  },
+  {
+    'default': 'assets/icons/collections.png',
+    'active': 'assets/icons/collections_active.png',
+  },
+  {
+    'default': 'assets/icons/appointments.png',
+    'active': 'assets/icons/appointments_active.png',
+  },
+  {
+    'default': 'assets/icons/notifications.png',
+    'active': 'assets/icons/notifications_active.png',
+  },
+  {
+    'default': 'assets/icons/settings.png',
+    'active': 'assets/icons/settings_active.png',
+  },
+];
