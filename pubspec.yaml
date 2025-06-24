@@ -63,6 +63,21 @@ flutter:
     - assets/images/Noise & Texture.png
     - assets/images/qr_code.png
     - assets/images/Junkify.png
+<<<<<<< Updated upstream
+=======
+    - assets/images/intro_screen.gif
+    - assets/images/welcome_screen.png
+    - assets/icons/home.png
+    - assets/icons/home_active.png
+    - assets/icons/collections.png
+    - assets/icons/collections_active.png
+    - assets/icons/appointments.png
+    - assets/icons/appointments_active.png
+    - assets/icons/notifications.png
+    - assets/icons/notifications_active.png
+    - assets/icons/settings.png
+    - assets/icons/settings_active.png
+>>>>>>> Stashed changes
 
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a
