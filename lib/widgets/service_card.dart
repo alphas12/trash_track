@@ -116,7 +116,16 @@ class ServiceCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      Text(
+                        distance,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.white,
+                          fontFamily: 'Mallanna',
+                        ),
+                      ),
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 8,
@@ -128,22 +137,18 @@ class ServiceCard extends StatelessWidget {
                               : Colors.red[400],
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        child: Text(
-                          status.toLowerCase(),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontFamily: 'Mallanna',
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        distance,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.white,
-                          fontFamily: 'Mallanna',
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              status.toLowerCase(),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontFamily: 'Mallanna',
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
