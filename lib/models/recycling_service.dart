@@ -7,6 +7,7 @@ class RecyclingService {
   final String address;
   final List<String> serviceTypes;
   final bool isFavorite;
+  final double rating;
 
   RecyclingService({
     required this.id,
@@ -17,6 +18,7 @@ class RecyclingService {
     required this.address,
     required this.serviceTypes,
     this.isFavorite = false,
+    this.rating = 0.0,
   });
 
   // Helper method to get formatted distance

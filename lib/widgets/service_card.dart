@@ -9,6 +9,7 @@ class ServiceCard extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onFavorite;
   final bool isFavorite;
+  final double rating;
 
   const ServiceCard({
     super.key,
@@ -20,32 +21,24 @@ class ServiceCard extends StatelessWidget {
     this.onTap,
     this.onFavorite,
     this.isFavorite = false,
+    this.rating = 0.0,
   });
 
   @override
   Widget build(BuildContext context) {
-    // Get the screen width for responsive sizing
     final screenWidth = MediaQuery.of(context).size.width;
-    // Calculate card width to fit two cards with proper spacing
-    final cardWidth = (screenWidth - 48) / 2; // 32 padding on sides + 16 between cards
+    final cardWidth = (screenWidth - 48) / 2;
 
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: cardWidth,
-        height: 180, // Reduced height to match design
+        height: 180,
         decoration: BoxDecoration(
           color: Colors.black,
           borderRadius: BorderRadius.circular(12),
           image: imageUrl != null
-              ? DecorationImage(
-                  image: AssetImage(imageUrl!),
-                  fit: BoxFit.cover,
-                  colorFilter: ColorFilter.mode(
-                    Colors.black.withOpacity(0.3),
-                    BlendMode.darken,
-                  ),
-                )
+              ? DecorationImage(image: AssetImage(imageUrl!), fit: BoxFit.cover)
               : null,
         ),
         child: Stack(
@@ -57,10 +50,7 @@ class ServiceCard extends StatelessWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    Colors.black.withOpacity(0.8),
-                  ],
+                  colors: [Colors.transparent, Colors.black.withOpacity(0.9)],
                 ),
               ),
             ),
@@ -78,7 +68,7 @@ class ServiceCard extends StatelessWidget {
                   onTap: onFavorite,
                   child: Icon(
                     isFavorite ? Icons.favorite : Icons.favorite_border,
-                    color: isFavorite? Color(0xFF4A5F44): Colors.white,
+                    color: isFavorite ? Color(0xFF4A5F44) : Colors.white,
                     size: 20,
                   ),
                 ),
@@ -93,7 +83,6 @@ class ServiceCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Title and Status
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -109,8 +98,35 @@ class ServiceCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
+                      Row(
+                        children: [
+                          Icon(Icons.star, color: Colors.amber, size: 16),
+                          const SizedBox(width: 4),
+                          Text(
+                            rating.toStringAsFixed(1),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontFamily: 'Mallanna',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        distance,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.white,
+                          fontFamily: 'Mallanna',
+                        ),
+                      ),
                       Container(
-                        margin: const EdgeInsets.only(left: 8),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 8,
                           vertical: 2,
@@ -121,49 +137,31 @@ class ServiceCard extends StatelessWidget {
                               : Colors.red[400],
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        child: Text(
-                          status.toLowerCase(),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontFamily: 'Mallanna',
-                          ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              status.toLowerCase(),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontFamily: 'Mallanna',
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 4),
-                  // Distance and Service Types
-                  Row(
-                    children: [
-                      Text(
-                        distance,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.white,
-                          fontFamily: 'Mallanna',
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      const Text(
-                        '|',
-                        style: TextStyle(
-                          color: Colors.white70,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          serviceTypes.join(', '),
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Colors.white,
-                            fontFamily: 'Mallanna',
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
+                  Text(
+                    serviceTypes.join(', '),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.white70,
+                      fontFamily: 'Mallanna',
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
