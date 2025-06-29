@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:trash_track/screens/qr_confirmation_page.dart';
 
 class AppointmentDetailsPage extends StatelessWidget {
-  final bool isPickup; // toggle this for pickup/drop-off
-  const AppointmentDetailsPage({super.key, this.isPickup = false}); // change true to false & vice versa
+  final Map<String, String?> appointment;
+
+  const AppointmentDetailsPage({super.key, required this.appointment});
 
   @override
   Widget build(BuildContext context) {
+    final isPickup = appointment["type"] == "Pick Up";
+    final id = appointment["id"] ?? "N/A";
+
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -58,7 +63,12 @@ class AppointmentDetailsPage extends StatelessWidget {
               const Spacer(),
               ElevatedButton(
                 onPressed: () {
-                  // Confirm logic or navigate to QR page
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => QRConfirmationPage(appointmentId: "1"), // 1 is a placeholder
+                    ),
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF4B5320),

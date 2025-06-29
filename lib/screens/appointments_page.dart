@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'appointment_details_page.dart'; // Make sure this exists and accepts a Map<String, String?>
 
 class AppointmentsPage extends StatelessWidget {
   const AppointmentsPage({super.key});
@@ -7,18 +8,26 @@ class AppointmentsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final appointments = [
       {
+        "id": "A123",
         "datetime": "Today at 09:00 A.M.",
         "location": "Junkify",
         "type": "Drop-Off",
         "status": "Pending",
         "waste": "12 pcs. of plastic bottles",
+        "notes": "None",
       },
       {
+        "id": "B456",
         "datetime": "Wednesday at 12:00 P.M.",
         "location": "ReClaim",
         "type": "Pick Up",
         "status": "N/A",
         "waste": "12 pcs. of plastic bottles",
+        "notes": "Placed on the front gate.",
+        "address": "123 Street, Barangay ABC, Cebu City",
+        "phone": "09123456789",
+        "driverName": "Trash Track",
+        "driverNumber": "0987654321",
       },
     ];
 
@@ -47,7 +56,12 @@ class AppointmentsPage extends StatelessWidget {
 
           return GestureDetector(
             onTap: () {
-              // Future: Navigate to appointment detail
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => AppointmentDetailsPage(appointment: appt),
+                ),
+              );
             },
             child: Container(
               margin: const EdgeInsets.only(bottom: 15),
@@ -92,23 +106,6 @@ class AppointmentsPage extends StatelessWidget {
           );
         },
       ),
-      //bottomNavigationBar: _buildBottomNav(),
     );
   }
-
-  // Widget _buildBottomNav() {
-  //   return BottomNavigationBar(
-  //     selectedItemColor: const Color(0xFF4B5320),
-  //     unselectedItemColor: Colors.grey,
-  //     currentIndex: 2,
-  //     type: BottomNavigationBarType.fixed,
-  //     items: const [
-  //       BottomNavigationBarItem(icon: Icon(Icons.home), label: ""),
-  //       BottomNavigationBarItem(icon: Icon(Icons.bookmark), label: ""),
-  //       BottomNavigationBarItem(icon: Icon(Icons.view_list), label: ""),
-  //       BottomNavigationBarItem(icon: Icon(Icons.notifications), label: ""),
-  //       BottomNavigationBarItem(icon: Icon(Icons.settings), label: ""),
-  //     ],
-  //   );
-  // }
 }
