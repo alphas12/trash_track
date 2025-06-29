@@ -77,6 +77,24 @@ flutter:
     - assets/icons/settings_active.png
     - assets/images/intro_screen.gif
     - assets/images/welcome_screen.png
+    - assets/icons/beauty.png
+    - assets/icons/beauty_active.png
+    - assets/icons/fashion.png
+    - assets/icons/fashion_active.png
+    - assets/icons/food.png
+    - assets/icons/food_active.png
+    - assets/icons/health.png
+    - assets/icons/health_active.png
+    - assets/icons/lifestyle.png
+    - assets/icons/lifestyle_active.png
+    - assets/icons/pet.png
+    - assets/icons/pet_active.png
+    - assets/icons/recycle.png
+    - assets/icons/services.png
+    - assets/icons/services_active.png
+    - assets/icons/tech.png
+    - assets/icons/tech_active.png
+    - assets/images/eco_shop.png
 
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a
