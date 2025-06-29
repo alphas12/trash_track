@@ -20,16 +20,15 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
 
-      home: const EcoShopScreen()
-      // initialRoute: '/intro',
-      // routes: {
-      //   '/intro': (context) => const IntroScreen(),
-      //   '/welcome': (context) => const WelcomeScreen(),
-      //   '/signup': (context) => const SignUpOptionsPage(),
-      //   '/login': (context) => const LoginPage(),
-      //   '/dashboard': (context) => const DashboardScreen(),
-      //   '/bookmark': (context) => const CollectionsPage(),
-      // },
+      initialRoute: '/intro',
+      routes: {
+        '/intro': (context) => const IntroScreen(),
+        '/welcome': (context) => const WelcomeScreen(),
+        '/signup': (context) => const SignUpOptionsPage(),
+        '/login': (context) => const LoginPage(),
+        '/dashboard': (context) => const DashboardScreen(),
+        '/bookmark': (context) => const CollectionsPage(),
+      },
     );
   }
 }
