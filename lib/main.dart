@@ -5,6 +5,7 @@ import 'screens/welcome_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/signup_options.dart';
 import 'screens/loading_screen.dart';
+import 'screens/bookmark_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -25,6 +26,7 @@ class MyApp extends StatelessWidget {
         '/signup': (context) => const SignUpOptionsPage(),
         '/login': (context) => const LoginPage(),
         '/dashboard': (context) => const DashboardScreen(),
+        '/bookmark': (context) => const CollectionsPage(),
       },
     );
   }
