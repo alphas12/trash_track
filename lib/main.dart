@@ -8,7 +8,6 @@ import 'screens/welcome_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/signup_options.dart';
 import 'screens/loading_screen.dart';
-import 'screens/bookmark_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -22,7 +21,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
 
-      initialRoute: '/intro',
+      initialRoute: '/bookmark',
       routes: {
         '/intro': (context) => const IntroScreen(),
         '/welcome': (context) => const WelcomeScreen(),
