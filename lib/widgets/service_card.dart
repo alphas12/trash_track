@@ -66,10 +66,13 @@ class ServiceCard extends StatelessWidget {
                 ),
                 child: GestureDetector(
                   onTap: onFavorite,
-                  child: Icon(
-                    isFavorite ? Icons.favorite : Icons.favorite_border,
-                    color: isFavorite ? Color(0xFF4A5F44) : Colors.white,
-                    size: 20,
+                  child: Image.asset(
+                    isFavorite
+                        ? 'assets/icons/collections_active.png'
+                        : 'assets/icons/collections.png',
+                    width: 20,
+                    height: 20,
+                    color: isFavorite ? const Color(0xFF4A5F44) : Colors.white,
                   ),
                 ),
               ),
