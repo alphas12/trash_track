@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:trash_track/screens/bookmark_screen.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/intro_screen.dart';
 import 'screens/welcome_screen.dart';
@@ -25,6 +26,7 @@ class MyApp extends StatelessWidget {
         '/signup': (context) => const SignUpOptionsPage(),
         '/login': (context) => const LoginPage(),
         '/dashboard': (context) => const DashboardScreen(),
+        '/bookmark': (context) => const CollectionsPage(),
       },
     );
   }
