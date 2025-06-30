@@ -106,6 +106,14 @@ When creating new files:
 - [Flutter Packages](https://pub.dev/)
 - [Android Studio Documentation](https://developer.android.com/studio/intro)
 
+### Contributors
+
+Big thanks to the following people for coding everything:
+
+- [@DestinEcarma](https://github.com/DestinEcarma)
+- [@elderfieldzeus](https://github.com/elderfieldzeus)
+- [@despee](https://github.com/despee)
+
 ### Need Help?
 - Check the [Flutter GitHub Issues](https://github.com/flutter/flutter/issues)
 - Join the [Flutter Discord Community](https://discord.gg/flutter)
