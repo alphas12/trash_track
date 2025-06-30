@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:trash_track/screens/appointments_page.dart';
 import 'package:trash_track/screens/qr_confirmation_page.dart';
 
 class AppointmentDetailsPage extends StatelessWidget {
@@ -61,30 +62,59 @@ class AppointmentDetailsPage extends StatelessWidget {
                 ),
               ],
               const Spacer(),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => QRConfirmationPage(appointmentId: "1"), // 1 is a placeholder
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => QRConfirmationPage(appointmentId: "1"),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF4B5320),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text(
+                        "Confirm",
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF4B5320),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
                   ),
-                ),
-                child: const Center(
-                  child: Text(
-                    "Confirm",
-                    style: TextStyle(color: Colors.white),
+                  const SizedBox(width: 12), // spacing between buttons
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const AppointmentsPage(),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red[400],
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text(
+                        "Cancel",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
               const SizedBox(height: 30),
+
             ],
           ),
         ),
