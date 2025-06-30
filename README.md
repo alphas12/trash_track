@@ -110,9 +110,9 @@ When creating new files:
 
 Big thanks to the following people for coding everything:
 
-- @DestinEcarma
-- @elderfieldzeus
-- @despee
+- [@DestinEcarma](https://github.com/DestinEcarma)
+- [@elderfieldzeus](https://github.com/elderfieldzeus)
+- [@despee](https://github.com/despee)
 
 ### Need Help?
 - Check the [Flutter GitHub Issues](https://github.com/flutter/flutter/issues)
