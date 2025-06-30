@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:trash_track/screens/bookmark_screen.dart';
+import 'screens/eco_shop_screen.dart';
+import 'screens/settings_screen.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/intro_screen.dart';
 import 'screens/welcome_screen.dart';
@@ -18,13 +21,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
 
-      initialRoute: '/intro',
+      initialRoute: '/bookmark',
       routes: {
         '/intro': (context) => const IntroScreen(),
         '/welcome': (context) => const WelcomeScreen(),
         '/signup': (context) => const SignUpOptionsPage(),
         '/login': (context) => const LoginPage(),
         '/dashboard': (context) => const DashboardScreen(),
+        '/bookmark': (context) => const CollectionsPage(),
       },
     );
   }

@@ -3,6 +3,9 @@ import '../models/recycling_service.dart';
 import '../services/recycling_service_repository.dart';
 import '../widgets/custom_bottom_nav_bar.dart';
 import '../widgets/service_card.dart';
+import '../screens/search_screen.dart';
+import '../screens/recommended_screen.dart';
+import '../screens/top_services_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -15,7 +18,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   int _selectedIndex = 0;
   final RecyclingServiceRepository _repository = RecyclingServiceRepository();
   List<RecyclingService> _recommendedServices = [];
-  List<RecyclingService> _nearestServices = [];
+  List<RecyclingService> _topServices = [];
   bool _isLoading = true;
 
   @override
@@ -25,26 +28,80 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> _loadServices() async {
+    if (!mounted) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
     try {
       final recommended = await _repository.getRecommendedServices();
-      final nearest = await _repository.getNearestServices();
+      final topServices = await _repository.getTopServices();
+
+      if (!mounted) return;
+
       setState(() {
         _recommendedServices = recommended;
-        _nearestServices = nearest;
+        _topServices = topServices;
         _isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
+
       setState(() {
         _isLoading = false;
       });
-      // Handle error appropriately
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Error loading services: ${e.toString()}',
+            style: const TextStyle(fontFamily: 'Mallanna'),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
-  void _onItemTapped(int index) {
+  // Navigation is now handled in the CustomBottomNavBar
+
+  void _toggleFavorite(RecyclingService service) {
     setState(() {
-      _selectedIndex = index;
+      final index = _recommendedServices.indexWhere((s) => s.id == service.id);
+      if (index != -1) {
+        _recommendedServices[index] = RecyclingService(
+          id: service.id,
+          name: service.name,
+          distance: service.distance,
+          status: service.status,
+          imageUrl: service.imageUrl,
+          address: service.address,
+          serviceTypes: service.serviceTypes,
+          rating: service.rating,
+          isFavorite: !service.isFavorite,
+        );
+      }
+
+      final topIndex = _topServices.indexWhere((s) => s.id == service.id);
+      if (topIndex != -1) {
+        _topServices[topIndex] = RecyclingService(
+          id: service.id,
+          name: service.name,
+          distance: service.distance,
+          status: service.status,
+          imageUrl: service.imageUrl,
+          address: service.address,
+          serviceTypes: service.serviceTypes,
+          rating: service.rating,
+          isFavorite: !service.isFavorite,
+        );
+      }
     });
+  }
+
+  void _onServiceTap(RecyclingService service) {
+    // For now, just print to console. Later we can navigate to a details screen
+    print('Service tapped: ${service.name}');
   }
 
   @override
@@ -157,47 +214,45 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     children: [
                                       // Search Bar
                                       Expanded(
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 16,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: const Color(0xFFD9D9D9),
-                                            borderRadius: BorderRadius.circular(
-                                              12,
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    const SearchScreen(),
+                                              ),
+                                            );
+                                          },
+                                          child: Container(
+                                            height: 52,
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 16,
                                             ),
-                                          ),
-                                          child: Row(
-                                            children: [
-                                              const Icon(
-                                                Icons.search,
-                                                color: Color(0xFF4A5F44),
-                                              ),
-                                              const SizedBox(width: 8),
-                                              Expanded(
-                                                child: TextField(
-                                                  style: const TextStyle(
-                                                    fontFamily: 'Mallanna',
-                                                    fontSize: 16,
-                                                  ),
-                                                  decoration:
-                                                      const InputDecoration(
-                                                        hintText: 'Search',
-                                                        hintStyle: TextStyle(
-                                                          fontFamily:
-                                                              'Mallanna',
-                                                          color: Colors.grey,
-                                                        ),
-                                                        border:
-                                                            InputBorder.none,
-                                                        contentPadding:
-                                                            EdgeInsets.symmetric(
-                                                              vertical: 15,
-                                                            ),
-                                                      ),
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFFD9D9D9),
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                const Icon(
+                                                  Icons.search,
+                                                  color: Color(0xFF4A5F44),
                                                 ),
-                                              ),
-                                            ],
+                                                const SizedBox(width: 8),
+                                                const Expanded(
+                                                  child: Text(
+                                                    'Search',
+                                                    style: TextStyle(
+                                                      fontFamily: 'Mallanna',
+                                                      fontSize: 16,
+                                                      color: Colors.grey,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -253,7 +308,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   ),
                                   TextButton(
                                     onPressed: () {
-                                      // Handle see all
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              const RecommendedScreen(),
+                                        ),
+                                      );
                                     },
                                     child: const Text(
                                       'See All',
@@ -284,7 +345,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     alignment: WrapAlignment.center,
                                     spacing: 16,
                                     runSpacing: 16,
-                                    children: _recommendedServices.map((
+                                    children: _recommendedServices.take(2).map((
                                       service,
                                     ) {
                                       return ServiceCard(
@@ -294,24 +355,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                         serviceTypes: service.serviceTypes,
                                         imageUrl: service.imageUrl,
                                         isFavorite: service.isFavorite,
-                                        onTap: () {
-                                          // Handle service tap
-                                        },
-                                        onFavorite: () {
-                                          // Handle favorite toggle
-                                        },
+                                        rating: service.rating,
+                                        onTap: () => _onServiceTap(service),
+                                        onFavorite: () =>
+                                            _toggleFavorite(service),
                                       );
                                     }).toList(),
                                   ),
                                 ),
                               const SizedBox(height: 32),
-                              // Nearest Services Section
+                              // Top Services Section
                               Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   const Text(
-                                    'Nearest Services',
+                                    'Top Services',
                                     style: TextStyle(
                                       fontSize: 24,
                                       fontWeight: FontWeight.bold,
@@ -320,7 +379,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   ),
                                   TextButton(
                                     onPressed: () {
-                                      // Handle see all
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              const TopServicesScreen(),
+                                        ),
+                                      );
                                     },
                                     child: const Text(
                                       'See All',
@@ -335,10 +400,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               const SizedBox(height: 16),
                               if (_isLoading)
                                 const Center(child: CircularProgressIndicator())
-                              else if (_nearestServices.isEmpty)
+                              else if (_topServices.isEmpty)
                                 const Center(
                                   child: Text(
-                                    'No nearby services available',
+                                    'No top services available',
                                     style: TextStyle(
                                       fontFamily: 'Mallanna',
                                       fontSize: 16,
@@ -351,7 +416,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     alignment: WrapAlignment.center,
                                     spacing: 16,
                                     runSpacing: 16,
-                                    children: _nearestServices.map((service) {
+                                    children: _topServices.take(2).map((
+                                      service,
+                                    ) {
                                       return ServiceCard(
                                         title: service.name,
                                         distance: service.formattedDistance,
@@ -359,12 +426,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                         serviceTypes: service.serviceTypes,
                                         imageUrl: service.imageUrl,
                                         isFavorite: service.isFavorite,
-                                        onTap: () {
-                                          // Handle service tap
-                                        },
-                                        onFavorite: () {
-                                          // Handle favorite toggle
-                                        },
+                                        rating: service.rating,
+                                        onTap: () => _onServiceTap(service),
+                                        onFavorite: () =>
+                                            _toggleFavorite(service),
                                       );
                                     }).toList(),
                                   ),
@@ -382,8 +447,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
       ),
       bottomNavigationBar: CustomBottomNavBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
+        currentIndex: 0,
+        onTap: (index) {},
       ),
     );
   }
