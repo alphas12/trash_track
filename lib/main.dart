@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:trash_track/screens/bookmark_screen.dart';
 import 'package:trash_track/screens/eco_shop_screen.dart';
 import 'package:trash_track/screens/settings_screen.dart';
@@ -9,7 +10,15 @@ import 'screens/login_screen.dart';
 import 'screens/signup_options.dart';
 import 'screens/loading_screen.dart';
 
-void main() {
+void main() async {
+
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Supabase.initialize(
+    url: 'https://ywwwbihmwddykdwnrvtr.supabase.co',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3d3diaWhtd2RkeWtkd25ydnRyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAzNDA3MTYsImV4cCI6MjA2NTkxNjcxNn0.U7lKSxrqq1I7VfV8hnSTnnCe-t-u2c4FGXEgMoePnpw',
+  );
+
   runApp(const MyApp());
 }
 
@@ -21,7 +30,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
 
-      initialRoute: '/bookmark',
+      initialRoute: '/intro',
       routes: {
         '/intro': (context) => const IntroScreen(),
         '/welcome': (context) => const WelcomeScreen(),
