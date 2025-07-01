@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:trash_track/screens/bookmark_screen.dart';
-import 'package:trash_track/screens/eco_shop_screen.dart';
-import 'package:trash_track/screens/settings_screen.dart';
+import 'screens/eco_shop_screen.dart';
+import 'screens/settings_screen.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/intro_screen.dart';
 import 'screens/welcome_screen.dart';
