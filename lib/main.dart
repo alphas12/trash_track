@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
 
-      initialRoute: '/intro',
+      initialRoute: '/bookmark',
       routes: {
         '/intro': (context) => const IntroScreen(),
         '/welcome': (context) => const WelcomeScreen(),
