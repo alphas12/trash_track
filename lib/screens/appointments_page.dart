@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/custom_bottom_nav_bar.dart';
 import 'appointment_details_page.dart'; // Make sure this exists and accepts a Map<String, String?>
 
 class AppointmentsPage extends StatelessWidget {
@@ -104,6 +105,12 @@ class AppointmentsPage extends StatelessWidget {
               ),
             ),
           );
+        },
+      ),
+      bottomNavigationBar: CustomBottomNavBar(
+        currentIndex: 1, // or whatever index you assign to WasteService
+        onTap: (int newIndex) {
+          // Already handled by the onTap inside the CustomBottomNavBar
         },
       ),
     );

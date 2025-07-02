@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:trash_track/screens/appointments_page.dart';
 import 'package:trash_track/screens/qr_confirmation_page.dart';
 
+import '../widgets/custom_bottom_nav_bar.dart';
+
 class AppointmentDetailsPage extends StatelessWidget {
   final Map<String, String?> appointment;
 
@@ -118,6 +120,12 @@ class AppointmentDetailsPage extends StatelessWidget {
             ],
           ),
         ),
+      ),
+      bottomNavigationBar: CustomBottomNavBar(
+        currentIndex: 1, // or whatever index you assign to WasteService
+        onTap: (int newIndex) {
+          // Already handled by the onTap inside the CustomBottomNavBar
+        },
       ),
     );
   }

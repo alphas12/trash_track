@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../widgets/custom_bottom_nav_bar.dart';
+
 class QRConfirmationPage extends StatelessWidget {
   final String appointmentId;
 
@@ -57,6 +59,12 @@ class QRConfirmationPage extends StatelessWidget {
             ],
           ),
         ),
+      ),
+      bottomNavigationBar: CustomBottomNavBar(
+        currentIndex: 1, // or whatever index you assign to WasteService
+        onTap: (int newIndex) {
+          // Already handled by the onTap inside the CustomBottomNavBar
+        },
       ),
     );
   }
