@@ -10,4 +10,19 @@ class AuthService {
     );
     return response;
   }
+
+  Future<AuthResponse> login(String email, String password) async {
+    return await client.auth.signInWithPassword(
+      email: email,
+      password: password,
+    );
+  }
+
+  Future<void> logout() async {
+    return await client.auth.signOut();
+  }
+
+  User? get currentUser => client.auth.currentUser;
+
+  Session? get currentSession => client.auth.currentSession;
 }

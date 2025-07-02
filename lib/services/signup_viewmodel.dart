@@ -16,9 +16,10 @@ class SignupViewModel extends ChangeNotifier {
     errorMessage = null;
     notifyListeners();
 
+    
     try {
-      final authService = ref(authServiceProvider);
-      await authService.signUp(email, password);
+      final authService = ref.read(authServiceProvider); // this line authenticates the input using the provider
+      await authService.signUp(email, password); // no need for SQL query lines, supabase does it
     } on AuthException catch (e) {
       errorMessage = e.message;
     } finally {

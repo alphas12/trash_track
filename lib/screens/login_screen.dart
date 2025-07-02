@@ -1,19 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trash_track/screens/signup_page.dart';
+import '../../providers/login_provider.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
+
+  @override
+  ConsumerState<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends ConsumerState<LoginPage> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  bool _obscurePassword = true;
 
   @override
   Widget build(BuildContext context) {
     final Color oliveGreen = const Color(0xFF5C653E);
     final size = MediaQuery.of(context).size;
     final isSmall = size.height < 600;
+    final viewModel = ref.watch(loginViewModelProvider);
 
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: SingleChildScrollView( // Makes it scrollable on small devices
+        child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(24.0),
             child: ConstrainedBox(
@@ -46,6 +59,7 @@ class LoginPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 30),
                     TextField(
+                      controller: _emailController,
                       decoration: InputDecoration(
                         hintText: 'Email address',
                         border: OutlineInputBorder(
@@ -55,15 +69,22 @@ class LoginPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 20),
                     TextField(
-                      obscureText: true,
+                      controller: _passwordController,
+                      obscureText: _obscurePassword,
                       decoration: InputDecoration(
                         hintText: 'Password',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
                         suffixIcon: IconButton(
-                          icon: const Icon(Icons.visibility_off),
-                          onPressed: () {},
+                          icon: Icon(
+                            _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
+                          },
                         ),
                       ),
                     ),
@@ -75,26 +96,40 @@ class LoginPage extends StatelessWidget {
                         child: const Text('Forgot your password?'),
                       ),
                     ),
-                    const SizedBox(height: 300),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pushNamed(context, '/dashboard');
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: oliveGreen,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                    const Spacer(),
+                    if (viewModel.isLoading)
+                      const Center(child: CircularProgressIndicator())
+                    else
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            await ref.read(loginViewModelProvider).login(
+                                  _emailController.text.trim(),
+                                  _passwordController.text.trim(),
+                                );
+
+                            if (viewModel.errorMessage != null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(viewModel.errorMessage!)),
+                              );
+                            } else {
+                              Navigator.pushNamed(context, '/dashboard');
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: oliveGreen,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 16),
                           ),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                        ),
-                        child: const Text(
-                          'Login',
-                          style: TextStyle(fontSize: 16, letterSpacing: 1.2, color: Colors.white),
+                          child: const Text(
+                            'Login',
+                            style: TextStyle(fontSize: 16, letterSpacing: 1.2, color: Colors.white),
+                          ),
                         ),
                       ),
-                    ),
                     const SizedBox(height: 1),
                     Align(
                       alignment: Alignment.center,
