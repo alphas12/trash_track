@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/auth_service.dart';
-import '../app/providers.dart';
+import '../providers/providers.dart';
 
 class SignupViewModel extends ChangeNotifier {
   final Ref ref;
