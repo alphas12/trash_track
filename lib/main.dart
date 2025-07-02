@@ -8,6 +8,8 @@ import 'screens/welcome_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/signup_options.dart';
 import 'screens/loading_screen.dart';
+import 'screens/eco_shop_screen.dart';
+import 'screens/settings_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -20,8 +22,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-
-      initialRoute: '/bookmark',
+      debugShowCheckedModeBanner: false,
+      initialRoute: '/settings',
       routes: {
         '/intro': (context) => const IntroScreen(),
         '/welcome': (context) => const WelcomeScreen(),
@@ -29,6 +31,8 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const LoginPage(),
         '/dashboard': (context) => const DashboardScreen(),
         '/bookmark': (context) => const CollectionsPage(),
+        '/ecoshop': (context) => const EcoShopScreen(),
+        '/settings': (context) => const SettingsScreen()
       },
     );
   }
