@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-<<<<<<< Updated upstream
-=======
 import 'package:trash_track/screens/appointments_page.dart';
 import 'package:trash_track/screens/notification_screen.dart';
 import 'package:trash_track/screens/settings_screen.dart';
 import '../screens/dashboard_screen.dart';
 import '../screens/bookmark_screen.dart';
->>>>>>> Stashed changes
 
 class CustomBottomNavBar extends StatelessWidget {
   final int currentIndex;
@@ -41,9 +38,6 @@ class CustomBottomNavBar extends StatelessWidget {
           final isSelected = index == currentIndex;
 
           return GestureDetector(
-<<<<<<< Updated upstream
-            onTap: () => onTap(index),
-=======
             onTap: () {
               onTap(index);
               switch (index) {
@@ -97,7 +91,6 @@ class CustomBottomNavBar extends StatelessWidget {
                   break;
               }
             },
->>>>>>> Stashed changes
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               padding: const EdgeInsets.all(10),
