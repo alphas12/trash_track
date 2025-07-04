@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:trash_track/screens/appointments_page.dart';
+import 'package:trash_track/screens/notification_screen.dart';
+import 'package:trash_track/screens/settings_screen.dart';
+import '../screens/dashboard_screen.dart';
+import '../screens/bookmark_screen.dart';
 
 class CustomBottomNavBar extends StatelessWidget {
   final int currentIndex;
@@ -33,12 +38,66 @@ class CustomBottomNavBar extends StatelessWidget {
           final isSelected = index == currentIndex;
 
           return GestureDetector(
-            onTap: () => onTap(index),
+            onTap: () {
+              onTap(index);
+              switch (index) {
+                case 0: // Home
+                  if (currentIndex != 0) {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const DashboardScreen(),
+                      ),
+                    );
+                  }
+                  break;
+                case 1: // Collections
+                  if (currentIndex != 1) {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const CollectionsPage(),
+                      ),
+                    );
+                  }
+                  break;
+                case 2:
+                  if (currentIndex != 2){
+                    Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const AppointmentsPage(),
+                        ),
+                    );
+                  }
+                  break;
+                case 3:
+                  if (currentIndex != 3){
+                    Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => const NotificationsScreen(),
+                        ),
+                    );
+                  }
+                  break;
+                case 4:
+                  if(currentIndex != 4){
+                    Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => const SettingsScreen(),
+                        ),
+                    );
+                  }
+                  break;
+              }
+            },
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: isSelected ? const Color(0xFF4A5F44).withOpacity(0.1) : Colors.transparent,
+                color: isSelected
+                    ? const Color(0xFF4A5F44).withOpacity(0.1)
+                    : Colors.transparent,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Image.asset(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/custom_bottom_nav_bar.dart';
+import '/screens/dashboard_screen.dart';
 
 class EcoShopScreen extends StatefulWidget {
   const EcoShopScreen({super.key});
@@ -29,11 +30,11 @@ class _EcoShopScreenState extends State<EcoShopScreen> {
   ];
 
   final List<Map<String, String>> _shops = List.generate(6, (index) => {
-    'name': 'Eco Shop ${index + 1}',
+    'name': "Eco Shop ${index + 1}",
     'status': '10AM - 5PM | OPEN',
     'address': 'Sample Address, Cebu',
     'services': 'Lifestyle, Beauty, Health',
-    'details': 'Welcome to Eco Shop ${index + 1}, a locally grown space that makes sustainable and zero waste products accessible.'
+    'details': "Welcome to Eco Shop ${index + 1}, a locally grown space that makes sustainable and zero waste products accessible."
   });
 
   @override
@@ -46,7 +47,7 @@ class _EcoShopScreenState extends State<EcoShopScreen> {
               top: 0,
               left: 0,
               right: 0,
-              height: 280,
+              height: 220,
               child: Container(
                 decoration: const BoxDecoration(
                   color: Color(0xFF4A5F44),
@@ -57,78 +58,92 @@ class _EcoShopScreenState extends State<EcoShopScreen> {
                 ),
               ),
             ),
-            SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    height: 300,
-                    padding: const EdgeInsets.all(16),
-                    child: Stack(
-                      children: [
-                        Positioned(
-                          right: -40,
-                          top: -30,
-                          child: Opacity(
-                            opacity: 0.9,
-                            child: Image.asset(
-                              'assets/images/eco_shop.png',
-                              height: 420,
-                            ),
-                          ),
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: const [
-                                    Text(
-                                      'Shop For Change',
-                                      style: TextStyle(
-                                        fontFamily: 'Mallanna',
-                                        fontSize: 28,
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(0xFFFEFAE0),
-                                      ),
-                                    ),
-                                    Text(
-                                      'Look for Eco-friendly shops\nand reduce your waste',
-                                      style: TextStyle(
-                                        fontFamily: 'Mallanna',
-                                        fontSize: 14,
-                                        color: Color(0xFFFEFAE0),
-                                      ),
-                                    ),
-                                  ],
+            Column(
+              children: [
+                Container(
+                  color: Colors.transparent,
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        height: 260,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Stack(
+                            children: [
+                              Positioned(
+                                right: 20,
+                                top: 0,
+                                child: Opacity(
+                                  opacity: 1,
+                                  child: Image.asset(
+                                    'assets/images/eco_shop.png',
+                                    height: 320,
+                                  ),
                                 ),
-                                Column(
-                                  children: [
-                                    Image.asset(
-                                      'assets/icons/recycle.png',
-                                      height: 26,
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 8.0),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: const [
+                                            Text(
+                                              'Shop For Change',
+                                              style: TextStyle(
+                                                fontFamily: 'Mallanna',
+                                                fontSize: 33,
+                                                fontWeight: FontWeight.bold,
+                                                color: Color(0xFFFEFAE0),
+                                              ),
+                                            ),
+                                            Text(
+                                              'Look for Eco-friendly shops\nand reduce your waste',
+                                              style: TextStyle(
+                                                fontFamily: 'Mallanna',
+                                                fontSize: 16,
+                                                color: Color(0xFFFEFAE0),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        GestureDetector(
+                                          onTap: () {
+                                            Navigator.pushReplacement(
+                                              context,
+                                              MaterialPageRoute(builder: (context) => const DashboardScreen()),
+                                            );
+                                          },
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: const [
+                                              Icon(
+                                                Icons.shopping_cart,
+                                                color: Color(0xFFFEFAE0),
+                                                size: 28,
+                                              ),
+                                              SizedBox(height: 4),
+                                              Text(
+                                                'Shop',
+                                                style: TextStyle(
+                                                  fontFamily: 'Mallanna',
+                                                  color: Color(0xFFFEFAE0),
+                                                  fontSize: 16,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    const SizedBox(height: 4),
-                                    const Text(
-                                      'Recycle',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Color(0xFFFEFAE0),
-                                        fontFamily: 'Mallanna',
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Container(
+                                  ),
+                                  const SizedBox(height: 20),
+                                  Container(
+                                    height: 52,
                                     padding: const EdgeInsets.symmetric(horizontal: 16),
                                     decoration: BoxDecoration(
                                       color: const Color(0xFFD9D9D9),
@@ -144,38 +159,44 @@ class _EcoShopScreenState extends State<EcoShopScreen> {
                                               hintText: 'Search',
                                               border: InputBorder.none,
                                             ),
+                                            style: TextStyle(
+                                              fontFamily: 'Mallanna',
+                                              fontSize: 16,
+                                              color: Colors.black,
+                                            ),
                                           ),
-                                        )
+                                        ),
                                       ],
                                     ),
                                   ),
-                                )
-                              ],
-                            )
-                          ],
-                        )
-                      ],
-                    ),
-                  ),
-
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Text(
-                      'Shop by Category',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Mallanna',
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-
-                  const SizedBox(height: 10),
-
-                  Row(
-                    children: [
-                      Expanded(
-                        child: SingleChildScrollView(
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 24),
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16.0),
+                          child: Text(
+                            'Shop by Category',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Mallanna',
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Row(
@@ -213,84 +234,76 @@ class _EcoShopScreenState extends State<EcoShopScreen> {
                             }).toList(),
                           ),
                         ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.arrow_forward_ios, size: 16),
-                        onPressed: () {},
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Text(
-                      'Recommended',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Mallanna',
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: _shops.length,
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        mainAxisSpacing: 12,
-                        crossAxisSpacing: 12,
-                        childAspectRatio: 0.8,
-                      ),
-                      itemBuilder: (context, index) {
-                        final shop = _shops[index];
-                        return GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ShopDetailsScreen(shop: shop),
-                              ),
-                            );
-                          },
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFD9D9D9),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: const Center(
-                                    child: Icon(Icons.image, size: 50, color: Colors.grey),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                shop['name']!,
-                                style: const TextStyle(
-                                  fontFamily: 'Mallanna',
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
+                        const SizedBox(height: 24),
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16.0),
+                          child: Text(
+                            'Recommended',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Mallanna',
+                            ),
                           ),
-                        );
-                      },
+                        ),
+                        const SizedBox(height: 12),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(bottom: 80),
+                          child: GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: _shops.length,
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              mainAxisSpacing: 12,
+                              crossAxisSpacing: 12,
+                              childAspectRatio: 0.8,
+                            ),
+                            itemBuilder: (context, index) {
+                              final shop = _shops[index];
+                              return GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => ShopDetailsScreen(shop: shop),
+                                    ),
+                                  );
+                                },
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFD9D9D9),
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child: const Center(
+                                          child: Icon(Icons.image, size: 50, color: Colors.grey),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      shop['name']!,
+                                      style: const TextStyle(
+                                        fontFamily: 'Mallanna',
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ],
         ),
@@ -317,6 +330,31 @@ class ShopDetailsScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Row(
+                children: [
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 150),
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            spreadRadius: 2,
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(Icons.arrow_back, color: Colors.black, size: 24),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
               ClipRRect(
                 borderRadius: BorderRadius.circular(16),
                 child: Container(
@@ -341,7 +379,7 @@ class ShopDetailsScreen extends StatelessWidget {
                 shop['status']!,
                 style: const TextStyle(
                   fontSize: 14,
-                  color: Colors.green,
+                  color: Color(0xFF6A8126),
                   fontFamily: 'Mallanna',
                 ),
               ),
@@ -362,7 +400,13 @@ class ShopDetailsScreen extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 4),
-              Text(shop['services']!, style: const TextStyle(fontFamily: 'Mallanna')),
+              Row (
+                children: [
+                  const Icon(Icons.category, size: 16, color: Colors.grey),
+                  const SizedBox(width: 4),
+                  Text(shop['services']!, style: TextStyle(fontFamily: 'Mallanna')),
+                ],
+              ),
               const SizedBox(height: 16),
               const Text(
                 'Details',

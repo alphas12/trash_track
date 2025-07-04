@@ -28,34 +28,42 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> _loadServices() async {
+    if (!mounted) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
     try {
       final recommended = await _repository.getRecommendedServices();
       final topServices = await _repository.getTopServices();
+
+      if (!mounted) return;
+
       setState(() {
         _recommendedServices = recommended;
         _topServices = topServices;
         _isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
+
       setState(() {
         _isLoading = false;
       });
-      // Handle error appropriately
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Error loading services: ${e.toString()}',
+            style: const TextStyle(fontFamily: 'Mallanna'),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
-  void _navigateToSearchScreen() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const SearchScreen()),
-    );
-  }
+  // Navigation is now handled in the CustomBottomNavBar
 
   void _toggleFavorite(RecyclingService service) {
     setState(() {
@@ -137,7 +145,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 right: 20,
                                 top: 0,
                                 child: Opacity(
-                                  opacity: 0.85,
+                                  opacity: 1,
                                   child: Image.asset(
                                     'assets/images/World-cuate 1.png',
                                     height: 280,
@@ -439,8 +447,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
       ),
       bottomNavigationBar: CustomBottomNavBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
+        currentIndex: 0,
+        onTap: (index) {},
       ),
     );
   }
