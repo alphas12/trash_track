@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/disposal_service_provider.dart';
 import '../widgets/disposal_service_card.dart';
 import '../widgets/custom_bottom_nav_bar.dart';
+import 'search_screen.dart';
 import 'recommended_screen.dart';
 import 'top_services_screen.dart';
 
@@ -129,12 +130,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                       Expanded(
                                         child: GestureDetector(
                                           onTap: () {
-                                            // Navigator.push(
-                                            //   context,
-                                            //   MaterialPageRoute(
-                                            //     builder: (context) => const SearchScreen(),
-                                            //   ),
-                                            // );
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => const SearchScreen(),
+                                              ),
+                                            );
                                           },
                                           child: Container(
                                             height: 52,
