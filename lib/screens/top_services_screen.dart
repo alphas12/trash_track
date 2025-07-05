@@ -17,9 +17,12 @@ class _TopServicesScreenState extends ConsumerState<TopServicesScreen> {
 
   List<DisposalService> _filterServices(List<DisposalService> services) {
     if (_filterStatus == 'all') return services;
-    
+
     return services.where((service) {
-      final isOpen = ref.read(isServiceOpenProvider(service));
+      final isOpen = ref.watch(isServiceOpenProvider(service));
+      print(
+        'Service ${service.serviceName} is ${isOpen ? 'open' : 'closed'}',
+      ); // Debug print
       return _filterStatus == 'open' ? isOpen : !isOpen;
     }).toList();
   }
@@ -109,7 +112,7 @@ class _TopServicesScreenState extends ConsumerState<TopServicesScreen> {
               child: topServices.when(
                 data: (services) {
                   final filteredServices = _filterServices(services);
-                  
+
                   if (filteredServices.isEmpty) {
                     return Center(
                       child: Column(
@@ -172,6 +175,7 @@ class _TopServicesScreenState extends ConsumerState<TopServicesScreen> {
                         ),
                         child: DisposalServiceCard(
                           service: service,
+                          isCompact: false, // This will show material chips
                           onTap: () {
                             // TODO: Navigate to service details
                           },
@@ -181,9 +185,7 @@ class _TopServicesScreenState extends ConsumerState<TopServicesScreen> {
                   );
                 },
                 loading: () => const Center(
-                  child: CircularProgressIndicator(
-                    color: Color(0xFF4A5F44),
-                  ),
+                  child: CircularProgressIndicator(color: Color(0xFF4A5F44)),
                 ),
                 error: (error, stack) => Center(
                   child: Text(
@@ -202,107 +204,6 @@ class _TopServicesScreenState extends ConsumerState<TopServicesScreen> {
     );
   }
 }
-
-//       });
-//     }
-//   }
-
-//   List<RecyclingService> get _filteredServices {
-//     if (_filterStatus == 'all') return _services;
-//     return _services
-//         .where((service) => service.status.toLowerCase() == _filterStatus)
-//         .toList();
-//   }
-
-//   void _handleServiceFavorite(RecyclingService service) {
-//     setState(() {
-//       final index = _services.indexWhere((s) => s.id == service.id);
-//       if (index != -1) {
-//         _services[index] = RecyclingService(
-//           id: service.id,
-//           name: service.name,
-//           distance: service.distance,
-//           status: service.status,
-//           imageUrl: service.imageUrl,
-//           address: service.address,
-//           serviceTypes: service.serviceTypes,
-//           isFavorite: !service.isFavorite,
-//           rating: service.rating,
-//         );
-//       }
-//     });
-//   }
-
-//   Widget _buildHeader() {
-//     return Container(
-//       decoration: BoxDecoration(
-//         color: Colors.white,
-//         boxShadow: [
-//           BoxShadow(
-//             color: Colors.black.withOpacity(0.05),
-//             spreadRadius: 1,
-//             blurRadius: 10,
-//             offset: const Offset(0, 4),
-//           ),
-//         ],
-//       ),
-//       padding: const EdgeInsets.all(24.0),
-//       child: Column(
-//         crossAxisAlignment: CrossAxisAlignment.start,
-//         children: [
-//           GestureDetector(
-//             onTap: () => Navigator.pop(context),
-//             child: Container(
-//               padding: const EdgeInsets.all(8),
-//               decoration: BoxDecoration(
-//                 color: Colors.white,
-//                 borderRadius: BorderRadius.circular(12),
-//                 boxShadow: [
-//                   BoxShadow(
-//                     color: Colors.black.withOpacity(0.1),
-//                     spreadRadius: 2,
-//                     blurRadius: 8,
-//                     offset: const Offset(0, 2),
-//                   ),
-//                 ],
-//               ),
-//               child: const Icon(
-//                 Icons.arrow_back,
-//                 color: Colors.black,
-//                 size: 24,
-//               ),
-//             ),
-//           ),
-//           const SizedBox(height: 24),
-//           const Text(
-//             'Top Services',
-//             style: TextStyle(
-//               fontSize: 40,
-//               fontWeight: FontWeight.bold,
-//               color: Colors.black,
-//               height: 1.2,
-//               fontFamily: 'Mallanna',
-//             ),
-//           ),
-//           const SizedBox(height: 8),
-//           const Text(
-//             'Explore the highest-rated recycling services worldwide.',
-//             style: TextStyle(
-//               fontSize: 16,
-//               color: Colors.black54,
-//               height: 1.5,
-//               fontFamily: 'Mallanna',
-//             ),
-//           ),
-//           const SizedBox(height: 24),
-//           FilterBar(
-//             selectedFilter: _filterStatus,
-//             onFilterChanged: (status) => setState(() => _filterStatus = status),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
 
 //   @override
 //   Widget build(BuildContext context) {
