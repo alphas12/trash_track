@@ -39,24 +39,22 @@ class DisposalService {
 
     try {
       return DisposalService(
-        serviceId: map['service_id'] as String,
-        serviceName: map['service_name'] as String,
-        serviceDescription: map['service_description'] as String,
-        serviceLocation: map['service_location'] as String,
-        serviceDistance: (map['service_distance'] as num).toDouble(),
+        serviceId: map['service_id']?.toString() ?? '',
+        serviceName: map['service_name']?.toString() ?? '',
+        serviceDescription: map['service_description']?.toString() ?? '',
+        serviceLocation: map['service_location']?.toString() ?? '',
+        serviceDistance: (map['service_distance'] as num?)?.toDouble() ?? 0.0,
         serviceRating: (map['service_rating'] as num?)?.toDouble() ?? 0.0,
-        serviceImgUrl: map['service_img'] as String,
+        serviceImgUrl: map['service_img']?.toString() ?? '',
         serviceAvailability: List<String>.from(map['service_avail'] ?? []),
         isRecommended: map['is_recommended'] as bool? ?? false,
         createdAt: DateTime.parse(map['created_at'] as String),
         updatedAt: DateTime.parse(map['updated_at'] as String),
-        operatingHours:
-            (map['operating_hours'] as List<dynamic>?)
+        operatingHours: (map['operating_hours'] as List<dynamic>?)
                 ?.map((e) => OperatingHours.fromMap(e as Map<String, dynamic>))
                 .toList() ??
             [],
-        serviceMaterials:
-            (map['service_materials'] as List<dynamic>?)
+        serviceMaterials: (map['service_materials'] as List<dynamic>?)
                 ?.map((e) => ServiceMaterial.fromMap(e as Map<String, dynamic>))
                 .toList() ??
             [],
@@ -89,11 +87,11 @@ class DisposalService {
   String get formattedDistance => '${serviceDistance.toStringAsFixed(1)}km';
 
   Widget get formattedRating => Row(
-    children: [
-      Text(serviceRating.toStringAsFixed(1)),
-      const Icon(Icons.star, color: Colors.amber, size: 16),
-    ],
-  );
+        children: [
+          Text(serviceRating.toStringAsFixed(1)),
+          const Icon(Icons.star, color: Colors.amber, size: 16),
+        ],
+      );
 
   bool isCurrentlyOpen() {
     if (operatingHours.isEmpty) return false;

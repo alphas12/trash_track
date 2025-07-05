@@ -19,7 +19,11 @@ class _RecommendedScreenState extends ConsumerState<RecommendedScreen> {
     if (_filterStatus == 'all') return services;
 
     return services.where((service) {
-      final isOpen = ref.read(isServiceOpenProvider(service));
+      // Watch instead of read to stay reactive to time changes
+      final isOpen = ref.watch(isServiceOpenProvider(service));
+      print(
+        'Service ${service.serviceName} is ${isOpen ? 'open' : 'closed'}',
+      ); // Debug print
       return _filterStatus == 'open' ? isOpen : !isOpen;
     }).toList();
   }
@@ -172,6 +176,7 @@ class _RecommendedScreenState extends ConsumerState<RecommendedScreen> {
                         ),
                         child: DisposalServiceCard(
                           service: service,
+                          isCompact: false, // This will show material chips
                           onTap: () {
                             // TODO: Navigate to service details
                           },

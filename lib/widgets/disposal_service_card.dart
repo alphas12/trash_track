@@ -6,14 +6,18 @@ class DisposalServiceCard extends StatelessWidget {
   final VoidCallback? onTap;
   final bool isFavorite;
   final VoidCallback? onFavorite;
+  final bool showMaterialTypes;
+  final bool isCompact;
 
   const DisposalServiceCard({
-    Key? key,
+    super.key,
     required this.service,
     this.isFavorite = false,
     this.onTap,
     this.onFavorite,
-  }) : super(key: key);
+    this.showMaterialTypes = false,
+    this.isCompact = true,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +28,7 @@ class DisposalServiceCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: cardWidth,
-        height: 180,
+        height: isCompact ? 180 : 220,
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
           color: Colors.black,
@@ -156,19 +160,63 @@ class DisposalServiceCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    service.serviceMaterials
-                            .map((m) => m.materialPoints.materialType)
-                            .take(3)
-                            .join(', ') +
-                        (service.serviceMaterials.length > 3 ? '...' : ''),
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.white70,
-                      fontFamily: 'Mallanna',
+                  if (isCompact)
+                    Text(
+                      service.serviceMaterials
+                              .map((m) => m.materialPoints.materialType)
+                              .toSet()
+                              .take(3)
+                              .join(', ') +
+                          (service.serviceMaterials.length > 3 ? '...' : ''),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.white70,
+                        fontFamily: 'Mallanna',
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                  // Material Types chips (only shown in full view)
+                  if (!isCompact && service.serviceMaterials.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Wrap(
+                        spacing: 4,
+                        runSpacing: 4,
+                        children: service.serviceMaterials
+                            .map(
+                              (material) =>
+                                  material.materialPoints.materialType,
+                            )
+                            .toSet()
+                            .map((materialType) {
+                              return Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: const Color(
+                                    0xFF4A5F44,
+                                  ).withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: const Color(0xFF4A5F44),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Text(
+                                  materialType,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                    fontFamily: 'Mallanna',
+                                  ),
+                                ),
+                              );
+                            })
+                            .toList(),
+                      ),
+                    ),
                 ],
               ),
             ),

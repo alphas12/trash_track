@@ -88,13 +88,27 @@ final isServiceOpenProvider = Provider.family<bool, DisposalService>((
   final now = DateTime.now();
   final currentDay = now.weekday;
 
+  // Check if there are any operating hours for today
+  final todayHoursExists = service.operatingHours.any(
+    (hours) => hours.operatingDays == currentDay,
+  );
+
+  // If no hours exist for today, the service is closed
+  if (!todayHoursExists) {
+    print('Service ${service.serviceName} is closed (no hours for today)');
+    return false;
+  }
+
   // Find today's operating hours
   final todayHours = service.operatingHours.firstWhere(
     (hours) => hours.operatingDays == currentDay,
-    orElse: () => service.operatingHours.first, // Default to first if not found
   );
 
-  if (!todayHours.isOpen) return false;
+  // Check if explicitly marked as closed
+  if (!todayHours.isOpen) {
+    print('Service ${service.serviceName} is marked as closed today');
+    return false;
+  }
 
   // Parse opening and closing times
   final openingTime = _parseTimeString(todayHours.openTime);
