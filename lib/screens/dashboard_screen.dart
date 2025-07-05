@@ -1,111 +1,26 @@
 import 'package:flutter/material.dart';
-import '../models/recycling_service.dart';
-import '../services/recycling_service_repository.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/disposal_service.dart';
+import '../providers/disposal_service_provider.dart';
+import '../widgets/disposal_service_card.dart';
 import '../widgets/custom_bottom_nav_bar.dart';
-import '../widgets/service_card.dart';
-import '../screens/search_screen.dart';
-import '../screens/recommended_screen.dart';
-import '../screens/top_services_screen.dart';
+// import 'search_screen.dart';
+import 'recommended_screen.dart';
+import 'top_services_screen.dart';
 
-class DashboardScreen extends StatefulWidget {
+class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
 
   @override
-  State<DashboardScreen> createState() => _DashboardScreenState();
+  ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> {
-  int _selectedIndex = 0;
-  final RecyclingServiceRepository _repository = RecyclingServiceRepository();
-  List<RecyclingService> _recommendedServices = [];
-  List<RecyclingService> _topServices = [];
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadServices();
-  }
-
-  Future<void> _loadServices() async {
-    if (!mounted) return;
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final recommended = await _repository.getRecommendedServices();
-      final topServices = await _repository.getTopServices();
-
-      if (!mounted) return;
-
-      setState(() {
-        _recommendedServices = recommended;
-        _topServices = topServices;
-        _isLoading = false;
-      });
-    } catch (e) {
-      if (!mounted) return;
-
-      setState(() {
-        _isLoading = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Error loading services: ${e.toString()}',
-            style: const TextStyle(fontFamily: 'Mallanna'),
-          ),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
-  // Navigation is now handled in the CustomBottomNavBar
-
-  void _toggleFavorite(RecyclingService service) {
-    setState(() {
-      final index = _recommendedServices.indexWhere((s) => s.id == service.id);
-      if (index != -1) {
-        _recommendedServices[index] = RecyclingService(
-          id: service.id,
-          name: service.name,
-          distance: service.distance,
-          status: service.status,
-          imageUrl: service.imageUrl,
-          address: service.address,
-          serviceTypes: service.serviceTypes,
-          rating: service.rating,
-          isFavorite: !service.isFavorite,
-        );
-      }
-
-      final topIndex = _topServices.indexWhere((s) => s.id == service.id);
-      if (topIndex != -1) {
-        _topServices[topIndex] = RecyclingService(
-          id: service.id,
-          name: service.name,
-          distance: service.distance,
-          status: service.status,
-          imageUrl: service.imageUrl,
-          address: service.address,
-          serviceTypes: service.serviceTypes,
-          rating: service.rating,
-          isFavorite: !service.isFavorite,
-        );
-      }
-    });
-  }
-
-  void _onServiceTap(RecyclingService service) {
-    // For now, just print to console. Later we can navigate to a details screen
-    print('Service tapped: ${service.name}');
-  }
-
+class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
+    final recommendedServices = ref.watch(dashboardRecommendedServicesProvider);
+    final topServices = ref.watch(dashboardTopServicesProvider);
+
     return Scaffold(
       body: SafeArea(
         child: Stack(
@@ -216,13 +131,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                       Expanded(
                                         child: GestureDetector(
                                           onTap: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    const SearchScreen(),
-                                              ),
-                                            );
+                                            // Navigator.push(
+                                            //   context,
+                                            //   MaterialPageRoute(
+                                            //     builder: (context) => const SearchScreen(),
+                                            //   ),
+                                            // );
                                           },
                                           child: Container(
                                             height: 52,
@@ -235,13 +149,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                   BorderRadius.circular(12),
                                             ),
                                             child: Row(
-                                              children: [
-                                                const Icon(
+                                              children: const [
+                                                Icon(
                                                   Icons.search,
                                                   color: Color(0xFF4A5F44),
                                                 ),
-                                                const SizedBox(width: 8),
-                                                const Expanded(
+                                                SizedBox(width: 8),
+                                                Expanded(
                                                   child: Text(
                                                     'Search',
                                                     style: TextStyle(
@@ -327,42 +241,51 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 ],
                               ),
                               const SizedBox(height: 16),
-                              if (_isLoading)
-                                const Center(child: CircularProgressIndicator())
-                              else if (_recommendedServices.isEmpty)
-                                const Center(
+                              recommendedServices.when(
+                                data: (services) {
+                                  if (services.isEmpty) {
+                                    return const Center(
+                                      child: Text(
+                                        'No recommended services available',
+                                        style: TextStyle(
+                                          fontFamily: 'Mallanna',
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                  return Center(
+                                    child: Wrap(
+                                      alignment: WrapAlignment.center,
+                                      spacing: 16,
+                                      runSpacing: 16,
+                                      children: services.map((service) {
+                                        final isOpen = ref.watch(
+                                          isServiceOpenProvider(service),
+                                        );
+                                        return DisposalServiceCard(
+                                          service: service,
+                                          onTap: () {
+                                            // TODO: Navigate to service details
+                                          },
+                                        );
+                                      }).toList(),
+                                    ),
+                                  );
+                                },
+                                loading: () => const Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                                error: (error, stack) => Center(
                                   child: Text(
-                                    'No recycling services available',
-                                    style: TextStyle(
+                                    'Error: $error',
+                                    style: const TextStyle(
+                                      color: Colors.red,
                                       fontFamily: 'Mallanna',
-                                      fontSize: 16,
                                     ),
                                   ),
-                                )
-                              else
-                                Center(
-                                  child: Wrap(
-                                    alignment: WrapAlignment.center,
-                                    spacing: 16,
-                                    runSpacing: 16,
-                                    children: _recommendedServices.take(2).map((
-                                      service,
-                                    ) {
-                                      return ServiceCard(
-                                        title: service.name,
-                                        distance: service.formattedDistance,
-                                        status: service.status,
-                                        serviceTypes: service.serviceTypes,
-                                        imageUrl: service.imageUrl,
-                                        isFavorite: service.isFavorite,
-                                        rating: service.rating,
-                                        onTap: () => _onServiceTap(service),
-                                        onFavorite: () =>
-                                            _toggleFavorite(service),
-                                      );
-                                    }).toList(),
-                                  ),
                                 ),
+                              ),
                               const SizedBox(height: 32),
                               // Top Services Section
                               Row(
@@ -398,42 +321,48 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 ],
                               ),
                               const SizedBox(height: 16),
-                              if (_isLoading)
-                                const Center(child: CircularProgressIndicator())
-                              else if (_topServices.isEmpty)
-                                const Center(
+                              topServices.when(
+                                data: (services) {
+                                  if (services.isEmpty) {
+                                    return const Center(
+                                      child: Text(
+                                        'No top services available',
+                                        style: TextStyle(
+                                          fontFamily: 'Mallanna',
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                  return Center(
+                                    child: Wrap(
+                                      alignment: WrapAlignment.center,
+                                      spacing: 16,
+                                      runSpacing: 16,
+                                      children: services.map((service) {
+                                        return DisposalServiceCard(
+                                          service: service,
+                                          onTap: () {
+                                            // TODO: Navigate to service details
+                                          },
+                                        );
+                                      }).toList(),
+                                    ),
+                                  );
+                                },
+                                loading: () => const Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                                error: (error, stack) => Center(
                                   child: Text(
-                                    'No top services available',
-                                    style: TextStyle(
+                                    'Error: $error',
+                                    style: const TextStyle(
+                                      color: Colors.red,
                                       fontFamily: 'Mallanna',
-                                      fontSize: 16,
                                     ),
                                   ),
-                                )
-                              else
-                                Center(
-                                  child: Wrap(
-                                    alignment: WrapAlignment.center,
-                                    spacing: 16,
-                                    runSpacing: 16,
-                                    children: _topServices.take(2).map((
-                                      service,
-                                    ) {
-                                      return ServiceCard(
-                                        title: service.name,
-                                        distance: service.formattedDistance,
-                                        status: service.status,
-                                        serviceTypes: service.serviceTypes,
-                                        imageUrl: service.imageUrl,
-                                        isFavorite: service.isFavorite,
-                                        rating: service.rating,
-                                        onTap: () => _onServiceTap(service),
-                                        onFavorite: () =>
-                                            _toggleFavorite(service),
-                                      );
-                                    }).toList(),
-                                  ),
                                 ),
+                              ),
                             ],
                           ),
                         ),
