@@ -60,7 +60,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                 right: 20,
                                 top: 0,
                                 child: Opacity(
-                                  opacity: 0.85,
+                                  opacity: 1,
                                   child: Image.asset(
                                     'assets/images/World-cuate 1.png',
                                     height: 280,
