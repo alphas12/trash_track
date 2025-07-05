@@ -10,71 +10,37 @@ class FilterBar extends StatelessWidget {
     required this.onFilterChanged,
   });
 
+  Widget _buildFilterChip(String label, String value) {
+    final isSelected = selectedFilter == value;
+    return FilterChip(
+      label: Text(label),
+      selected: isSelected,
+      selectedColor: const Color(0xFF4A5F44),
+      backgroundColor: Colors.white,
+      checkmarkColor: Colors.white,
+      side: BorderSide(
+        color: isSelected ? Colors.transparent : Colors.grey.shade300,
+      ),
+      labelStyle: TextStyle(
+        color: isSelected ? Colors.white : Colors.black,
+        fontFamily: 'Mallanna',
+      ),
+      onSelected: (bool selected) => onFilterChanged(value),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
         children: [
-          FilterChip(
-            label: const Text('All'),
-            selected: selectedFilter == 'all',
-            selectedColor: const Color(0xFF4A5F44),
-            backgroundColor: Colors.white,
-            checkmarkColor: Colors.white,
-            side: BorderSide(
-              color: selectedFilter == 'all'
-                  ? Colors.transparent
-                  : Colors.grey.shade300,
-            ),
-            labelStyle: TextStyle(
-              color: selectedFilter == 'all' ? Colors.white : Colors.black,
-              fontFamily: 'Mallanna',
-            ),
-            onSelected: (bool selected) {
-              onFilterChanged('all');
-            },
-          ),
+          _buildFilterChip('All', 'all'),
           const SizedBox(width: 8),
-          FilterChip(
-            label: const Text('Closed'),
-            selected: selectedFilter == 'closed',
-            selectedColor: const Color(0xFF4A5F44),
-            backgroundColor: Colors.white,
-            checkmarkColor: Colors.white,
-            side: BorderSide(
-              color: selectedFilter == 'closed'
-                  ? Colors.transparent
-                  : Colors.grey.shade300,
-            ),
-            labelStyle: TextStyle(
-              color: selectedFilter == 'closed' ? Colors.white : Colors.black,
-              fontFamily: 'Mallanna',
-            ),
-            onSelected: (bool selected) {
-              onFilterChanged('closed');
-            },
-          ),
+          _buildFilterChip('Open', 'open'),
           const SizedBox(width: 8),
-          FilterChip(
-            label: const Text('Open'),
-            selected: selectedFilter == 'open',
-            selectedColor: const Color(0xFF4A5F44),
-            backgroundColor: Colors.white,
-            checkmarkColor: Colors.white,
-            side: BorderSide(
-              color: selectedFilter == 'open'
-                  ? Colors.transparent
-                  : Colors.grey.shade300,
-            ),
-            labelStyle: TextStyle(
-              color: selectedFilter == 'open' ? Colors.white : Colors.black,
-              fontFamily: 'Mallanna',
-            ),
-            onSelected: (bool selected) {
-              onFilterChanged('open');
-            },
-          ),
+          _buildFilterChip('Closed', 'closed'),
         ],
       ),
     );

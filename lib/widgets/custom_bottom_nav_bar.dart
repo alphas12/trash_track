@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:trash_track/screens/appointments_page.dart';
-import 'package:trash_track/screens/notification_screen.dart';
-import 'package:trash_track/screens/settings_screen.dart';
 import '../screens/dashboard_screen.dart';
-import '../screens/bookmark_screen.dart';
+// import '../screens/bookmark_screen.dart';
 
 class CustomBottomNavBar extends StatelessWidget {
   final int currentIndex;
@@ -53,42 +50,15 @@ class CustomBottomNavBar extends StatelessWidget {
                   break;
                 case 1: // Collections
                   if (currentIndex != 1) {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const CollectionsPage(),
-                      ),
-                    );
+                    // Navigator.pushReplacement(
+                    //   context,
+                    //   MaterialPageRoute(
+                    //     builder: (context) => const CollectionsPage(),
+                    //   ),
+                    // );
                   }
                   break;
-                case 2:
-                  if (currentIndex != 2){
-                    Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const AppointmentsPage(),
-                        ),
-                    );
-                  }
-                  break;
-                case 3:
-                  if (currentIndex != 3){
-                    Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => const NotificationsScreen(),
-                        ),
-                    );
-                  }
-                  break;
-                case 4:
-                  if(currentIndex != 4){
-                    Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => const SettingsScreen(),
-                        ),
-                    );
-                  }
-                  break;
+                // Add other cases for appointments, notifications, settings when needed
               }
             },
             child: AnimatedContainer(

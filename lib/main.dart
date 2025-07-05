@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:trash_track/screens/bookmark_screen.dart';
 import 'screens/eco_shop_screen.dart';
 import 'screens/settings_screen.dart';
@@ -6,13 +8,19 @@ import 'screens/dashboard_screen.dart';
 import 'screens/intro_screen.dart';
 import 'screens/welcome_screen.dart';
 import 'screens/login_screen.dart';
-import 'screens/signup_options.dart';
+import 'screens/signup_page.dart';
 import 'screens/loading_screen.dart';
-import 'screens/eco_shop_screen.dart';
-import 'screens/settings_screen.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Supabase.initialize(
+    url: 'https://ywwwbihmwddykdwnrvtr.supabase.co',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3d3diaWhtd2RkeWtkd25ydnRyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAzNDA3MTYsImV4cCI6MjA2NTkxNjcxNn0.U7lKSxrqq1I7VfV8hnSTnnCe-t-u2c4FGXEgMoePnpw',
+  );
+
+  runApp(ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -22,18 +30,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
 
-      initialRoute: '/ecoshop',
+      initialRoute: '/intro',
       routes: {
         '/intro': (context) => const IntroScreen(),
         '/welcome': (context) => const WelcomeScreen(),
-        '/signup': (context) => const SignUpOptionsPage(),
+        '/signup': (context) => const SignUpPage(),
         '/login': (context) => const LoginPage(),
         '/dashboard': (context) => const DashboardScreen(),
         '/bookmark': (context) => const CollectionsPage(),
-        '/ecoshop': (context) => const EcoShopScreen(),
-        '/settings': (context) => const SettingsScreen()
       },
     );
   }

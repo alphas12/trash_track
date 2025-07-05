@@ -1,25 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:trash_track/screens/login_screen.dart';
+import '../../providers/signup_provider.dart';
 
-class SignUpPage extends StatefulWidget {
+class SignUpPage extends ConsumerStatefulWidget {
   const SignUpPage({super.key});
 
   @override
-  State<SignUpPage> createState() => _SignUpPageState();
+  ConsumerState<SignUpPage> createState() => _SignUpPageState();
 }
 
-class _SignUpPageState extends State<SignUpPage> {
+class _SignUpPageState extends ConsumerState<SignUpPage> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
-  // Input controllers (optional for back-end use later)
-  final TextEditingController _firstNameController = TextEditingController();
-  final TextEditingController _lastNameController = TextEditingController();
-  final TextEditingController _locationController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
+    final viewModel = ref.watch(signupViewModelProvider);
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -28,75 +30,92 @@ class _SignUpPageState extends State<SignUpPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Back Button
               IconButton(
                 icon: const Icon(Icons.arrow_back),
-                onPressed: () {
-                  Navigator.pop(context); // or navigate to signup_options later
-                },
+                onPressed: () => Navigator.pop(context),
               ),
               const SizedBox(height: 10),
-
-              // Sign up title (centered)
               const Center(
                 child: Text(
                   "Sign up",
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.black54,
-                  ),
+                  style: TextStyle(fontSize: 16, color: Colors.black54),
                 ),
               ),
               const SizedBox(height: 20),
-
-              // "Almost there!" Heading
               const Text(
                 "Almost\nthere!",
                 style: TextStyle(
                   fontSize: 38,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF4B5320), // Olive green
+                  color: Color(0xFF4B5320),
                   height: 1.1,
                   shadows: [
-                    Shadow(
-                      offset: Offset(2, 2),
-                      blurRadius: 3,
-                      color: Colors.black26,
-                    )
+                    Shadow(offset: Offset(2, 2), blurRadius: 3, color: Colors.black26)
                   ],
                 ),
               ),
               const SizedBox(height: 30),
-
-              // Text fields
-              _buildTextField("First Name", _firstNameController),
-              _buildTextField("Last Name", _lastNameController),
-              _buildTextField("Location", _locationController),
+              _buildTextField("Email", _emailController),
               _buildPasswordField("Password", _passwordController, isConfirm: false),
               _buildPasswordField("Confirm Password", _confirmPasswordController, isConfirm: true),
-
               const SizedBox(height: 30),
+              if (viewModel.isLoading)
+                const Center(child: CircularProgressIndicator())
+              else
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      final password = _passwordController.text.trim();
+                      final confirmPassword = _confirmPasswordController.text.trim();
 
-              // Sign up button
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    // No backend yet
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF4B5320), // Olive green
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      if (password != confirmPassword) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Passwords do not match")),
+                        );
+                        return;
+                      }
+
+                      await ref.read(signupViewModelProvider).signUp(
+                            _emailController.text.trim(),
+                            _passwordController.text.trim(),
+                          );
+
+                      if (viewModel.errorMessage != null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(viewModel.errorMessage!)),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Signup successful!")),
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF4B5320),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                  child: const Text(
-                    "Sign up",
-                    style: TextStyle(fontSize: 16, letterSpacing: 1.2, color: Colors.white),
+                    child: const Text(
+                      "Sign up",
+                      style: TextStyle(fontSize: 16, letterSpacing: 1.2, color: Colors.white),
+                    ),
                   ),
                 ),
-              ),
+                Align(
+                      alignment: Alignment.center,
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const LoginPage()),
+                          );
+                        },
+                        child: const Text("Already have an account?"),
+                      ),
+                    ),
             ],
           ),
         ),
