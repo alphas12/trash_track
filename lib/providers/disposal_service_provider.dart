@@ -80,6 +80,40 @@ final topServicesProvider = FutureProvider<List<DisposalService>>((ref) async {
   }
 });
 
+// Provider for all available material types
+final materialTypesProvider = FutureProvider<List<String>>((ref) async {
+  try {
+    final repository = ref.watch(disposalServiceRepositoryProvider);
+    final materials = await repository.getMaterialTypes();
+    return materials;
+  } catch (e, stack) {
+    print('Error fetching material types: $e');
+    print('Stack trace: $stack');
+    rethrow;
+  }
+});
+
+// Search services provider
+final searchServicesProvider =
+    FutureProvider.family<List<DisposalService>, SearchParams>((
+      ref,
+      params,
+    ) async {
+      try {
+        final repository = ref.watch(disposalServiceRepositoryProvider);
+        final services = await repository.searchServices(
+          query: params.query,
+          materialType: params.materialType,
+          isOpen: params.isOpen,
+        );
+        return services;
+      } catch (e, stack) {
+        print('Error in search services provider: $e');
+        print('Stack trace: $stack');
+        rethrow;
+      }
+    });
+
 // Helper provider to check if a service is currently open
 final isServiceOpenProvider = Provider.family<bool, DisposalService>((
   ref,
@@ -151,3 +185,24 @@ final allTopServicesProvider = FutureProvider<List<DisposalService>>((
   final repository = ref.watch(disposalServiceRepositoryProvider);
   return repository.getTopServices();
 });
+
+// Search parameters class
+class SearchParams {
+  final String query;
+  final String? materialType;
+  final bool? isOpen;
+
+  const SearchParams({required this.query, this.materialType, this.isOpen});
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is SearchParams &&
+        other.query == query &&
+        other.materialType == materialType &&
+        other.isOpen == isOpen;
+  }
+
+  @override
+  int get hashCode => Object.hash(query, materialType, isOpen);
+}

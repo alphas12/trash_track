@@ -1,28 +1,20 @@
 import 'package:flutter/material.dart';
-import '../models/recycling_service.dart';
-import '../services/recycling_service_repository.dart';
-import '../widgets/service_card.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/disposal_service_provider.dart';
+import '../widgets/disposal_service_card.dart';
 import '../widgets/material_filter_bar.dart';
 
-class SearchScreen extends StatefulWidget {
+class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
 
   @override
-  State<SearchScreen> createState() => _SearchScreenState();
+  ConsumerState<SearchScreen> createState() => _SearchScreenState();
 }
 
-class _SearchScreenState extends State<SearchScreen> {
+class _SearchScreenState extends ConsumerState<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
-  final RecyclingServiceRepository _repository = RecyclingServiceRepository();
-  List<RecyclingService> _services = [];
-  bool _isLoading = false;
   String? _selectedMaterial;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadServices();
-  }
+  String _searchQuery = '';
 
   @override
   void dispose() {
@@ -30,72 +22,36 @@ class _SearchScreenState extends State<SearchScreen> {
     super.dispose();
   }
 
-  Future<void> _loadServices() async {
-    if (!mounted) return;
-
+  void _onMaterialSelected(String? material) {
     setState(() {
-      _isLoading = true;
+      _selectedMaterial = material;
     });
-
-    try {
-      final services = await _repository.searchServices(_searchController.text);
-      if (!mounted) return;
-
-      setState(() {
-        _services = services;
-        if (_selectedMaterial != null && _selectedMaterial != 'All') {
-          _services = _services
-              .where(
-                (service) => service.serviceTypes.contains(_selectedMaterial),
-              )
-              .toList();
-        }
-      });
-    } catch (e) {
-      if (!mounted) return;
-
-      setState(() {
-        _services = [];
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error loading services: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    } finally {
-      if (!mounted) return;
-
-      setState(() {
-        _isLoading = false;
-      });
-    }
   }
 
-  void _handleServiceFavorite(int index) {
-    final service = _services[index];
+  void _onSearchChanged(String query) {
     setState(() {
-      _services[index] = RecyclingService(
-        id: service.id,
-        name: service.name,
-        distance: service.distance,
-        status: service.status,
-        imageUrl: service.imageUrl,
-        address: service.address,
-        serviceTypes: service.serviceTypes,
-        isFavorite: !service.isFavorite,
-      );
+      _searchQuery = query;
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final searchResults = ref.watch(
+      searchServicesProvider(
+        SearchParams(
+          query: _searchQuery,
+          materialType: _selectedMaterial,
+          isOpen: null,
+        ),
+      ),
+    );
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           children: [
+            // Header with search bar
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -108,87 +64,79 @@ class _SearchScreenState extends State<SearchScreen> {
                   ),
                 ],
               ),
-              child: Column(
-                children: [
-                  // Header with back button and search
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      children: [
-                        GestureDetector(
-                          onTap: () => Navigator.pop(context),
-                          child: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.1),
-                                  spreadRadius: 1,
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 1),
-                                ),
-                              ],
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.1),
+                              spreadRadius: 1,
+                              blurRadius: 4,
+                              offset: const Offset(0, 1),
                             ),
-                            child: const Icon(
-                              Icons.arrow_back,
-                              color: Colors.black,
-                            ),
-                          ),
+                          ],
                         ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Container(
-                            height: 52,
-                            decoration: BoxDecoration(
-                              color: Colors.grey[100],
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: TextField(
-                              controller: _searchController,
-                              onChanged: (_) => _loadServices(),
-                              decoration: const InputDecoration(
-                                hintText: 'Search recycling services',
-                                hintStyle: TextStyle(
-                                  color: Colors.grey,
-                                  fontFamily: 'Mallanna',
-                                ),
-                                prefixIcon: Icon(
-                                  Icons.search,
-                                  color: Color(0xFF4A5F44),
-                                ),
-                                border: InputBorder.none,
-                                contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 16,
-                                ),
-                              ),
-                            ),
-                          ),
+                        child: const Icon(
+                          Icons.arrow_back,
+                          color: Colors.black,
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                  // Material type filters
-                  MaterialFilterBar(
-                    selectedMaterial: _selectedMaterial,
-                    onMaterialSelected: (material) {
-                      setState(() {
-                        _selectedMaterial = material;
-                      });
-                      _loadServices();
-                    },
-                  ),
-                ],
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Container(
+                        height: 52,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: TextField(
+                          controller: _searchController,
+                          onChanged: _onSearchChanged,
+                          decoration: const InputDecoration(
+                            hintText: 'Search recycling services',
+                            hintStyle: TextStyle(
+                              color: Colors.grey,
+                              fontFamily: 'Mallanna',
+                            ),
+                            prefixIcon: Icon(
+                              Icons.search,
+                              color: Color(0xFF4A5F44),
+                            ),
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
+
+            // Material filter bar
+            MaterialFilterBar(
+              selectedMaterial: _selectedMaterial,
+              onMaterialSelected: _onMaterialSelected,
+            ),
+
             // Search results
             Expanded(
-              child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : _services.isEmpty
-                  ? Center(
+              child: searchResults.when(
+                data: (services) {
+                  if (services.isEmpty) {
+                    return Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -198,48 +146,60 @@ class _SearchScreenState extends State<SearchScreen> {
                             color: Colors.grey[400],
                           ),
                           const SizedBox(height: 16),
-                          Text(
+                          const Text(
                             'No services found',
                             style: TextStyle(
                               fontSize: 18,
-                              color: Colors.grey[600],
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black54,
                               fontFamily: 'Mallanna',
                             ),
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Try adjusting your search or filters',
+                            'Try adjusting your filters',
                             style: TextStyle(
                               fontSize: 16,
-                              color: Colors.grey[400],
+                              color: Colors.grey[600],
                               fontFamily: 'Mallanna',
                             ),
                           ),
                         ],
                       ),
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: _services.length,
-                      itemBuilder: (context, index) {
-                        final service = _services[index];
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 16),
-                          child: ServiceCard(
-                            title: service.name,
-                            distance: service.formattedDistance,
-                            status: service.status,
-                            serviceTypes: service.serviceTypes,
-                            imageUrl: service.imageUrl,
-                            isFavorite: service.isFavorite,
-                            onTap: () {
-                              // TODO: Navigate to service details
-                            },
-                            onFavorite: () => _handleServiceFavorite(index),
-                          ),
-                        );
-                      },
+                    );
+                  }
+
+                  return ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: services.length,
+                    itemBuilder: (context, index) {
+                      final service = services[index];
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 16),
+                        child: DisposalServiceCard(
+                          service: service,
+                          isCompact: false,
+                          onTap: () {
+                            // TODO: Navigate to service details
+                          },
+                        ),
+                      );
+                    },
+                  );
+                },
+                loading: () => const Center(
+                  child: CircularProgressIndicator(color: Color(0xFF4A5F44)),
+                ),
+                error: (error, stack) => Center(
+                  child: Text(
+                    'Error: $error',
+                    style: const TextStyle(
+                      color: Colors.red,
+                      fontFamily: 'Mallanna',
                     ),
+                  ),
+                ),
+              ),
             ),
           ],
         ),

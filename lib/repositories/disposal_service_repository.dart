@@ -101,20 +101,78 @@ class DisposalServiceRepository {
     }
   }
 
-  // Search services by name or location
-  Future<List<DisposalService>> searchServices(String query) async {
+  // Get all available material types
+  Future<List<String>> getMaterialTypes() async {
     try {
       final response = await _supabase
-          .from('disposal_service')
-          .select(_baseQuery)
-          .or('service_name.ilike.%$query%,service_location.ilike.%$query%')
-          .order('service_rating', ascending: false);
+          .from('material_points')
+          .select('material_type')
+          .order('material_type');
 
       return (response as List)
+          .map((data) => data['material_type'] as String)
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to fetch material types: $e');
+    }
+  }
+
+  // Enhanced search services with filtering by material type and search query
+  Future<List<DisposalService>> searchServices({
+    required String query,
+    String? materialType,
+    bool? isOpen,
+  }) async {
+    try {
+      // First, get all services with their materials
+      final response = await _supabase
+          .from('disposal_service')
+          .select(_baseQuery);
+
+      var services = (response as List)
           .map((data) => DisposalService.fromMap(data))
           .toList();
+
+      // Filter by material type if specified
+      if (materialType != null) {
+        services = services.where((service) {
+          return service.serviceMaterials.any(
+            (sm) => sm.materialPoints.materialType == materialType,
+          );
+        }).toList();
+      }
+
+      // Filter by search query if provided
+      if (query.isNotEmpty) {
+        services = services.where((service) {
+          return service.serviceName.toLowerCase().contains(
+                query.toLowerCase(),
+              ) ||
+              service.serviceLocation.toLowerCase().contains(
+                query.toLowerCase(),
+              );
+        }).toList();
+      }
+
+      // Sort by rating
+      services.sort((a, b) => b.serviceRating.compareTo(a.serviceRating));
+
+      return services;
     } catch (e) {
       throw Exception('Failed to search services: $e');
     }
+  }
+
+  // Helper function to parse time string (HH:mm) to DateTime
+  DateTime _parseTimeString(String timeStr) {
+    final now = DateTime.now();
+    final parts = timeStr.split(':');
+    return DateTime(
+      now.year,
+      now.month,
+      now.day,
+      int.parse(parts[0]),
+      int.parse(parts[1]),
+    );
   }
 }
