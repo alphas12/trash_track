@@ -4,6 +4,7 @@ import '../models/disposal_service.dart';
 import '../providers/disposal_service_provider.dart';
 import '../widgets/disposal_service_card.dart';
 import '../widgets/filter_bar.dart';
+import '../screens/disposal_shop_details_screen.dart';
 
 class TopServicesScreen extends ConsumerStatefulWidget {
   const TopServicesScreen({super.key});
@@ -175,9 +176,15 @@ class _TopServicesScreenState extends ConsumerState<TopServicesScreen> {
                         ),
                         child: DisposalServiceCard(
                           service: service,
-                          isCompact: false, // This will show material chips
+                          isCompact: false,
                           onTap: () {
-                            // TODO: Navigate to service details
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    DisposalShopDetailsScreen(service: service),
+                              ),
+                            );
                           },
                         ),
                       );

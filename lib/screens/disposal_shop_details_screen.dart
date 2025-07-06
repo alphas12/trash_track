@@ -1,16 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+import '../models/disposal_service.dart';
+import '../providers/disposal_service_provider.dart';
+import 'waste_service_page.dart';
 
-class DisposalShopDetailsScreen extends StatefulWidget {
-  final Map<String, String> shop;
+class DisposalShopDetailsScreen extends ConsumerStatefulWidget {
+  final DisposalService service;
 
-  const DisposalShopDetailsScreen({super.key, required this.shop});
+  const DisposalShopDetailsScreen({super.key, required this.service});
 
   @override
-  State<DisposalShopDetailsScreen> createState() => _DisposalShopDetailsScreenState();
+  ConsumerState<DisposalShopDetailsScreen> createState() =>
+      _DisposalShopDetailsScreenState();
 }
 
-class _DisposalShopDetailsScreenState extends State<DisposalShopDetailsScreen> {
+class _DisposalShopDetailsScreenState
+    extends ConsumerState<DisposalShopDetailsScreen> {
   bool isFavorited = false;
+
+  String _formatOperatingHours() {
+    final now = DateTime.now();
+    final currentDay = now.weekday;
+
+    final todayHours = widget.service.operatingHours
+        .where((hours) => hours.operatingDays == currentDay)
+        .firstOrNull;
+
+    if (todayHours == null) return 'Closed Today';
+    if (!todayHours.isOpen) return 'Closed Today';
+
+    // Parse the 24-hour times
+    final openFormat = DateFormat('HH:mm');
+    final displayFormat = DateFormat('h:mm a');
+
+    final openTime = openFormat.parse(todayHours.openTime);
+    final closeTime = openFormat.parse(todayHours.closeTime);
+
+    // Format into 12-hour format with AM/PM
+    return '${todayHours.dayName}, ${displayFormat.format(openTime)} - ${displayFormat.format(closeTime)}';
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -30,8 +60,8 @@ class _DisposalShopDetailsScreenState extends State<DisposalShopDetailsScreen> {
                       topLeft: Radius.circular(24),
                       topRight: Radius.circular(24),
                     ),
-                    child: Image.asset(
-                      widget.shop['image'] ?? '',
+                    child: Image.network(
+                      widget.service.serviceImgUrl,
                       height: 250,
                       width: double.infinity,
                       fit: BoxFit.cover,
@@ -41,7 +71,11 @@ class _DisposalShopDetailsScreenState extends State<DisposalShopDetailsScreen> {
                           width: double.infinity,
                           color: const Color(0xFFD9D9D9),
                           child: const Center(
-                            child: Icon(Icons.image, size: 60, color: Colors.grey),
+                            child: Icon(
+                              Icons.image,
+                              size: 60,
+                              color: Colors.grey,
+                            ),
                           ),
                         );
                       },
@@ -67,7 +101,11 @@ class _DisposalShopDetailsScreenState extends State<DisposalShopDetailsScreen> {
                             ),
                           ],
                         ),
-                        child: const Icon(Icons.arrow_back, color: Colors.black, size: 24),
+                        child: const Icon(
+                          Icons.arrow_back,
+                          color: Colors.black,
+                          size: 24,
+                        ),
                       ),
                     ),
                   ),
@@ -81,7 +119,7 @@ class _DisposalShopDetailsScreenState extends State<DisposalShopDetailsScreen> {
                 children: [
                   Expanded(
                     child: Text(
-                      widget.shop['name']!,
+                      widget.service.serviceName,
                       style: const TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
@@ -106,60 +144,127 @@ class _DisposalShopDetailsScreenState extends State<DisposalShopDetailsScreen> {
                 ],
               ),
               const SizedBox(height: 4),
-              Text(
-                widget.shop['status']!,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFF6A8126),
-                  fontFamily: 'Mallanna',
-                ),
-              ),
-
-              const SizedBox(height: 4),
-
-              // Address
+              // Operating Hours Status
               Row(
                 children: [
-                  const Icon(Icons.location_on, size: 16, color: Colors.grey),
-                  const SizedBox(width: 4),
-                  Text(widget.shop['address']!, style: const TextStyle(fontFamily: 'Mallanna')),
-                ],
-              ),
-
-              const SizedBox(height: 4),
-
-              // Drop-off or Pick-up info
-              Row(
-                children: [
-                  const Icon(Icons.local_shipping, size: 16, color: Colors.grey),
+                  Icon(
+                    Icons.access_time,
+                    size: 16,
+                    color: ref.watch(isServiceOpenProvider(widget.service))
+                        ? const Color(0xFF6A8126)
+                        : Colors.red[400],
+                  ),
                   const SizedBox(width: 4),
                   Text(
-                    widget.shop['method'] ?? 'Drop-off',
-                    style: const TextStyle(fontFamily: 'Mallanna'),
+                    _formatOperatingHours(),
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: ref.watch(isServiceOpenProvider(widget.service))
+                          ? const Color(0xFF6A8126)
+                          : Colors.red[400],
+                      fontFamily: 'Mallanna',
+                    ),
                   ),
                 ],
               ),
 
-              const SizedBox(height: 4),
+              const SizedBox(height: 8),
 
-              // Services (Waste Types)
+              // Location
               Row(
                 children: [
-                  const Icon(Icons.delete, size: 16, color: Colors.grey),
+                  const Icon(Icons.location_on, size: 16, color: Colors.grey),
                   const SizedBox(width: 4),
-                  Text(widget.shop['wasteTypes']!, style: const TextStyle(fontFamily: 'Mallanna')),
+                  Expanded(
+                    child: Text(
+                      widget.service.serviceLocation,
+                      style: const TextStyle(fontFamily: 'Mallanna'),
+                    ),
+                  ),
                 ],
+              ),
+
+              const SizedBox(height: 8),
+
+              // Service Availability
+              Row(
+                children: [
+                  Icon(
+                    Icons.local_shipping,
+                    size: 16,
+                    color: const Color(0xFF6A8126),
+                  ),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      widget.service.serviceAvailability.join(", "),
+                      style: const TextStyle(
+                        fontFamily: 'Mallanna',
+                        color: Color(0xFF6A8126),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 8),
+
+              // Materials Accepted
+              const Text(
+                'Materials Accepted',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'Mallanna',
+                ),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: widget.service.serviceMaterials
+                    .map((sm) => sm.materialPoints.materialType)
+                    .toSet()
+                    .map((materialType) {
+                      return Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF4A5F44).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: const Color(0xFF4A5F44),
+                            width: 1,
+                          ),
+                        ),
+                        child: Text(
+                          materialType,
+                          style: const TextStyle(
+                            color: Color(0xFF4A5F44),
+                            fontSize: 14,
+                            fontFamily: 'Mallanna',
+                          ),
+                        ),
+                      );
+                    })
+                    .toList(),
               ),
 
               const SizedBox(height: 16),
 
               const Text(
                 'Details',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Mallanna'),
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Mallanna',
+                ),
               ),
               const SizedBox(height: 8),
               Text(
-                widget.shop['details']!,
+                widget.service.serviceDescription,
                 style: const TextStyle(fontFamily: 'Mallanna'),
               ),
 
@@ -169,7 +274,15 @@ class _DisposalShopDetailsScreenState extends State<DisposalShopDetailsScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            WasteServicePage(service: widget.service),
+                      ),
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF4A5F44),
                     shape: RoundedRectangleBorder(
