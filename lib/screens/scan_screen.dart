@@ -1,0 +1,464 @@
+import 'dart:io';
+import 'dart:typed_data';
+
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:tflite_flutter/tflite_flutter.dart';
+import 'package:image/image.dart' as img;
+import 'package:flutter/services.dart';
+
+// Make sure to import the new screen file
+           
+
+/// Single‑screen flow:
+/// 1. User sees the options card (Scan / Upload).
+/// 2. User taps Scan -> sees a prompt -> opens camera.
+/// 3. User takes a picture.
+/// 4. Preview appears and identification runs automatically.
+/// 5. Prediction is shown below the image with waste type and description.
+class ScanScreen extends StatefulWidget {
+  const ScanScreen({super.key});
+
+  @override
+  State<ScanScreen> createState() => _ScanScreenState();
+}
+
+class _ScanScreenState extends State<ScanScreen> {
+  // ─────────────────────── UI constants ──────────────────────
+  static const _bg = Color(0xFFDCE2E5);
+  static const _text = Color(0xFF2A2A2A);
+
+  // ─────────────────────── image picking ─────────────────────
+  final ImagePicker _picker = ImagePicker();
+  File? _selectedImage;
+
+  // ─────────────────────── tflite model ──────────────────────
+  static const _modelPath = 'assets/models/GarbageClassification.tflite';
+  static const _labelsPath = 'assets/models/labels.txt';
+  Interpreter? _interpreter;
+  List<String> _labels = [];
+  bool _modelReady = false;
+
+  // ───────────────── classification state ────────────────────
+  String? _prediction;
+  String? _wasteType;
+  String? _wasteDescription;
+  bool _running = false;
+
+  // Data structure for waste details
+  static final Map<String, Map<String, String>> _wasteDetails = {
+    'cardboard': {
+      'type': 'Biodegradable',
+      'description':
+          'Cardboard is a paper-based material that is both recyclable and biodegradable. It is commonly used for packaging and shipping. Proper recycling of cardboard helps conserve resources and reduce landfill waste.',
+    },
+    'glass': {
+      'type': 'Non-Biodegradable',
+      'description':
+          'Glass is made from natural and stable materials, making it infinitely recyclable without loss of quality. However, it is not biodegradable and can persist in the environment for a very long time if not disposed of correctly. Please recycle glass to save energy and reduce pollution.',
+    },
+    'metal': {
+      'type': 'Non-Biodegradable',
+      'description':
+          'Metal objects are typically non-biodegradable but are highly valuable for recycling. Recycling metal conserves natural resources, saves energy, and reduces greenhouse gas emissions. Common recyclable metals include aluminum and steel cans.',
+    },
+    'paper': {
+      'type': 'Biodegradable',
+      'description':
+          'Paper is produced from wood pulp and is readily biodegradable and recyclable. Recycling paper saves trees, water, and energy compared to making it from raw materials. Please ensure it is clean and dry before recycling.',
+    },
+    'plastic': {
+      'type': 'Non-Biodegradable',
+      'description':
+          'Plastic is a synthetic material that is not biodegradable and can take hundreds of years to break down. It poses a significant threat to wildlife and ecosystems when it pollutes the environment. Recycling plastic helps reduce waste and consumption of raw materials.',
+    },
+    'trash': {
+      'type': 'Non-Biodegradable',
+      'description':
+          'This category typically includes mixed waste or items that are not easily recyclable. These materials are generally non-biodegradable and are destined for the landfill. Proper sorting is crucial to minimize the amount of waste sent to landfills.',
+    }
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    _loadModel();
+  }
+
+  Future<void> _loadModel() async {
+    try {
+      final options = InterpreterOptions();
+      _interpreter = await Interpreter.fromAsset(_modelPath, options: options);
+      final labelsRaw = await rootBundle.loadString(_labelsPath);
+      _labels = labelsRaw.split('\n').where((e) => e.isNotEmpty).toList();
+      setState(() => _modelReady = true);
+    } catch (e) {
+      debugPrint('Model load error: $e');
+      setState(() => _modelReady = false);
+    }
+  }
+
+  // ─────────────────────── ui handlers ───────────────────────
+
+  Future<void> _handleScan() async {
+    final bool? continueToCamera = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('For Best Results'),
+          content: const Text(
+            'Please take a picture of only one item at a time to ensure accurate identification.',
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+            ),
+          ],
+        );
+      },
+    );
+
+    if (continueToCamera == true) {
+      await _pickFromCamera();
+    }
+  }
+
+  Future<void> _pickFromCamera() async {
+    final XFile? picked = await _picker.pickImage(source: ImageSource.camera);
+    if (picked == null) return;
+    setState(() {
+      _selectedImage = File(picked.path);
+      _prediction = null;
+      _wasteType = null;
+      _wasteDescription = null;
+    });
+    _handleIdentify();
+  }
+
+  Future<void> _pickFromGallery() async {
+    final XFile? picked = await _picker.pickImage(source: ImageSource.gallery);
+    if (picked == null) return;
+    setState(() {
+      _selectedImage = File(picked.path);
+      _prediction = null;
+      _wasteType = null;
+      _wasteDescription = null;
+    });
+    _handleIdentify();
+  }
+
+  void _removeImage() {
+    setState(() {
+      _selectedImage = null;
+      _prediction = null;
+      _wasteType = null;
+      _wasteDescription = null;
+    });
+  }
+
+  Future<void> _handleIdentify() async {
+    if (_selectedImage == null || !_modelReady) return;
+    setState(() {
+      _running = true;
+      _prediction = null;
+    });
+    final pred = await _classifyImage(_selectedImage!);
+    _updateWasteDetails(pred);
+    setState(() {
+      _prediction = pred;
+      _running = false;
+    });
+  }
+
+  void _updateWasteDetails(String? prediction) {
+    if (prediction == null) {
+      _wasteType = null;
+      _wasteDescription = null;
+      return;
+    }
+    final details = _wasteDetails[prediction.toLowerCase()];
+    if (details != null) {
+      setState(() {
+        _wasteType = details['type'];
+        _wasteDescription = details['description'];
+      });
+    }
+  }
+
+  Future<String?> _classifyImage(File imgFile) async {
+    if (_interpreter == null) return null;
+
+    final Uint8List bytes = await imgFile.readAsBytes();
+    final img.Image? original = img.decodeImage(bytes);
+    if (original == null) return null;
+
+    final img.Image resized = img.copyResize(original, width: 224, height: 224);
+    final Float32List input = Float32List(224 * 224 * 3);
+    int i = 0;
+    for (int y = 0; y < 224; y++) {
+      for (int x = 0; x < 224; x++) {
+        final px = resized.getPixel(x, y);
+        input[i++] = px.rNormalized.toDouble();
+        input[i++] = px.gNormalized.toDouble();
+        input[i++] = px.bNormalized.toDouble();
+      }
+    }
+    final reshaped = input.reshape([1, 224, 224, 3]);
+    final output = List.filled(6, 0.0).reshape([1, 6]);
+    _interpreter!.run(reshaped, output);
+
+    var bestIdx = 0;
+    var bestProb = 0.0;
+    for (var j = 0; j < output[0].length; j++) {
+      if (output[0][j] > bestProb) {
+        bestProb = output[0][j];
+        bestIdx = j;
+      }
+    }
+    return bestIdx < _labels.length ? _labels[bestIdx] : null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: _bg,
+      appBar: AppBar(
+        backgroundColor: _bg,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new, color: _text),
+          onPressed: () => Navigator.maybePop(context),
+        ),
+        // NEW: "Find Place" button added here
+        actions: [
+          if (_prediction != null)
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          //Add DisposalShopDetailsScreen Here
+                    ),
+                  );
+                },
+                child: const Text(
+                  'Find Shop',
+                  style: TextStyle(
+                    color: _text,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.only(
+              top: 20.0,
+              left: 24.0,
+              right: 24.0,
+              bottom: 24.0,
+            ),
+            child: Column(
+              children: [
+                if (_selectedImage != null) ...[
+                  imagePreview(),
+                  const SizedBox(height: 24),
+                  if (_running)
+                    const CircularProgressIndicator()
+                  else if (_prediction != null)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 20),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: .05),
+                            blurRadius: 10,
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const Text(
+                            'Identified As:',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            _prediction!,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          if (_wasteType != null) ...[
+                            const SizedBox(height: 16),
+                            Text(
+                              _wasteType!,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: _wasteType == 'Biodegradable'
+                                    ? Colors.green.shade700
+                                    : Colors.red.shade700,
+                              ),
+                            ),
+                          ],
+                          if (_wasteDescription != null) ...[
+                            const SizedBox(height: 16),
+                            Text(
+                              _wasteDescription!,
+                              textAlign: TextAlign.justify,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Colors.black87,
+                                height: 1.5,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                ] else
+                  optionsCard(),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget imagePreview() {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Image.file(_selectedImage!, height: 300, fit: BoxFit.cover),
+          ),
+        ),
+        Positioned(
+          right: 8,
+          top: -10,
+          child: GestureDetector(
+            onTap: _removeImage,
+            child: Container(
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: .65),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.close, size: 16, color: Colors.white),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget optionsCard() {
+    return Container(
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: .05),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.center_focus_weak_rounded, size: 80, color: _text),
+          const SizedBox(height: 24),
+          const Text(
+            'Not sure what kind of trash you have?',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: _text,
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Choose one of the options below to help us identify it.',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 14, color: Colors.black54),
+          ),
+          const SizedBox(height: 32),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: _handleScan,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF5D6B4C),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: const Text(
+                    'Scan',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: _pickFromGallery,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFD9D9D9),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: const Text(
+                    'Upload',
+                    style: TextStyle(color: _text, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
