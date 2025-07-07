@@ -271,36 +271,36 @@ class _DisposalShopDetailsScreenState
               const SizedBox(height: 24),
 
               // Shop Now Button (Full Width)
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) =>
-                            WasteServicePage(service: widget.service),
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF4A5F44),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                  child: const Text(
-                    'Schedule',
-                    style: TextStyle(
-                      fontFamily: 'Mallanna',
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
-              ),
+              // SizedBox(
+              //   width: double.infinity,
+              //   child: ElevatedButton(
+              //     onPressed: () {
+              //       Navigator.push(
+              //         context,
+              //         MaterialPageRoute(
+              //           builder: (_) =>
+              //               WasteServicePage(service: widget.service),
+              //         ),
+              //       );
+              //     },
+              //     style: ElevatedButton.styleFrom(
+              //       backgroundColor: const Color(0xFF4A5F44),
+              //       shape: RoundedRectangleBorder(
+              //         borderRadius: BorderRadius.circular(12),
+              //       ),
+              //       padding: const EdgeInsets.symmetric(vertical: 14),
+              //     ),
+              //     child: const Text(
+              //       'Schedule',
+              //       style: TextStyle(
+              //         fontFamily: 'Mallanna',
+              //         color: Colors.white,
+              //         fontWeight: FontWeight.bold,
+              //         fontSize: 16,
+              //       ),
+              //     ),
+              //   ),
+              // ),
             ],
           ),
         ),

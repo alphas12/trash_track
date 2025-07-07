@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import '../providers/auth_provider.dart';
 
 class LoginViewModel extends ChangeNotifier {
+  final Ref ref;
+  LoginViewModel(this.ref);
+
   bool isLoading = false;
   String? errorMessage;
 
@@ -12,18 +15,10 @@ class LoginViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await Supabase.instance.client.auth.signInWithPassword(
-        email: email,
-        password: password,
-      );
-
-      if (response.user == null) {
-        errorMessage = "Login failed. Please check your credentials.";
-      }
-    } on AuthException catch (e) {
-      errorMessage = e.message;
+      final authService = ref.read(authServiceProvider);
+      await authService.signIn(email, password);
     } catch (e) {
-      errorMessage = "An unexpected error occurred.";
+      errorMessage = "Login failed. Please check your credentials.";
     } finally {
       isLoading = false;
       notifyListeners();
