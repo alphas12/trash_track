@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/signup_viewmodel.dart';
+import 'package:trash_track/screens/loading_screen.dart';
 import '../providers/auth_provider.dart';
 
 class SignUpPage extends ConsumerStatefulWidget {
@@ -168,16 +169,39 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
     );
   }
 
-  void _submit() {
-    if (_formKey.currentState!.validate()) {
-      ref.read(signUpViewModelProvider).signUp(
-            email: _emailController.text.trim(),
-            password: _passwordController.text,
-            fname: _fnameController.text.trim(),
-            lname: _lnameController.text.trim(),
-            location: _locationController.text.trim(),
-          );
+  // void _submit() {
+  //   if (_formKey.currentState!.validate()) {
+  //     ref.read(signUpViewModelProvider).signUp(
+  //           email: _emailController.text.trim(),
+  //           password: _passwordController.text,
+  //           fname: _fnameController.text.trim(),
+  //           lname: _lnameController.text.trim(),
+  //           location: _locationController.text.trim(),
+  //         );
+  //   }
+  // }
+
+  void _submit() async {
+  if (_formKey.currentState!.validate()) {
+    final viewModel = ref.read(signUpViewModelProvider);
+
+    await viewModel.signUp(
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
+      fname: _fnameController.text.trim(),
+      lname: _lnameController.text.trim(),
+      location: _locationController.text.trim(),
+    );
+
+    // If signup was successful (no error message), navigate to loading screen
+    if (viewModel.errorMessage == null && mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoadingScreen()),
+      );
     }
   }
+}
+
 
 }
