@@ -1,37 +1,104 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/appointment_model.dart';
+import '../models/disposal_service.dart';
+import '../providers/appointment_provider.dart';
 
-class WasteServicePage extends StatefulWidget {
-  const WasteServicePage({super.key});
+class WasteServicePage extends ConsumerStatefulWidget {
+  final DisposalService service;
+
+  const WasteServicePage({super.key, required this.service});
 
   @override
-  State<WasteServicePage> createState() => _WasteServicePageState();
+  ConsumerState<WasteServicePage> createState() => _WasteServicePageState();
 }
 
-class _WasteServicePageState extends State<WasteServicePage> {
-  bool isPickup = true;
-
-  // Dummy selected date
+class _WasteServicePageState extends ConsumerState<WasteServicePage> {
+  AppointmentType? selectedType;
   DateTime selectedDate = DateTime.now();
-
-  // Waste fields
-  String selectedCategory = "Plastic Bottle";
+  String? selectedMaterialType;
   int wasteQuantity = 1;
-
-  // Dummy location
-  String userLocation = "Green Haven, 42B, Meadowview";
-
-  // Notes controller
+  String? userLocation;
   final TextEditingController _notesController = TextEditingController();
+  bool isLoading = false;
+  String? error;
 
   void _incrementQuantity() => setState(() => wasteQuantity++);
+
   void _decrementQuantity() {
     if (wasteQuantity > 0) setState(() => wasteQuantity--);
   }
 
-  void _selectService(bool pickup) {
+  void _selectType(AppointmentType type) {
     setState(() {
-      isPickup = pickup;
+      selectedType = type;
+      // Reset location for drop-off
+      if (type == AppointmentType.dropOff) {
+        userLocation = widget.service.serviceLocation;
+      }
     });
+  }
+
+  Future<void> _scheduleAppointment() async {
+    if (selectedType == null) {
+      setState(() => error = 'Please select a service type');
+      return;
+    }
+    if (selectedMaterialType == null) {
+      setState(() => error = 'Please select a waste category');
+      return;
+    }
+    if (selectedType == AppointmentType.pickUp &&
+        (userLocation == null || userLocation!.isEmpty)) {
+      setState(() => error = 'Please provide a pickup address');
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+      error = null;
+    });
+
+    try {
+      // Find the service material for the selected type
+      final material = widget.service.serviceMaterials.firstWhere(
+        (m) => m.materialPoints.materialType == selectedMaterialType,
+      );
+
+      final appointmentData = {
+        'serviceId': widget.service.serviceId,
+        'appointmentDateTime': selectedDate,
+        'type': selectedType!,
+        'address': selectedType == AppointmentType.pickUp
+            ? userLocation
+            : widget.service.serviceLocation,
+        'notes': _notesController.text.trim(),
+        'wasteMaterials': [
+          {
+            'material_type': selectedMaterialType,
+            'quantity': wasteQuantity,
+            'points': (material.materialPoints.pointsPerKg * wasteQuantity)
+                .toInt(),
+          },
+        ],
+      };
+
+      final appointment = await ref.read(
+        createAppointmentProvider(appointmentData).future,
+      );
+
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Appointment scheduled successfully!')),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        error = 'Failed to schedule appointment: $e';
+        isLoading = false;
+      });
+    }
   }
 
   @override
@@ -50,11 +117,21 @@ class _WasteServicePageState extends State<WasteServicePage> {
               const Divider(height: 30),
               _buildWasteDetails(),
               const Divider(height: 30),
-              isPickup ? _buildPickupDetails() : _buildDropoffDetails(),
+              selectedType == AppointmentType.pickUp
+                  ? _buildPickupDetails()
+                  : _buildDropoffDetails(),
               const Divider(height: 30),
               _buildAdditionalNotes(),
               const Divider(height: 30),
               _buildWasteSummary(),
+              if (error != null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Text(
+                    error!,
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                ),
               const SizedBox(height: 20),
               _buildBottomSummary(),
             ],
@@ -64,17 +141,27 @@ class _WasteServicePageState extends State<WasteServicePage> {
     );
   }
 
+  void _clearForm() {
+    setState(() {
+      selectedType = null;
+      selectedDate = DateTime.now();
+      selectedMaterialType = null;
+      wasteQuantity = 1;
+      userLocation = null;
+      _notesController.clear();
+      error = null;
+    });
+  }
+
   Widget _buildHeader() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Icon(Icons.close),
-        TextButton(
-          onPressed: () {
-            // Clear logic
-          },
-          child: const Text("Clear data"),
-        )
+        IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        TextButton(onPressed: _clearForm, child: const Text("Clear data")),
       ],
     );
   }
@@ -83,35 +170,82 @@ class _WasteServicePageState extends State<WasteServicePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("Service", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+        const Text(
+          "Service",
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 5),
         const Text("Please select a type of service"),
         const SizedBox(height: 10),
         Row(
-          children: [
-            Expanded(
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: isPickup ? const Color(0xFF4B5320) : Colors.grey[300],
-                  foregroundColor: isPickup ? Colors.white : Colors.black,
-                ),
-                onPressed: () => _selectService(true),
-                child: const Text("Pick up"),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: !isPickup ? const Color(0xFF4B5320) : Colors.grey[300],
-                  foregroundColor: !isPickup ? Colors.white : Colors.black,
-                ),
-                onPressed: () => _selectService(false),
-                child: const Text("Drop off"),
-              ),
-            ),
-          ],
-        )
+          children:
+              widget.service.serviceAvailability.contains('pickup') &&
+                  widget.service.serviceAvailability.contains('dropoff')
+              ? [
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: selectedType == AppointmentType.pickUp
+                            ? const Color(0xFF4B5320)
+                            : Colors.grey[300],
+                        foregroundColor: selectedType == AppointmentType.pickUp
+                            ? Colors.white
+                            : Colors.black,
+                      ),
+                      onPressed: () => _selectType(AppointmentType.pickUp),
+                      child: const Text("Pick up"),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: selectedType == AppointmentType.dropOff
+                            ? const Color(0xFF4B5320)
+                            : Colors.grey[300],
+                        foregroundColor: selectedType == AppointmentType.dropOff
+                            ? Colors.white
+                            : Colors.black,
+                      ),
+                      onPressed: () => _selectType(AppointmentType.dropOff),
+                      child: const Text("Drop off"),
+                    ),
+                  ),
+                ]
+              : widget.service.serviceAvailability.contains('pickup')
+              ? [
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: selectedType == AppointmentType.pickUp
+                            ? const Color(0xFF4B5320)
+                            : Colors.grey[300],
+                        foregroundColor: selectedType == AppointmentType.pickUp
+                            ? Colors.white
+                            : Colors.black,
+                      ),
+                      onPressed: () => _selectType(AppointmentType.pickUp),
+                      child: const Text("Pick up"),
+                    ),
+                  ),
+                ]
+              : [
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: selectedType == AppointmentType.dropOff
+                            ? const Color(0xFF4B5320)
+                            : Colors.grey[300],
+                        foregroundColor: selectedType == AppointmentType.dropOff
+                            ? Colors.white
+                            : Colors.black,
+                      ),
+                      onPressed: () => _selectType(AppointmentType.dropOff),
+                      child: const Text("Drop off"),
+                    ),
+                  ),
+                ],
+        ),
       ],
     );
   }
@@ -120,24 +254,42 @@ class _WasteServicePageState extends State<WasteServicePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("Waste Details", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        const Text(
+          "Waste Details",
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 5),
         const Text(
-            "Input details of your waste—select a category and indicate the quantity or the amount of bags."),
+          "Input details of your waste—select a category and indicate the quantity or the amount of bags.",
+        ),
         const SizedBox(height: 10),
         Row(
           children: [
             Expanded(
               child: DropdownButtonFormField<String>(
-                value: selectedCategory,
-                items: ["Plastic Bottle", "Can", "Glass"]
-                    .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                value: selectedMaterialType,
+                items: widget.service.serviceMaterials
+                    .map(
+                      (material) => DropdownMenuItem(
+                        value: material.materialPoints.materialType,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(material.materialPoints.materialType),
+                            Text(
+                              '${material.materialPoints.pointsPerKg} pts/kg',
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
                     .toList(),
-                onChanged: (val) => setState(() => selectedCategory = val!),
+                onChanged: (val) => setState(() => selectedMaterialType = val),
                 decoration: const InputDecoration(
                   filled: true,
                   fillColor: Color(0xFFF0F0F0),
                   border: OutlineInputBorder(borderSide: BorderSide.none),
+                  hintText: 'Select waste type',
                 ),
               ),
             ),
@@ -155,8 +307,14 @@ class _WasteServicePageState extends State<WasteServicePage> {
                 ),
               ),
             ),
-            IconButton(onPressed: _decrementQuantity, icon: const Icon(Icons.remove)),
-            IconButton(onPressed: _incrementQuantity, icon: const Icon(Icons.add)),
+            IconButton(
+              onPressed: _decrementQuantity,
+              icon: const Icon(Icons.remove),
+            ),
+            IconButton(
+              onPressed: _incrementQuantity,
+              icon: const Icon(Icons.add),
+            ),
           ],
         ),
       ],
@@ -167,7 +325,10 @@ class _WasteServicePageState extends State<WasteServicePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("Pick up Details", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        const Text(
+          "Pick up Details",
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 10),
         _buildCalendarSection(),
         const SizedBox(height: 15),
@@ -179,12 +340,17 @@ class _WasteServicePageState extends State<WasteServicePage> {
             borderRadius: BorderRadius.circular(12),
           ),
           padding: const EdgeInsets.all(12),
-          child: Row(
+          child: Column(
             children: [
-              const Icon(Icons.location_on),
-              const SizedBox(width: 8),
-              Expanded(child: Text(userLocation)),
-              TextButton(onPressed: () {}, child: const Text("edit")),
+              TextField(
+                onChanged: (value) => setState(() => userLocation = value),
+                decoration: const InputDecoration(
+                  icon: Icon(Icons.location_on),
+                  hintText: 'Enter pickup address',
+                  border: InputBorder.none,
+                ),
+                maxLines: null,
+              ),
             ],
           ),
         ),
@@ -197,11 +363,11 @@ class _WasteServicePageState extends State<WasteServicePage> {
           ],
         ),
         const SizedBox(height: 5),
-        const Row(
+        Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text("Php 50.00 / bag"),
-            Text("50.00"),
+            const Text("Php 50.00 / service"),
+            Text("${(50.00).toStringAsFixed(2)}"),
           ],
         ),
       ],
@@ -212,7 +378,10 @@ class _WasteServicePageState extends State<WasteServicePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("Drop Off Details", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        const Text(
+          "Drop Off Details",
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 10),
         _buildCalendarSection(),
       ],
@@ -223,13 +392,52 @@ class _WasteServicePageState extends State<WasteServicePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("Date", style: TextStyle(fontWeight: FontWeight.bold)),
+        const Text(
+          "Date & Time",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 10),
         Container(
-          height: 200,
-          color: Colors.grey[100],
-          alignment: Alignment.center,
-          child: Text("Calendar UI Placeholder\nSelected: ${selectedDate.toLocal()}".split(' ')[0]),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF0F0F0),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            children: [
+              TextButton(
+                onPressed: () async {
+                  final date = await showDatePicker(
+                    context: context,
+                    initialDate: selectedDate,
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime.now().add(const Duration(days: 30)),
+                  );
+                  if (date != null) {
+                    final time = await showTimePicker(
+                      context: context,
+                      initialTime: TimeOfDay.fromDateTime(selectedDate),
+                    );
+                    if (time != null) {
+                      setState(() {
+                        selectedDate = DateTime(
+                          date.year,
+                          date.month,
+                          date.day,
+                          time.hour,
+                          time.minute,
+                        );
+                      });
+                    }
+                  }
+                },
+                child: Text(
+                  '${selectedDate.toString().split('.')[0]}',
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -239,7 +447,10 @@ class _WasteServicePageState extends State<WasteServicePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("Additional Notes", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        const Text(
+          "Additional Notes",
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 5),
         const Text("Leave any additional instructions or preferences."),
         const SizedBox(height: 8),
@@ -261,10 +472,14 @@ class _WasteServicePageState extends State<WasteServicePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("Waste Summary", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        const Text(
+          "Waste Summary",
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 5),
         const Text(
-            "Below is a summary of your entered waste information. You can update or edit it above."),
+          "Below is a summary of your entered waste information. You can update or edit it above.",
+        ),
         const SizedBox(height: 10),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -277,45 +492,98 @@ class _WasteServicePageState extends State<WasteServicePage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(selectedCategory),
+            Text(selectedMaterialType ?? 'Not selected'),
             Text(wasteQuantity.toString()),
           ],
         ),
-        if (isPickup)
+        const SizedBox(height: 10),
+        if (selectedType == AppointmentType.pickUp && userLocation != null)
           Padding(
             padding: const EdgeInsets.only(top: 10),
-            child: Text("Address: $userLocation\nPick Up Date: Wed, 25 Jun 2025 at 12:00 P.M."),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Address: $userLocation"),
+                Text("Pick Up Date: ${selectedDate.toString().split('.')[0]}"),
+              ],
+            ),
+          ),
+        if (selectedType == AppointmentType.dropOff)
+          Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Drop-off Location: ${widget.service.serviceLocation}"),
+                Text("Drop-off Date: ${selectedDate.toString().split('.')[0]}"),
+              ],
+            ),
           ),
       ],
     );
   }
 
   Widget _buildBottomSummary() {
+    // Calculate total points for the selected material
+    int totalPoints = 0;
+    if (selectedMaterialType != null) {
+      final material = widget.service.serviceMaterials.firstWhere(
+        (m) => m.materialPoints.materialType == selectedMaterialType,
+      );
+      totalPoints = (material.materialPoints.pointsPerKg * wasteQuantity)
+          .toInt();
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (isPickup) ...[
-          const Text("Total Price", style: TextStyle(fontWeight: FontWeight.bold)),
-          const Text("Php 50.00 (per bag)"),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              "Total Points:",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Text('$totalPoints points'),
+          ],
+        ),
+        const SizedBox(height: 8),
+        if (selectedType == AppointmentType.pickUp) ...[
+          const Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Service Fee:",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Text('₱50.00'),
+            ],
+          ),
           const SizedBox(height: 8),
         ],
         ElevatedButton(
-          onPressed: () {
-            // Future backend logic here
-          },
+          onPressed: isLoading ? null : _scheduleAppointment,
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFF4B5320),
             padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-          child: const Text(
-              "Schedule",
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-                fontSize: 16,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
             ),
           ),
+          child: isLoading
+              ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(color: Colors.white),
+                )
+              : const Text(
+                  "Schedule",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                  ),
+                ),
         ),
         const SizedBox(height: 30),
       ],
