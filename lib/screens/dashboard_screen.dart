@@ -6,6 +6,7 @@ import '../widgets/custom_bottom_nav_bar.dart';
 import 'search_screen.dart';
 import 'recommended_screen.dart';
 import 'top_services_screen.dart';
+import '../screens/disposal_shop_details_screen.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -219,24 +220,24 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                       fontFamily: 'Mallanna',
                                     ),
                                   ),
-                                  // TextButton(
-                                  //   onPressed: () {
-                                  //     Navigator.push(
-                                  //       context,
-                                  //       MaterialPageRoute(
-                                  //         builder: (context) =>
-                                  //             const RecommendedScreen(),
-                                  //       ),
-                                  //     );
-                                  //   },
-                                  //   child: const Text(
-                                  //     'See All',
-                                  //     style: TextStyle(
-                                  //       color: Color(0xFF4A5F44),
-                                  //       fontFamily: 'Mallanna',
-                                  //     ),
-                                  //   ),
-                                  // ),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              const RecommendedScreen(),
+                                        ),
+                                      );
+                                    },
+                                    child: const Text(
+                                      'See All',
+                                      style: TextStyle(
+                                        color: Color(0xFF4A5F44),
+                                        fontFamily: 'Mallanna',
+                                      ),
+                                    ),
+                                  ),
                                 ],
                               ),
                               const SizedBox(height: 16),
@@ -265,7 +266,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                         return DisposalServiceCard(
                                           service: service,
                                           onTap: () {
-                                            // TODO: Navigate to service details
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    DisposalShopDetailsScreen(
+                                                  service: service,
+                                                ),
+                                              ),
+                                            );
                                           },
                                         );
                                       }).toList(),
@@ -342,7 +351,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                         return DisposalServiceCard(
                                           service: service,
                                           onTap: () {
-                                            // TODO: Navigate to service details
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    DisposalShopDetailsScreen(
+                                                  service: service,
+                                                ),
+                                              ),
+                                            );
                                           },
                                         );
                                       }).toList(),
