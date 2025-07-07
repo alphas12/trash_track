@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:trash_track/screens/loading_screen.dart';
 import 'package:trash_track/screens/signup_page.dart';
 import '../providers/auth_provider.dart';
 
@@ -114,7 +115,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                 SnackBar(content: Text(viewModel.errorMessage!)),
                               );
                             } else {
-                              Navigator.pushNamed(context, '/dashboard');
+                              Navigator.pushReplacement(context,
+                                MaterialPageRoute(builder: (context) => const LoadingScreen()),
+                              );
                             }
                           },
                           style: ElevatedButton.styleFrom(
