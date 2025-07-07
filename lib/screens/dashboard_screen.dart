@@ -219,24 +219,24 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                       fontFamily: 'Mallanna',
                                     ),
                                   ),
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              const RecommendedScreen(),
-                                        ),
-                                      );
-                                    },
-                                    child: const Text(
-                                      'See All',
-                                      style: TextStyle(
-                                        color: Color(0xFF4A5F44),
-                                        fontFamily: 'Mallanna',
-                                      ),
-                                    ),
-                                  ),
+                                  // TextButton(
+                                  //   onPressed: () {
+                                  //     Navigator.push(
+                                  //       context,
+                                  //       MaterialPageRoute(
+                                  //         builder: (context) =>
+                                  //             const RecommendedScreen(),
+                                  //       ),
+                                  //     );
+                                  //   },
+                                  //   child: const Text(
+                                  //     'See All',
+                                  //     style: TextStyle(
+                                  //       color: Color(0xFF4A5F44),
+                                  //       fontFamily: 'Mallanna',
+                                  //     ),
+                                  //   ),
+                                  // ),
                                 ],
                               ),
                               const SizedBox(height: 16),

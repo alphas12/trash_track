@@ -32,8 +32,8 @@ class AuthService {
         fname: fname,
         lname: lname,
         location: location,
-        phoneNum: null,
-        profileImg: null,
+        // phoneNum: null,
+        // profileImg: null,
       );
 
       await _client.from('user_info').insert(info.toMap());
@@ -42,7 +42,7 @@ class AuthService {
       await _client.from('user_credentials').insert({
         'user_cred_id': userCredId,
         'user_email': userEmail,
-        'password': password, // optional: omit if using Supabase Auth only
+        'user_password': password, // optional: omit if using Supabase Auth only
         'user_info_id': userInfoId,
       });
     }
