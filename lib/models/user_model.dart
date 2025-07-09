@@ -3,6 +3,7 @@ class UserInfoModel {
   final String fname;
   final String lname;
   final String location;
+  final String authId; 
   final String? phoneNum;
   final String? profileImg;
 
@@ -13,6 +14,8 @@ class UserInfoModel {
     required this.location,
     this.phoneNum,
     this.profileImg,
+    required this.authId,
+
   });
 
   Map<String, dynamic> toMap() {
@@ -23,6 +26,8 @@ class UserInfoModel {
       'user_location': location,
       'user_phone_num': phoneNum,
       'user_profile_img': profileImg,
+      'auth_user_id': authId, // ✅ new field
+      
     };
   }
 }

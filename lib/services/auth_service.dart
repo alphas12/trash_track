@@ -32,8 +32,7 @@ class AuthService {
         fname: fname,
         lname: lname,
         location: location,
-        // phoneNum: null,
-        // profileImg: null,
+        authId: userCredId, // Store auth user ID
       );
 
       await _client.from('user_info').insert(info.toMap());

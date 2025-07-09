@@ -21,7 +21,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   Widget build(BuildContext context) {
     final Color oliveGreen = const Color(0xFF5C653E);
     final size = MediaQuery.of(context).size;
-    final isSmall = size.height < 600;
     final viewModel = ref.watch(loginViewModelProvider);
 
     return Scaffold(
