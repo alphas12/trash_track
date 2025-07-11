@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:trash_track/screens/disposal_shop_details_screen.dart';
 import '../providers/disposal_service_provider.dart';
 import '../widgets/disposal_service_card.dart';
 import '../widgets/custom_bottom_nav_bar.dart';
@@ -134,7 +135,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(
-                                                builder: (context) => const SearchScreen(),
+                                                builder: (context) =>
+                                                    const SearchScreen(),
                                               ),
                                             );
                                           },
@@ -282,7 +284,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                   );
                                 },
                                 loading: () => const Center(
-                                  child: CircularProgressIndicator(color: Color(0xFF4A5F44)),
+                                  child: CircularProgressIndicator(
+                                    color: Color(0xFF4A5F44),
+                                  ),
                                 ),
                                 error: (error, stack) => Center(
                                   child: Text(
@@ -367,7 +371,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                   );
                                 },
                                 loading: () => const Center(
-                                  child: CircularProgressIndicator(color: Color(0xFF4A5F44)),
+                                  child: CircularProgressIndicator(
+                                    color: Color(0xFF4A5F44),
+                                  ),
                                 ),
                                 error: (error, stack) => Center(
                                   child: Text(
