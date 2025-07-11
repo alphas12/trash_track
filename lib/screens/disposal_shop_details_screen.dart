@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../models/disposal_service.dart';
 import '../providers/disposal_service_provider.dart';
-import 'waste_service_page.dart';
+import 'schedule_appointment_page.dart';
 
 class DisposalShopDetailsScreen extends ConsumerStatefulWidget {
   final DisposalService service;
@@ -40,7 +40,6 @@ class _DisposalShopDetailsScreenState
     // Format into 12-hour format with AM/PM
     return '${todayHours.dayName}, ${displayFormat.format(openTime)} - ${displayFormat.format(closeTime)}';
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -271,36 +270,36 @@ class _DisposalShopDetailsScreenState
               const SizedBox(height: 24),
 
               // Shop Now Button (Full Width)
-              // SizedBox(
-              //   width: double.infinity,
-              //   child: ElevatedButton(
-              //     onPressed: () {
-              //       Navigator.push(
-              //         context,
-              //         MaterialPageRoute(
-              //           builder: (_) =>
-              //               WasteServicePage(service: widget.service),
-              //         ),
-              //       );
-              //     },
-              //     style: ElevatedButton.styleFrom(
-              //       backgroundColor: const Color(0xFF4A5F44),
-              //       shape: RoundedRectangleBorder(
-              //         borderRadius: BorderRadius.circular(12),
-              //       ),
-              //       padding: const EdgeInsets.symmetric(vertical: 14),
-              //     ),
-              //     child: const Text(
-              //       'Schedule',
-              //       style: TextStyle(
-              //         fontFamily: 'Mallanna',
-              //         color: Colors.white,
-              //         fontWeight: FontWeight.bold,
-              //         fontSize: 16,
-              //       ),
-              //     ),
-              //   ),
-              // ),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            ScheduleAppointmentPage(service: widget.service),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF4A5F44),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  child: const Text(
+                    'Schedule',
+                    style: TextStyle(
+                      fontFamily: 'Mallanna',
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ),

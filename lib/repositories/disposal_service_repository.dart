@@ -25,6 +25,14 @@ class DisposalServiceRepository {
       close_time,
       is_open
     ),
+    available_schedules (
+      avail_sched_id,
+      service_id,
+      avail_date,
+      avail_start_time,
+      avail_end_time,
+      is_slot_booked
+    ),
     service_materials (
       service_materials_id,
       disposal_service_id,
