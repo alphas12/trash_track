@@ -38,6 +38,8 @@ dependencies:
   riverpod_annotation: ^2.6.1
   supabase_flutter: ^2.9.1
   uuid: ^4.0.0
+  grouped_list: ^5.1.2
+  qr_flutter: ^4.1.0
   
 dev_dependencies:
   flutter_test:

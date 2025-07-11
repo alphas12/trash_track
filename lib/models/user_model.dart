@@ -26,7 +26,7 @@ class UserInfoModel {
       'user_location': location,
       'user_phone_num': phoneNum,
       'user_profile_img': profileImg,
-      'auth_user_id': authId, // ✅ new field
+      'auth_user_id': authId
       
     };
   }
