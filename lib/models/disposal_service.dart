@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'operating_hours.dart';
 import 'service_material.dart';
+import 'appointment_model.dart';
 
 class DisposalService {
-  final String serviceId;
+  final String serviceId; // Unique identifier for the service
   final String serviceName;
   final String serviceDescription;
   final String serviceLocation;
@@ -13,8 +14,6 @@ class DisposalService {
   final List<String> serviceAvailability;
   final List<ServiceMaterial> serviceMaterials;
   final bool isRecommended;
-  final DateTime createdAt;
-  final DateTime updatedAt;
   final List<OperatingHours> operatingHours;
 
   DisposalService({
@@ -28,8 +27,6 @@ class DisposalService {
     required this.serviceAvailability,
     required this.serviceMaterials,
     required this.isRecommended,
-    required this.createdAt,
-    required this.updatedAt,
     this.operatingHours = const [],
   });
 
@@ -46,15 +43,19 @@ class DisposalService {
         serviceDistance: (map['service_distance'] as num?)?.toDouble() ?? 0.0,
         serviceRating: (map['service_rating'] as num?)?.toDouble() ?? 0.0,
         serviceImgUrl: map['service_img']?.toString() ?? '',
-        serviceAvailability: List<String>.from(map['service_avail'] ?? []),
+        serviceAvailability:
+            (map['service_avail'] as List<dynamic>?)
+                ?.map((e) => e.toString())
+                .toList() ??
+            [],
         isRecommended: map['is_recommended'] as bool? ?? false,
-        createdAt: DateTime.parse(map['created_at'] as String),
-        updatedAt: DateTime.parse(map['updated_at'] as String),
-        operatingHours: (map['operating_hours'] as List<dynamic>?)
+        operatingHours:
+            (map['operating_hours'] as List<dynamic>?)
                 ?.map((e) => OperatingHours.fromMap(e as Map<String, dynamic>))
                 .toList() ??
             [],
-        serviceMaterials: (map['service_materials'] as List<dynamic>?)
+        serviceMaterials:
+            (map['service_materials'] as List<dynamic>?)
                 ?.map((e) => ServiceMaterial.fromMap(e as Map<String, dynamic>))
                 .toList() ??
             [],
@@ -76,8 +77,6 @@ class DisposalService {
       'service_img': serviceImgUrl,
       'service_avail': serviceAvailability,
       'is_recommended': isRecommended,
-      'created_at': createdAt.toIso8601String(),
-      'updated_at': updatedAt.toIso8601String(),
       'operating_hours': operatingHours.map((e) => e.toMap()).toList(),
       'service_materials': serviceMaterials.map((e) => e.toMap()).toList(),
     };
@@ -87,11 +86,11 @@ class DisposalService {
   String get formattedDistance => '${serviceDistance.toStringAsFixed(1)}km';
 
   Widget get formattedRating => Row(
-        children: [
-          Text(serviceRating.toStringAsFixed(1)),
-          const Icon(Icons.star, color: Colors.amber, size: 16),
-        ],
-      );
+    children: [
+      Text(serviceRating.toStringAsFixed(1)),
+      const Icon(Icons.star, color: Colors.amber, size: 16),
+    ],
+  );
 
   bool isCurrentlyOpen() {
     if (operatingHours.isEmpty) return false;
@@ -141,5 +140,18 @@ class DisposalService {
       return now >= open || now <= close;
     }
     return now >= open && now <= close;
+  }
+
+  // Helper methods to check service availability
+  bool get hasPickupService => serviceAvailability.contains('Pick-Up');
+  bool get hasDropoffService => serviceAvailability.contains('Drop-Off');
+  bool get hasBothServices => hasPickupService && hasDropoffService;
+
+  AppointmentType? get defaultServiceType {
+    if (serviceAvailability.length == 1) {
+      if (hasPickupService) return AppointmentType.pickUp;
+      if (hasDropoffService) return AppointmentType.dropOff;
+    }
+    return null;
   }
 }
