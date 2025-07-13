@@ -218,7 +218,8 @@ class _ManageProfileScreenState extends ConsumerState<ManageProfileScreen> {
   Widget build(BuildContext context) {
     final viewModel = ref.watch(profileViewModelProvider);
     final controller = ref.read(profileViewModelProvider.notifier);
-
+    final uploadedImageUrl = viewModel.uploadedImageUrl;
+ 
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -228,64 +229,39 @@ class _ManageProfileScreenState extends ConsumerState<ManageProfileScreen> {
             children: [
               // Top Bar
               Stack(
-                alignment: Alignment.center,
-                children: [
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              spreadRadius: 2,
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: const Icon(Icons.arrow_back, size: 24),
-                      ),
-                    ),
-                  ),
-                  const Text(
-                    'Account Settings',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Mallanna',
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-
-              Stack(
                 alignment: Alignment.bottomRight,
                 children: [
-                  const CircleAvatar(
+                  CircleAvatar(
                     radius: 55,
-                    backgroundImage: AssetImage('assets/images/default_profile.png'),
+                    backgroundImage: controller.pickedImage != null
+                        ? FileImage(controller.pickedImage!) // show new image before saving
+                        : (controller.uploadedImageUrl != null
+                            ? NetworkImage(controller.uploadedImageUrl!)
+                            : const AssetImage('assets/images/default_profile.png')) as ImageProvider,
                   ),
-                  Positioned(
-                    right: 4,
-                    bottom: 4,
-                    child: Container(
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.grey,
+                  if (isEditing)
+                    Positioned(
+                      right: 4,
+                      bottom: 4,
+                      child: GestureDetector(
+                        onTap: () async {
+                          await controller.pickImage(); // just picks image and stores it
+                          setState(() {}); // trigger UI update to show new image
+                        },
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.grey,
+                          ),
+                          padding: const EdgeInsets.all(4),
+                          child: const Icon(Icons.add, color: Colors.white, size: 18),
+                        ),
                       ),
-                      padding: const EdgeInsets.all(4),
-                      child: const Icon(Icons.add, color: Colors.white, size: 18),
                     ),
-                  ),
                 ],
               ),
-              const SizedBox(height: 12),
+
+              const SizedBox(height: 24),
               Text(
                 '${controller.fnameController.text} ${controller.lnameController.text}',
                 style: const TextStyle(
