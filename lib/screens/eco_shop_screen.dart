@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/custom_bottom_nav_bar.dart';
-import '/screens/dashboard_screen.dart';
+import 'dashboard_screen.dart';
 
 class EcoShopScreen extends StatefulWidget {
   const EcoShopScreen({super.key});

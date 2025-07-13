@@ -4,7 +4,7 @@ import '../models/disposal_service.dart';
 import '../providers/disposal_service_provider.dart';
 import '../widgets/disposal_service_card.dart';
 import '../widgets/filter_bar.dart';
-import '../screens/disposal_shop_details_screen.dart';
+import 'disposal_shop_details_screen.dart';
 
 class TopServicesScreen extends ConsumerStatefulWidget {
   const TopServicesScreen({super.key});
