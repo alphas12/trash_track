@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class IntroScreen extends StatefulWidget {
   const IntroScreen({super.key});
@@ -11,11 +12,21 @@ class _IntroScreenState extends State<IntroScreen> {
   @override
   void initState() {
     super.initState();
+    _checkSessionAndRedirect();
+  }
 
-    // Automatically navigate to profile screen after 3 seconds
-    Future.delayed(const Duration(milliseconds: 5500), () {
+  Future<void> _checkSessionAndRedirect() async {
+    await Future.delayed(const Duration(milliseconds: 5500)); // your animation duration
+
+    final session = Supabase.instance.client.auth.currentSession;
+
+    if (!mounted) return;
+
+    if (session != null) {
+      Navigator.pushReplacementNamed(context, '/dashboard');
+    } else {
       Navigator.pushReplacementNamed(context, '/welcome');
-    });
+    }
   }
 
   @override
@@ -31,5 +42,4 @@ class _IntroScreenState extends State<IntroScreen> {
       ),
     );
   }
-
 }

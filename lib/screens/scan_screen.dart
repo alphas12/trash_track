@@ -8,7 +8,7 @@ import 'package:image/image.dart' as img;
 import 'package:flutter/services.dart';
 
 // Make sure to import the new screen file
-           
+
 
 /// Single‑screen flow:
 /// 1. User sees the options card (Scan / Upload).

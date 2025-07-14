@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:trash_track/screens/admin_dashboard.dart';
 import 'package:trash_track/screens/bookmark_screen.dart';
 import 'screens/eco_shop_screen.dart';
 import 'screens/settings_screen.dart';
@@ -10,6 +11,9 @@ import 'screens/welcome_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/signup_page.dart';
 import 'screens/loading_screen.dart';
+
+// import 'screens/profile_screen.dart';
+// import 'screens/settings_screen.dart';
 
 void main() async {
 
@@ -39,6 +43,9 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const LoginPage(),
         '/dashboard': (context) => const DashboardScreen(),
         // '/bookmark': (context) => const CollectionsPage(),
+        // '/profile': (context) => const ProfileScreen(),
+        '/settings': (context) => const SettingsScreen(),
+
       },
     );
   }

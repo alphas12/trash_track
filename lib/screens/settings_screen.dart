@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../widgets/custom_bottom_nav_bar.dart';
+import '../providers/manage_profile_provider.dart';
+import '../services/manage_profile_viewmodel.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -9,11 +13,11 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  int _selectedIndex = 4;
+  final int _selectedIndex = 4;
 
   void _onItemTapped(int index) {
     setState(() {
-      _selectedIndex = index;
+      index = _selectedIndex;
     });
   }
 
@@ -162,8 +166,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
               const Divider(thickness: 1, height: 1),
               _buildSettingsTile(
                 'Log Out',
-                    () {
-                  // Add logout logic here
+                    () async {
+                  await Supabase.instance.client.auth.signOut();
+
+                  if (context.mounted) {
+                    Navigator.pushNamedAndRemoveUntil(context, '/welcome', (route) => false);
+                  }
                 },
               ),
               const Divider(thickness: 1, height: 1),
@@ -195,25 +203,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 }
 
-class ManageProfileScreen extends StatefulWidget {
+class ManageProfileScreen extends ConsumerStatefulWidget {
   const ManageProfileScreen({super.key});
 
   @override
-  State<ManageProfileScreen> createState() => _ManageProfileScreenState();
+  ConsumerState<ManageProfileScreen> createState() => _ManageProfileScreenState();
 }
 
-class _ManageProfileScreenState extends State<ManageProfileScreen> {
+class _ManageProfileScreenState extends ConsumerState<ManageProfileScreen> {
   bool isEditing = false;
-
-  final TextEditingController nameController =
-  TextEditingController(text: 'Sam Russel C. Mahayag');
-  final TextEditingController contactController =
-  TextEditingController(text: '09123456789');
-  final TextEditingController locationController =
-  TextEditingController(text: 'Cebu City, Philippines');
+  
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() => ref.read(profileViewModelProvider.notifier).fetchUserInfo());
+  }
 
   @override
   Widget build(BuildContext context) {
+    final viewModel = ref.watch(profileViewModelProvider);
+    final controller = ref.read(profileViewModelProvider.notifier);
+    final uploadedImageUrl = viewModel.uploadedImageUrl;
+ 
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -221,11 +232,7 @@ class _ManageProfileScreenState extends State<ManageProfileScreen> {
           padding: const EdgeInsets.all(24.0),
           child: Column(
             children: [
-              // Top Bar
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  Align(
+              Align(
                     alignment: Alignment.centerLeft,
                     child: GestureDetector(
                       onTap: () => Navigator.pop(context),
@@ -247,65 +254,81 @@ class _ManageProfileScreenState extends State<ManageProfileScreen> {
                       ),
                     ),
                   ),
-                  const Text(
-                    'Account Settings',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Mallanna',
-                    ),
+              // Top Bar
+              Stack(
+                alignment: Alignment.bottomRight,
+                children: [
+                  CircleAvatar(
+                    radius: 55,
+                    backgroundImage: controller.pickedImage != null
+                        ? FileImage(controller.pickedImage!) // show new image before saving
+                        : (controller.uploadedImageUrl != null
+                            ? NetworkImage(controller.uploadedImageUrl!)
+                            : const AssetImage('assets/images/default_profile.png')) as ImageProvider,
                   ),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () {
-                        setState(() {
-                          isEditing = !isEditing;
-                        });
-
-                        if (!isEditing) {
-                          // Save logic here
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Profile updated')),
-                          );
-                        }
-                      },
-                      child: Text(
-                        isEditing ? 'Save' : 'Edit',
-                        style: const TextStyle(
-                          fontFamily: 'Mallanna',
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF4A5F44),
+                  if (isEditing)
+                    Positioned(
+                      right: 4,
+                      bottom: 4,
+                      child: GestureDetector(
+                        onTap: () async {
+                          await controller.pickImage(); // just picks image and stores it
+                          setState(() {}); // trigger UI update to show new image
+                        },
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.grey,
+                          ),
+                          padding: const EdgeInsets.all(4),
+                          child: const Icon(Icons.add, color: Colors.white, size: 18),
                         ),
                       ),
                     ),
-                  ),
                 ],
               ),
-              const SizedBox(height: 24),
 
-              // Profile Picture
-              const CircleAvatar(
-                radius: 50,
-                backgroundImage: AssetImage('assets/images/default_profile.png'),
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                'Sam Russel C. Mahayag',
-                style: TextStyle(
+              const SizedBox(height: 24),
+              Text(
+                '${controller.fnameController.text} ${controller.lnameController.text}',
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'Mallanna',
                 ),
               ),
               const SizedBox(height: 32),
+              Align(
+                alignment: Alignment.center,
+                  child: TextButton(
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStateProperty.all(const Color(0xFF4A5F44)),
+                    ),
+                    onPressed: () async {
+                      setState(() => isEditing = !isEditing);
+                      if (!isEditing) {
+                        await controller.updateUserInfo(context);
+                      }
+                    },
+                    child: Text(
+                      isEditing ? 'Save' : 'Edit',
+                      style: const TextStyle(
+                        fontFamily: 'Mallanna',
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                ),
+              ),
 
-              // Profile Fields
-              _buildEditableField('Full Name', nameController, isEditing),
+              // Editable Fields
+              _buildInputField('First Name', controller.fnameController, isEditing),
               const SizedBox(height: 16),
-              _buildEditableField('Contact Number', contactController, isEditing),
+              _buildInputField('Last Name', controller.lnameController, isEditing),
               const SizedBox(height: 16),
-              _buildEditableField('Location', locationController, isEditing),
+              _buildInputField('Contact Number', controller.contactController, isEditing),
+              const SizedBox(height: 16),
+              _buildInputField('Location', controller.locationController, isEditing),
             ],
           ),
         ),
@@ -313,8 +336,7 @@ class _ManageProfileScreenState extends State<ManageProfileScreen> {
     );
   }
 
-  Widget _buildEditableField(
-      String label, TextEditingController controller, bool isEnabled) {
+  Widget _buildInputField(String label, TextEditingController controller, bool enabled) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -329,11 +351,14 @@ class _ManageProfileScreenState extends State<ManageProfileScreen> {
         const SizedBox(height: 6),
         TextField(
           controller: controller,
-          enabled: isEnabled,
+          enabled: enabled,
           decoration: InputDecoration(
             contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            filled: true,
+            fillColor: const Color(0xFFF5F5F5),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
             ),
           ),
           style: const TextStyle(fontFamily: 'Mallanna'),
@@ -342,6 +367,8 @@ class _ManageProfileScreenState extends State<ManageProfileScreen> {
     );
   }
 }
+
+
 
 class HistoryScreen extends StatelessWidget {
   const HistoryScreen({super.key});
