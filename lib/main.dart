@@ -14,8 +14,6 @@ import 'screens/loading_screen.dart';
 // import 'screens/profile_screen.dart';
 // import 'screens/settings_screen.dart';
 
-
-
 void main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,7 +43,7 @@ class MyApp extends StatelessWidget {
         '/dashboard': (context) => const DashboardScreen(),
         // '/bookmark': (context) => const CollectionsPage(),
         // '/profile': (context) => const ProfileScreen(),
-        // '/settings': (context) => const SettingsScreen(),
+        '/settings': (context) => const SettingsScreen(),
 
       },
     );

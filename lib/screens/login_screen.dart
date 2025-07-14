@@ -104,21 +104,20 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: () async {
-                            await ref.read(loginViewModelProvider).login(
-                                  _emailController.text.trim(),
-                                  _passwordController.text.trim(),
+                            final userType = await ref
+                              .read(loginViewModelProvider.notifier)
+                              .login(_emailController.text, _passwordController.text);
+                              if (userType == 'Admin') {
+                                Navigator.pushReplacementNamed(context, '/settings');
+                              } else if (userType == 'Disposer') {
+                                Navigator.pushReplacementNamed(context, '/dashboard');
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Unauthorized role')),
                                 );
-
-                            if (viewModel.errorMessage != null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(viewModel.errorMessage!)),
-                              );
-                            } else {
-                              Navigator.pushReplacement(context,
-                                MaterialPageRoute(builder: (context) => const LoadingScreen()),
-                              );
-                            }
+                              }
                           },
+
                           style: ElevatedButton.styleFrom(
                             backgroundColor: oliveGreen,
                             shape: RoundedRectangleBorder(
