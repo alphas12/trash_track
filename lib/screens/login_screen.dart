@@ -108,7 +108,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               .read(loginViewModelProvider.notifier)
                               .login(_emailController.text, _passwordController.text);
                               if (userType == 'Admin') {
-                                Navigator.pushReplacementNamed(context, '/settings');
+                                Navigator.pushReplacementNamed(context, '/settings'); // change to actual admin dashboard
                               } else if (userType == 'Disposer') {
                                 Navigator.pushReplacementNamed(context, '/dashboard');
                               } else {
