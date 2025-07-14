@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../widgets/custom_bottom_nav_bar.dart';
 import '../providers/manage_profile_provider.dart';
 import '../services/manage_profile_viewmodel.dart';
@@ -165,8 +166,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
               const Divider(thickness: 1, height: 1),
               _buildSettingsTile(
                 'Log Out',
-                    () {
-                  // Add logout logic here
+                    () async {
+                  await Supabase.instance.client.auth.signOut();
+
+                  if (context.mounted) {
+                    Navigator.pushNamedAndRemoveUntil(context, '/welcome', (route) => false);
+                  }
                 },
               ),
               const Divider(thickness: 1, height: 1),
