@@ -227,6 +227,28 @@ class _ManageProfileScreenState extends ConsumerState<ManageProfileScreen> {
           padding: const EdgeInsets.all(24.0),
           child: Column(
             children: [
+              Align(
+                    alignment: Alignment.centerLeft,
+                    child: GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              spreadRadius: 2,
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(Icons.arrow_back, size: 24),
+                      ),
+                    ),
+                  ),
               // Top Bar
               Stack(
                 alignment: Alignment.bottomRight,
