@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/disposal_service_provider.dart';
 import '../widgets/disposal_service_card.dart';
 import '../widgets/material_filter_bar.dart';
-import '../screens/disposal_shop_details_screen.dart';
+import 'disposal_shop_details_screen.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});

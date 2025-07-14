@@ -5,6 +5,19 @@ import '../models/user_model.dart';
 class AuthService {
   final SupabaseClient _client = Supabase.instance.client;
 
+  // Expose current session and user
+  Session? get currentSession => _client.auth.currentSession;
+  User? get currentUser => _client.auth.currentUser;
+
+  // Optional: Listen to session changes (e.g. for logout or refresh tokens)
+  void listenToAuthChanges(Function(AuthChangeEvent event, Session? session)? callback) {
+    _client.auth.onAuthStateChange.listen((data) {
+      final event = data.event;
+      final session = data.session;
+      if (callback != null) callback(event, session);
+    });
+  }
+
   Future<void> signUpWithCredentials({
     required String email,
     required String password,
