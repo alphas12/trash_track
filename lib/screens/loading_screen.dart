@@ -1,24 +1,46 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dashboard_screen.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/auth_provider.dart';
 
-class LoadingScreen extends StatefulWidget {
-  const LoadingScreen({super.key});
+
+class LoadingScreen extends ConsumerStatefulWidget {
+  final String email;
+  final String password;
+
+  const LoadingScreen({
+    required this.email,
+    required this.password,
+    super.key,
+  });
 
   @override
-  State<LoadingScreen> createState() => _LoadingScreenState();
+  ConsumerState<LoadingScreen> createState() => _LoadingScreenState();
 }
 
-class _LoadingScreenState extends State<LoadingScreen> {
+class _LoadingScreenState extends ConsumerState<LoadingScreen> {
   @override
   void initState() {
     super.initState();
 
-    Timer(const Duration(milliseconds: 5500), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const DashboardScreen()),
-      );
+    Future.microtask(() async {
+      final loginNotifier = ref.read(loginViewModelProvider.notifier);
+
+      final userType = await loginNotifier.login(widget.email, widget.password);
+
+      if (!mounted) return;
+
+      if (userType == 'Admin') {
+        Navigator.pushReplacementNamed(context, '/settings'); // TODO: replace navigate link to actual admin page
+      } else if (userType == 'Disposer') {
+        Navigator.pushReplacementNamed(context, '/dashboard');
+      } else {
+        Navigator.pop(context); // go back to login screen
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Unauthorized role')),
+        );
+      }
     });
   }
 

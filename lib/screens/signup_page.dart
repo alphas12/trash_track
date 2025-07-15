@@ -169,18 +169,6 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
     );
   }
 
-  // void _submit() {
-  //   if (_formKey.currentState!.validate()) {
-  //     ref.read(signUpViewModelProvider).signUp(
-  //           email: _emailController.text.trim(),
-  //           password: _passwordController.text,
-  //           fname: _fnameController.text.trim(),
-  //           lname: _lnameController.text.trim(),
-  //           location: _locationController.text.trim(),
-  //         );
-  //   }
-  // }
-
   void _submit() async {
   if (_formKey.currentState!.validate()) {
     final viewModel = ref.read(signUpViewModelProvider);
@@ -197,7 +185,12 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
     if (viewModel.errorMessage == null && mounted) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const LoadingScreen()),
+        MaterialPageRoute(
+          builder: (context) => LoadingScreen(
+            email: _emailController.text.trim(),
+            password: _passwordController.text.trim(),
+          ),
+        ),
       );
     }
   }
