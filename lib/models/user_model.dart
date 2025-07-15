@@ -27,7 +27,7 @@ class UserInfoModel {
       'user_phone_num': phoneNum,
       'user_profile_img': profileImg,
       'auth_user_id': authId
-      
+
     };
   }
 }

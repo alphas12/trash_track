@@ -17,6 +17,13 @@ class LoginViewModel extends ChangeNotifier {
     errorMessage = null;
     notifyListeners();
 
+    if (email.isEmpty || password.isEmpty) {
+      errorMessage = "Email and password cannot be empty.";
+      isLoading = false;
+      notifyListeners();
+      return null;
+    }
+
     try {
       final authService = ref.read(authServiceProvider);
       await authService.signIn(email, password);
@@ -30,8 +37,6 @@ class LoginViewModel extends ChangeNotifier {
         .select('user_type')
         .eq('user_cred_id', userId)
         .maybeSingle();
-
-        print('Debug: $userType');
 
       return userType?['user_type'];
 
