@@ -44,6 +44,7 @@ class MyApp extends StatelessWidget {
         '/dashboard': (context) => const DashboardScreen(),
         // '/bookmark': (context) => const CollectionsPage(),
         // '/profile': (context) => const ProfileScreen(),
+        '/admin': (context) => const AdminDashboardScreen(),
         '/settings': (context) => const SettingsScreen(),
 
       },

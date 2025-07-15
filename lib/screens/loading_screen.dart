@@ -32,7 +32,7 @@ class _LoadingScreenState extends ConsumerState<LoadingScreen> {
       if (!mounted) return;
 
       if (userType == 'Admin') {
-        Navigator.pushReplacementNamed(context, '/settings'); // TODO: replace navigate link to actual admin page
+        Navigator.pushReplacementNamed(context, '/admin');
       } else if (userType == 'Disposer') {
         Navigator.pushReplacementNamed(context, '/dashboard');
       } else {

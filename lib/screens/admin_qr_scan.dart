@@ -1,21 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../providers/admin_disposal_provider.dart';
 
-class AdminQRScanScreen extends StatefulWidget {
+class AdminQRScanScreen extends ConsumerStatefulWidget {
   const AdminQRScanScreen({super.key});
 
   @override
-  State<AdminQRScanScreen> createState() => _AdminQRScanScreenState();
+  ConsumerState<AdminQRScanScreen> createState() => _AdminQRScanScreenState();
 }
 
-class _AdminQRScanScreenState extends State<AdminQRScanScreen> {
-  String? _scanResult;
+class _AdminQRScanScreenState extends ConsumerState<AdminQRScanScreen> {
   final MobileScannerController _controller = MobileScannerController(
     detectionSpeed: DetectionSpeed.normal,
     facing: CameraFacing.back,
     torchEnabled: false,
   );
+
+  bool _isProcessing = false; // avoid double reads
 
   @override
   void initState() {
@@ -24,12 +28,69 @@ class _AdminQRScanScreenState extends State<AdminQRScanScreen> {
   }
 
   Future<void> _requestCameraPermission() async {
-    var status = await Permission.camera.status;
-    if (!status.isGranted) {
-      await Permission.camera.request();
+    final status = await Permission.camera.status;
+    if (!status.isGranted) await Permission.camera.request();
+  }
+
+  /* ─────────────── CORE LOGIC ─────────────── */
+  Future<void> _handleScan(String qr) async {
+    if (_isProcessing) return;
+    _isProcessing = true;
+    _controller.stop();
+
+    final supabase = Supabase.instance.client;
+
+    try {
+      // OPTIONAL: restrict by service_id
+      final service = await ref.read(adminServiceProvider.future);
+      final serviceId = service.serviceId;
+
+      final List rows = await supabase
+          .from('appointment_info')
+          .select()
+          .eq('appointment_qr_code', qr)
+          .eq('service_id', serviceId) // <- uncomment if needed
+          .limit(1);
+
+      if (rows.isEmpty) {
+        _showSnack('No matching appointment found', Colors.red);
+        return;
+      }
+
+      final row = rows.first;
+
+      if (row['appointment_status'] == 'Confirmed' ||
+          row['appointment_status'] == 'Completed') {
+        _showSnack('Appointment is already ${row['appointment_status']}.', Colors.orange);
+        return;
+      }
+
+      await supabase
+          .from('appointment_info')
+          .update({'appointment_status': 'Confirmed'})
+          .eq('appointment_info_id', row['appointment_info_id']);
+
+      _showSnack('Appointment confirmed ✔️', Colors.green);
+
+      // Optionally pop back after a short delay
+      await Future.delayed(const Duration(seconds: 1));
+      if (mounted) Navigator.pop(context);
+    } catch (e) {
+      _showSnack('Error confirming appointment: $e', Colors.red);
+    } finally {
+      _isProcessing = false;
+      if (mounted) _controller.start();
     }
   }
 
+  void _showSnack(String msg, Color bg) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg), backgroundColor: bg),
+    );
+  }
+
+  /* ─────────────── UI ─────────────── */
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,88 +100,71 @@ class _AdminQRScanScreenState extends State<AdminQRScanScreen> {
           MobileScanner(
             controller: _controller,
             onDetect: (capture) {
-              final barcode = capture.barcodes.first;
-              if (barcode.rawValue == null) return;
-              setState(() => _scanResult = barcode.rawValue);
-
-              // Optionally pause scanning after first read
-              _controller.stop();
-
-              // TODO: navigate or validate here
-              // Navigator.push(context, MaterialPageRoute(
-              //   builder: (_) => SomeValidationScreen(data: _scanResult!)));
+              final code = capture.barcodes.first.rawValue;
+              if (code != null) _handleScan(code);
             },
           ),
+
           // Back button
-          Positioned(
+          _pillButton(
             top: MediaQuery.of(context).padding.top + 16,
             left: 16,
-            child: GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      spreadRadius: 2,
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: const Icon(Icons.arrow_back, color: Colors.black, size: 24),
-              ),
-            ),
+            icon: Icons.arrow_back,
+            onTap: () => Navigator.pop(context),
           ),
+
           // Torch toggle
-          Positioned(
+          _pillButton(
             top: MediaQuery.of(context).padding.top + 16,
             right: 16,
-            child: GestureDetector(
-              onTap: _controller.toggleTorch,
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      spreadRadius: 2,
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: ValueListenableBuilder(
-                  valueListenable: _controller.torchState,
-                  builder: (context, state, child) => Icon(
-                    state == TorchState.off ? Icons.flash_off : Icons.flash_on,
-                    color: Colors.black,
-                    size: 24,
-                  ),
-                ),
+            builder: (ctx) => ValueListenableBuilder(
+              valueListenable: _controller.torchState,
+              builder: (_, state, __) => Icon(
+                state == TorchState.off ? Icons.flash_off : Icons.flash_on,
+                color: Colors.black,
+                size: 24,
               ),
             ),
+            onTap: _controller.toggleTorch,
           ),
-          if (_scanResult != null)
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                color: Colors.white,
-                child: Text(
-                  'Scanned: $_scanResult',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontFamily: 'Mallanna'),
-                ),
-              ),
-            ),
         ],
+      ),
+    );
+  }
+
+  /// Re‑usable pill‑style container
+  Widget _pillButton({
+    double? top,
+    double? left,
+    double? right,
+    required GestureTapCallback onTap,
+    IconData? icon,
+    WidgetBuilder? builder,
+  }) {
+    return Positioned(
+      top: top,
+      left: left,
+      right: right,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                spreadRadius: 2,
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: builder != null
+              ? builder(context)
+              : Icon(icon, color: Colors.black, size: 24),
+        ),
       ),
     );
   }
