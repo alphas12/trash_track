@@ -5,6 +5,8 @@ import '../widgets/custom_bottom_nav_bar.dart';
 import '../providers/manage_profile_provider.dart';
 import '../services/manage_profile_viewmodel.dart';
 import '../providers/points_provider.dart';
+import '../services/change_password_viewmodel.dart';
+import '../providers/auth_provider.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -1019,18 +1021,21 @@ class DeleteAccountScreen extends StatelessWidget {
   }
 }
 
-class ChangePasswordScreen extends StatefulWidget {
+class ChangePasswordScreen extends ConsumerStatefulWidget {
   const ChangePasswordScreen({super.key});
 
   @override
-  State<ChangePasswordScreen> createState() => _ChangePasswordScreenState();
+  ConsumerState<ChangePasswordScreen> createState() => _ChangePasswordScreenState();
 }
-
-class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
+class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
   final _formKey = GlobalKey<FormState>();
   final _currentPasswordController = TextEditingController();
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+
+  bool _obscureCurrent = true;
+  bool _obscureNew = true;
+  bool _obscureConfirm = true;
 
   @override
   void dispose() {
@@ -1040,14 +1045,21 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     super.dispose();
   }
 
-  void _changePassword() {
-    if (_formKey.currentState!.validate()) {
-      // TODO: Add password update logic
+  void _handleChangePassword() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final viewModel = ref.read(changePasswordViewModelProvider);
+    final success = await viewModel.changePassword(
+      _currentPasswordController.text.trim(),
+      _newPasswordController.text.trim(),
+    );
+
+    if (success && mounted) {
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
           title: const Text('Success'),
-          content: const Text('Your password has been changed.'),
+          content: Text(viewModel.successMessage ?? 'Password updated.'),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
@@ -1056,11 +1068,17 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           ],
         ),
       );
+    } else if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(viewModel.errorMessage ?? 'Failed to update password.')),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final viewModel = ref.watch(changePasswordViewModelProvider);
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -1069,6 +1087,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Back and title
               Stack(
                 alignment: Alignment.center,
                 children: [
@@ -1105,16 +1124,29 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 ],
               ),
               const SizedBox(height: 32),
+
+              // Form
               Form(
                 key: _formKey,
                 child: Column(
                   children: [
+                    // Current password
                     TextFormField(
                       controller: _currentPasswordController,
-                      obscureText: true,
-                      decoration: const InputDecoration(
+                      obscureText: _obscureCurrent,
+                      decoration: InputDecoration(
                         labelText: 'Current Password',
-                        border: OutlineInputBorder(),
+                        border: const OutlineInputBorder(),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscureCurrent ? Icons.visibility_off : Icons.visibility,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscureCurrent = !_obscureCurrent;
+                            });
+                          },
+                        ),
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -1124,12 +1156,24 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       },
                     ),
                     const SizedBox(height: 16),
+
+                    // New password
                     TextFormField(
                       controller: _newPasswordController,
-                      obscureText: true,
-                      decoration: const InputDecoration(
+                      obscureText: _obscureNew,
+                      decoration: InputDecoration(
                         labelText: 'New Password',
-                        border: OutlineInputBorder(),
+                        border: const OutlineInputBorder(),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscureNew ? Icons.visibility_off : Icons.visibility,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscureNew = !_obscureNew;
+                            });
+                          },
+                        ),
                       ),
                       validator: (value) {
                         if (value == null || value.length < 6) {
@@ -1139,12 +1183,24 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       },
                     ),
                     const SizedBox(height: 16),
+
+                    // Confirm new password
                     TextFormField(
                       controller: _confirmPasswordController,
-                      obscureText: true,
-                      decoration: const InputDecoration(
+                      obscureText: _obscureConfirm,
+                      decoration: InputDecoration(
                         labelText: 'Confirm New Password',
-                        border: OutlineInputBorder(),
+                        border: const OutlineInputBorder(),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscureConfirm ? Icons.visibility_off : Icons.visibility,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscureConfirm = !_obscureConfirm;
+                            });
+                          },
+                        ),
                       ),
                       validator: (value) {
                         if (value != _newPasswordController.text) {
@@ -1156,9 +1212,12 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   ],
                 ),
               ),
+
               const Spacer(),
+
+              // Save button
               ElevatedButton(
-                onPressed: _changePassword,
+                onPressed: viewModel.isLoading ? null : _handleChangePassword,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF4A5F44),
                   minimumSize: const Size.fromHeight(48),
@@ -1166,14 +1225,16 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text(
-                  'Save Changes',
-                  style: TextStyle(
-                    fontFamily: 'Mallanna',
-                    fontSize: 16,
-                    color: Colors.white,
-                  ),
-                ),
+                child: viewModel.isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text(
+                        'Save Changes',
+                        style: TextStyle(
+                          fontFamily: 'Mallanna',
+                          fontSize: 16,
+                          color: Colors.white,
+                        ),
+                      ),
               ),
             ],
           ),
