@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:trash_track/screens/admin_dashboard.dart';
 import 'package:trash_track/screens/bookmark_screen.dart';
 import 'screens/eco_shop_screen.dart';
 import 'screens/settings_screen.dart';
@@ -43,6 +44,7 @@ class MyApp extends StatelessWidget {
         '/dashboard': (context) => const DashboardScreen(),
         // '/bookmark': (context) => const CollectionsPage(),
         // '/profile': (context) => const ProfileScreen(),
+        '/admin': (context) => const AdminDashboardScreen(),
         '/settings': (context) => const SettingsScreen(),
 
       },

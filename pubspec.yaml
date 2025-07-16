@@ -40,6 +40,8 @@ dependencies:
   uuid: ^4.0.0
   grouped_list: ^5.1.2
   qr_flutter: ^4.1.0
+  mobile_scanner: ^3.5.1
+  permission_handler: ^11.0.1
   image_picker: ^1.0.4
   path: ^1.8.3
 
@@ -69,44 +71,9 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/images/loading_screen.gif
-    - assets/images/World-cuate 1.png
-    - assets/images/Rectangle 113.png
-    - assets/images/Noise & Texture.png
-    - assets/images/qr_code.png
-    - assets/images/intro_screen.gif
-    - assets/images/welcome_screen.png
-    - assets/icons/home.png
-    - assets/icons/home_active.png
-    - assets/icons/collections.png
-    - assets/icons/collections_active.png
-    - assets/icons/appointments.png
-    - assets/icons/appointments_active.png
-    - assets/icons/notifications.png
-    - assets/icons/notifications_active.png
-    - assets/icons/settings.png
-    - assets/icons/settings_active.png
-    - assets/images/intro_screen.gif
-    - assets/images/welcome_screen.png
-    - assets/icons/beauty.png
-    - assets/icons/beauty_active.png
-    - assets/icons/fashion.png
-    - assets/icons/fashion_active.png
-    - assets/icons/food.png
-    - assets/icons/food_active.png
-    - assets/icons/health.png
-    - assets/icons/health_active.png
-    - assets/icons/lifestyle.png
-    - assets/icons/lifestyle_active.png
-    - assets/icons/pet.png
-    - assets/icons/pet_active.png
-    - assets/icons/recycle.png
-    - assets/icons/services.png
-    - assets/icons/services_active.png
-    - assets/icons/tech.png
-    - assets/icons/tech_active.png
-    - assets/images/eco_shop.png
-    - assets/images/default_profile.png
+    - assets/images/
+    - assets/icons/
+    - assets/models/
 
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a
