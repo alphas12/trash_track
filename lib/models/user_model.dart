@@ -26,13 +26,8 @@ class UserInfoModel {
       'user_location': location,
       'user_phone_num': phoneNum,
       'user_profile_img': profileImg,
-<<<<<<< Updated upstream
-      'auth_user_id': authId
-
-=======
       'auth_user_id': authUserId
-      
->>>>>>> Stashed changes
+
     };
   }
 }

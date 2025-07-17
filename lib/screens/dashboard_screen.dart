@@ -220,7 +220,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                   fontFamily: 'Mallanna',
                                 ),
                               ),
-<<<<<<< Updated upstream
                               const SizedBox(height: 16),
                               recommendedServices.when(
                                 data: (services) {
@@ -241,9 +240,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                       spacing: 16,
                                       runSpacing: 16,
                                       children: services.map((service) {
-                                        final isOpen = ref.watch(
-                                          isServiceOpenProvider(service),
-                                        );
+                                        // Removed unused isOpen variable
                                         return DisposalServiceCard(
                                           service: service,
                                           onTap: () {
@@ -259,22 +256,19 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                           },
                                         );
                                       }).toList(),
-=======
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => const RecommendedScreen(),
->>>>>>> Stashed changes
                                     ),
                                   );
                                 },
-                                child: const Text(
-                                  'See All',
-                                  style: TextStyle(
-                                    color: Color(0xFF4A5F44),
-                                    fontFamily: 'Mallanna',
+                                loading: () => const Center(
+                                  child: CircularProgressIndicator(color: Color(0xFF4A5F44)),
+                                ),
+                                error: (error, stack) => Center(
+                                  child: Text(
+                                    'Error: $error',
+                                    style: const TextStyle(
+                                      color: Colors.red,
+                                      fontFamily: 'Mallanna',
+                                    ),
                                   ),
                                 ),
                               ),
