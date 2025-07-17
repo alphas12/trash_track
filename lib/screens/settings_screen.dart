@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../widgets/appointment/appointment_card.dart';
 import '../widgets/custom_bottom_nav_bar.dart';
 import '../providers/manage_profile_provider.dart';
 import '../services/manage_profile_viewmodel.dart';
-import '../models/appointment_model.dart';
+import '../providers/points_provider.dart';
+import '../services/change_password_viewmodel.dart';
+import '../providers/auth_provider.dart';
+import '../widgets/appointment/appointment_card.dart';
 import '../providers/appointment_provider.dart';
+import '../models/appointment_model.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -474,31 +477,46 @@ class HistoryScreen extends ConsumerWidget {
   }
 }
 
-class PointsScreen extends StatelessWidget {
+class PointsScreen extends ConsumerStatefulWidget {
   const PointsScreen({super.key});
 
   @override
+  ConsumerState<PointsScreen> createState() => _PointsScreenState();
+}
+
+class _PointsScreenState extends ConsumerState<PointsScreen> {
+  final List<Map<String, dynamic>> rewards = [
+    {
+      'title': 'P10 Voucher',
+      'points': 1000,
+      'rewardValue': 'P10',
+      'icon': Icons.local_cafe,
+    },
+    {
+      'title': 'P30 Discount',
+      'points': 3000,
+      'rewardValue': 'P30',
+      'icon': Icons.shopping_bag,
+    },
+    {
+      'title': 'TrashTrack Elite',
+      'points': 10000,
+      'rewardValue': 'P120',
+      'icon': Icons.verified,
+    },
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() =>
+        ref.read(pointsViewModelProvider).fetchPoints());
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final List<Map<String, dynamic>> rewards = [
-      {
-        'title': 'P10 Voucher',
-        'points': 1000,
-        'rewardValue': 'P10',
-        'icon': Icons.local_cafe,
-      },
-      {
-        'title': 'P30 Discount',
-        'points': 3000,
-        'rewardValue': 'P30',
-        'icon': Icons.shopping_bag,
-      },
-      {
-        'title': 'TrashTrack Elite',
-        'points': 10000,
-        'rewardValue': 'P120',
-        'icon': Icons.verified,
-      },
-    ];
+    final viewModel = ref.watch(pointsViewModelProvider);
+    final points = viewModel.userPoints.points;
 
     return Scaffold(
       body: SafeArea(
@@ -507,31 +525,14 @@ class PointsScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Stack(
-                alignment: Alignment.center,
+              // Top Bar
+              Row(
                 children: [
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              spreadRadius: 2,
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: const Icon(Icons.arrow_back, color: Colors.black, size: 24),
-                      ),
-                    ),
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: const Icon(Icons.arrow_back),
                   ),
+                  const Spacer(),
                   const Text(
                     'Points',
                     style: TextStyle(
@@ -540,20 +541,23 @@ class PointsScreen extends StatelessWidget {
                       fontFamily: 'Mallanna',
                     ),
                   ),
+                  const Spacer(),
                 ],
               ),
               const SizedBox(height: 32),
+
+              // Points Balance
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF4A5F44), // Eco green
+                  color: const Color(0xFF4A5F44),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text(
+                  children: [
+                    const Text(
                       'Current Balance',
                       style: TextStyle(
                         fontSize: 16,
@@ -562,10 +566,10 @@ class PointsScreen extends StatelessWidget {
                         color: Colors.white,
                       ),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Text(
-                      '150 EcoBits',
-                      style: TextStyle(
+                      '$points EcoBits',
+                      style: const TextStyle(
                         fontSize: 36,
                         fontWeight: FontWeight.bold,
                         fontFamily: 'Mallanna',
@@ -575,6 +579,7 @@ class PointsScreen extends StatelessWidget {
                   ],
                 ),
               ),
+
               const SizedBox(height: 32),
               const Text(
                 'Redeem Rewards',
@@ -585,6 +590,8 @@ class PointsScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
+
+              // Rewards List
               Expanded(
                 child: ListView.builder(
                   itemCount: rewards.length,
@@ -596,50 +603,36 @@ class PointsScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(16),
                       ),
                       elevation: 4,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Row(
-                          children: [
-                            CircleAvatar(
-                              backgroundColor: const Color(0xFF4A5F44).withOpacity(0.1),
-                              child: Icon(
-                                reward['icon'],
-                                color: const Color(0xFF4A5F44),
-                              ),
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: const Color(0xFF4A5F44).withOpacity(0.1),
+                          child: Icon(reward['icon'], color: const Color(0xFF4A5F44)),
+                        ),
+                        title: Text(
+                          reward['title'],
+                          style: const TextStyle(
+                            fontFamily: 'Mallanna',
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        subtitle: Text(
+                          'Redeem with ${reward['points']} EcoBits',
+                          style: const TextStyle(fontFamily: 'Mallanna'),
+                        ),
+                        trailing: ElevatedButton(
+                          onPressed: points >= reward['points']
+                              ? () => _showRedeemDialog(context, reward)
+                              : null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF4A5F44),
+                          ),
+                          child: Text(
+                            'Redeem',
+                            style: const TextStyle(
+                              fontFamily: 'Mallanna',
+                              color: Colors.white, // Set text color here
                             ),
-                            const SizedBox(width: 12),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  reward['title'],
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'Mallanna',
-                                  ),
-                                ),
-                                Text(
-                                  'Redeem with ${reward['points']} Ecobits',
-                                  style: const TextStyle(
-                                    fontFamily: 'Mallanna',
-                                    fontSize: 14,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const Spacer(),
-                            Text(
-                              reward['rewardValue'],
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'Mallanna',
-                                color: Color(0xFF4A5F44),
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       ),
                     );
@@ -652,7 +645,90 @@ class PointsScreen extends StatelessWidget {
       ),
     );
   }
+
+  void _showRedeemDialog(BuildContext context, Map<String, dynamic> reward) {
+  showDialog(
+    context: context,
+    builder: (BuildContext dialogContext) {
+      return AlertDialog(
+        title: const Text("Are you sure you want to redeem this reward?"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "📦 Voucher: ${reward['title']}",
+              style: const TextStyle(
+                fontFamily: 'Mallanna',
+                color: Colors.black, // Set text color here
+              ),
+            ),
+            Text(
+              "💸 Cost: ${reward['points']} EcoBits",
+              style: const TextStyle(
+                fontFamily: 'Mallanna',
+                color: Colors.black, // Set text color here
+              ),
+            ),
+            Text(
+              "🏷️ Reward Value: ${reward['rewardValue']}",
+              style: const TextStyle(
+                fontFamily: 'Mallanna',
+                color: Colors.black, // Set text color here
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text(
+              "Cancel",
+              style: const TextStyle(
+                fontFamily: 'Mallanna',
+                color: Colors.black, // Set text color here
+              ),
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF4A5F44),
+            ),
+            onPressed: () async {
+              final success = await ref
+                  .read(pointsViewModelProvider)
+                  .redeem(reward['points']);
+
+              Navigator.pop(dialogContext); // Close dialog
+
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      success
+                          ? 'You redeemed: ${reward['title']}'
+                          : 'Not enough EcoBits.',
+                    ),
+                  ),
+                );
+              }
+            },
+            child: const Text(
+              "Confirm",
+              style: const TextStyle(
+                  fontFamily: 'Mallanna',
+                  color: Colors.white, // Set text color here
+                ),
+              ),
+          ),
+        ],
+      );
+    },
+  );
 }
+
+}
+
 
 class PrivacyPolicyScreen extends StatelessWidget {
   const PrivacyPolicyScreen({super.key});
@@ -942,18 +1018,21 @@ class DeleteAccountScreen extends StatelessWidget {
   }
 }
 
-class ChangePasswordScreen extends StatefulWidget {
+class ChangePasswordScreen extends ConsumerStatefulWidget {
   const ChangePasswordScreen({super.key});
 
   @override
-  State<ChangePasswordScreen> createState() => _ChangePasswordScreenState();
+  ConsumerState<ChangePasswordScreen> createState() => _ChangePasswordScreenState();
 }
-
-class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
+class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
   final _formKey = GlobalKey<FormState>();
   final _currentPasswordController = TextEditingController();
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+
+  bool _obscureCurrent = true;
+  bool _obscureNew = true;
+  bool _obscureConfirm = true;
 
   @override
   void dispose() {
@@ -963,14 +1042,21 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     super.dispose();
   }
 
-  void _changePassword() {
-    if (_formKey.currentState!.validate()) {
-      // TODO: Add password update logic
+  void _handleChangePassword() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final viewModel = ref.read(changePasswordViewModelProvider);
+    final success = await viewModel.changePassword(
+      _currentPasswordController.text.trim(),
+      _newPasswordController.text.trim(),
+    );
+
+    if (success && mounted) {
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
           title: const Text('Success'),
-          content: const Text('Your password has been changed.'),
+          content: Text(viewModel.successMessage ?? 'Password updated.'),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
@@ -979,11 +1065,17 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           ],
         ),
       );
+    } else if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(viewModel.errorMessage ?? 'Failed to update password.')),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final viewModel = ref.watch(changePasswordViewModelProvider);
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -992,6 +1084,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Back and title
               Stack(
                 alignment: Alignment.center,
                 children: [
@@ -1028,16 +1121,29 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 ],
               ),
               const SizedBox(height: 32),
+
+              // Form
               Form(
                 key: _formKey,
                 child: Column(
                   children: [
+                    // Current password
                     TextFormField(
                       controller: _currentPasswordController,
-                      obscureText: true,
-                      decoration: const InputDecoration(
+                      obscureText: _obscureCurrent,
+                      decoration: InputDecoration(
                         labelText: 'Current Password',
-                        border: OutlineInputBorder(),
+                        border: const OutlineInputBorder(),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscureCurrent ? Icons.visibility_off : Icons.visibility,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscureCurrent = !_obscureCurrent;
+                            });
+                          },
+                        ),
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -1047,12 +1153,24 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       },
                     ),
                     const SizedBox(height: 16),
+
+                    // New password
                     TextFormField(
                       controller: _newPasswordController,
-                      obscureText: true,
-                      decoration: const InputDecoration(
+                      obscureText: _obscureNew,
+                      decoration: InputDecoration(
                         labelText: 'New Password',
-                        border: OutlineInputBorder(),
+                        border: const OutlineInputBorder(),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscureNew ? Icons.visibility_off : Icons.visibility,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscureNew = !_obscureNew;
+                            });
+                          },
+                        ),
                       ),
                       validator: (value) {
                         if (value == null || value.length < 6) {
@@ -1062,12 +1180,24 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       },
                     ),
                     const SizedBox(height: 16),
+
+                    // Confirm new password
                     TextFormField(
                       controller: _confirmPasswordController,
-                      obscureText: true,
-                      decoration: const InputDecoration(
+                      obscureText: _obscureConfirm,
+                      decoration: InputDecoration(
                         labelText: 'Confirm New Password',
-                        border: OutlineInputBorder(),
+                        border: const OutlineInputBorder(),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscureConfirm ? Icons.visibility_off : Icons.visibility,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscureConfirm = !_obscureConfirm;
+                            });
+                          },
+                        ),
                       ),
                       validator: (value) {
                         if (value != _newPasswordController.text) {
@@ -1079,9 +1209,12 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   ],
                 ),
               ),
+
               const Spacer(),
+
+              // Save button
               ElevatedButton(
-                onPressed: _changePassword,
+                onPressed: viewModel.isLoading ? null : _handleChangePassword,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF4A5F44),
                   minimumSize: const Size.fromHeight(48),
@@ -1089,14 +1222,16 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text(
-                  'Save Changes',
-                  style: TextStyle(
-                    fontFamily: 'Mallanna',
-                    fontSize: 16,
-                    color: Colors.white,
-                  ),
-                ),
+                child: viewModel.isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text(
+                        'Save Changes',
+                        style: TextStyle(
+                          fontFamily: 'Mallanna',
+                          fontSize: 16,
+                          color: Colors.white,
+                        ),
+                      ),
               ),
             ],
           ),
