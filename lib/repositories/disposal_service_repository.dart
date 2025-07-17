@@ -109,6 +109,21 @@ class DisposalServiceRepository {
     }
   }
 
+  // Get disposal service by ID (nullable)
+  Future<DisposalService?> getDisposalServiceById(String id) async {
+    try {
+      final response = await _supabase
+          .from('disposal_service')
+          .select(_baseQuery)
+          .eq('service_id', id)
+          .maybeSingle();
+      if (response == null) return null;
+      return DisposalService.fromMap(response);
+    } catch (e) {
+      return null;
+    }
+  }
+
   // Get all available material types
   Future<List<String>> getMaterialTypes() async {
     try {

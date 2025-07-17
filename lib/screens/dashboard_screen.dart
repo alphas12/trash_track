@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
 import 'disposal_shop_details_screen.dart';
 import '../providers/disposal_service_provider.dart';
 import '../providers/favorite_services_provider.dart';
 import '../widgets/disposal_service_card.dart';
 import '../widgets/custom_bottom_nav_bar.dart';
 import 'search_screen.dart';
-import 'recommended_screen.dart';
 import 'top_services_screen.dart';
-import '../screens/disposal_shop_details_screen.dart';
+import 'recommended_screen.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -29,10 +27,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         body: Center(
           child: Text(
             'You must be logged in to view the dashboard.',
-            style: TextStyle(
-              fontSize: 16,
-              fontFamily: 'Mallanna',
-            ),
+            style: TextStyle(fontSize: 16, fontFamily: 'Mallanna'),
           ),
         ),
       );
@@ -42,7 +37,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final recommendedServices = ref.watch(dashboardRecommendedServicesProvider);
     final topServices = ref.watch(dashboardTopServicesProvider);
     final favoriteIds = ref.watch(favoriteServicesProvider(userId));
-    final favoritesNotifier = ref.read(favoriteServicesProvider(userId).notifier);
+    final favoritesNotifier = ref.read(
+      favoriteServicesProvider(userId).notifier,
+    );
 
     return Scaffold(
       body: SafeArea(
@@ -92,10 +89,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                   Padding(
                                     padding: const EdgeInsets.only(right: 8.0),
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: const [
                                             Text(
                                               'Save The Planet',
@@ -147,20 +146,27 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(
-                                                builder: (context) => const SearchScreen(),
+                                                builder: (context) =>
+                                                    const SearchScreen(),
                                               ),
                                             );
                                           },
                                           child: Container(
                                             height: 52,
-                                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 16,
+                                            ),
                                             decoration: BoxDecoration(
                                               color: const Color(0xFFD9D9D9),
-                                              borderRadius: BorderRadius.circular(12),
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
                                             ),
                                             child: Row(
                                               children: const [
-                                                Icon(Icons.search, color: Color(0xFF4A5F44)),
+                                                Icon(
+                                                  Icons.search,
+                                                  color: Color(0xFF4A5F44),
+                                                ),
                                                 SizedBox(width: 8),
                                                 Expanded(
                                                   child: Text(
@@ -184,7 +190,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                         padding: const EdgeInsets.all(13),
                                         decoration: BoxDecoration(
                                           color: const Color(0xFFD9D9D9),
-                                          borderRadius: BorderRadius.circular(12),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
                                         ),
                                         child: Image.asset(
                                           'assets/images/qr_code.png',
@@ -220,55 +228,20 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                   fontFamily: 'Mallanna',
                                 ),
                               ),
-                              const SizedBox(height: 16),
-                              recommendedServices.when(
-                                data: (services) {
-                                  if (services.isEmpty) {
-                                    return const Center(
-                                      child: Text(
-                                        'No recommended services available',
-                                        style: TextStyle(
-                                          fontFamily: 'Mallanna',
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                  return Center(
-                                    child: Wrap(
-                                      alignment: WrapAlignment.center,
-                                      spacing: 16,
-                                      runSpacing: 16,
-                                      children: services.map((service) {
-                                        // Removed unused isOpen variable
-                                        return DisposalServiceCard(
-                                          service: service,
-                                          onTap: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    DisposalShopDetailsScreen(
-                                                  service: service,
-                                                ),
-                                              ),
-                                            );
-                                          },
-                                        );
-                                      }).toList(),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>  const RecommendedScreen(),
                                     ),
                                   );
                                 },
-                                loading: () => const Center(
-                                  child: CircularProgressIndicator(color: Color(0xFF4A5F44)),
-                                ),
-                                error: (error, stack) => Center(
-                                  child: Text(
-                                    'Error: $error',
-                                    style: const TextStyle(
-                                      color: Colors.red,
-                                      fontFamily: 'Mallanna',
-                                    ),
+                                child: const Text(
+                                  'See All',
+                                  style: TextStyle(
+                                    color: Color(0xFF4A5F44),
+                                    fontFamily: 'Mallanna',
                                   ),
                                 ),
                               ),
@@ -296,15 +269,19 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                   children: services.map((service) {
                                     return DisposalServiceCard(
                                       service: service,
-                                      isFavorite: favoriteIds.contains(service.serviceId),
-                                      onFavorite: () =>
-                                          favoritesNotifier.toggleFavorite(service.serviceId),
+                                      isFavorite: favoriteIds.contains(
+                                        service.serviceId,
+                                      ),
+                                      onFavorite: () => favoritesNotifier
+                                          .toggleFavorite(service.serviceId),
                                       onTap: () {
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
                                             builder: (context) =>
-                                                DisposalShopDetailsScreen(service: service),
+                                                DisposalShopDetailsScreen(
+                                                  service: service,
+                                                ),
                                           ),
                                         );
                                       },
@@ -314,7 +291,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                               );
                             },
                             loading: () => const Center(
-                              child: CircularProgressIndicator(color: Color(0xFF4A5F44)),
+                              child: CircularProgressIndicator(
+                                color: Color(0xFF4A5F44),
+                              ),
                             ),
                             error: (error, stack) => Center(
                               child: Text(
@@ -345,7 +324,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => const TopServicesScreen(),
+                                      builder: (context) =>
+                                          const TopServicesScreen(),
                                     ),
                                   );
                                 },
@@ -381,15 +361,19 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                   children: services.map((service) {
                                     return DisposalServiceCard(
                                       service: service,
-                                      isFavorite: favoriteIds.contains(service.serviceId),
-                                      onFavorite: () =>
-                                          favoritesNotifier.toggleFavorite(service.serviceId),
+                                      isFavorite: favoriteIds.contains(
+                                        service.serviceId,
+                                      ),
+                                      onFavorite: () => favoritesNotifier
+                                          .toggleFavorite(service.serviceId),
                                       onTap: () {
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
                                             builder: (context) =>
-                                                DisposalShopDetailsScreen(service: service),
+                                                DisposalShopDetailsScreen(
+                                                  service: service,
+                                                ),
                                           ),
                                         );
                                       },
@@ -399,7 +383,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                               );
                             },
                             loading: () => const Center(
-                              child: CircularProgressIndicator(color: Color(0xFF4A5F44)),
+                              child: CircularProgressIndicator(
+                                color: Color(0xFF4A5F44),
+                              ),
                             ),
                             error: (error, stack) => Center(
                               child: Text(

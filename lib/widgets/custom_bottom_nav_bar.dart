@@ -60,7 +60,6 @@ class CustomBottomNavBar extends StatelessWidget {
                     );
                   }
                   break;
-
                 case 2: // Appointment Page
                   if (currentIndex != 2) {
                     Navigator.pushReplacement(

@@ -9,6 +9,13 @@ final disposalServiceRepositoryProvider = Provider<DisposalServiceRepository>((
   return DisposalServiceRepository();
 });
 
+// Disposal service by ID provider
+final disposalServiceByIdProvider =
+    FutureProvider.family<DisposalService?, String>((ref, serviceId) async {
+      final repo = ref.watch(disposalServiceRepositoryProvider);
+      return await repo.getDisposalServiceById(serviceId);
+    });
+
 // All services provider
 final allServicesProvider = FutureProvider<List<DisposalService>>((ref) async {
   final repository = ref.watch(disposalServiceRepositoryProvider);
@@ -171,20 +178,6 @@ DateTime _parseTimeString(String timeStr) {
   );
 }
 
-// Additional providers for full lists (used in their respective screens)
-final allRecommendedServicesProvider = FutureProvider<List<DisposalService>>((
-  ref,
-) async {
-  final repository = ref.watch(disposalServiceRepositoryProvider);
-  return repository.getRecommendedServices();
-});
-
-final allTopServicesProvider = FutureProvider<List<DisposalService>>((
-  ref,
-) async {
-  final repository = ref.watch(disposalServiceRepositoryProvider);
-  return repository.getTopServices();
-});
 
 // Search parameters class
 class SearchParams {
