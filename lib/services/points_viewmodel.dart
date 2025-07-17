@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/user_points_model.dart';
 
+
 class PointsViewModel extends ChangeNotifier {
   final SupabaseClient _client = Supabase.instance.client;
   final Ref ref;
@@ -60,5 +61,57 @@ class PointsViewModel extends ChangeNotifier {
     _userPoints = UserPoints(points: newBalance);
     notifyListeners();
     return true;
+  }
+
+  Future<bool> addPointsForAppointment(String appointmentId, String? qrData) async {
+    try {
+      isLoading = true;
+      notifyListeners();
+
+      final userId = _client.auth.currentUser?.id;
+      if (userId == null || qrData == null) return false;
+
+      // Extract points from QR data
+      final pointsMatch = RegExp(r'Points:(\d+(\.\d+)?)').firstMatch(qrData);
+      if (pointsMatch == null) return false;
+
+      final pointsEarned = double.tryParse(pointsMatch.group(1) ?? '0')?.round() ?? 0;
+
+      // Get user_info_id
+      final userResponse = await _client
+          .from('user_credentials')
+          .select('user_info_id')
+          .eq('user_cred_id', userId)
+          .maybeSingle();
+
+      final userInfoId = userResponse?['user_info_id'];
+      if (userInfoId == null) return false;
+
+      // Get current user points
+      final userInfoResponse = await _client
+          .from('user_info')
+          .select('user_points')
+          .eq('user_info_id', userInfoId)
+          .maybeSingle();
+
+      final currentPoints = (userInfoResponse?['user_points'] ?? 0) as int;
+      final newBalance = currentPoints + pointsEarned;
+
+      // Update user points
+      await _client
+          .from('user_info')
+          .update({'user_points': newBalance})
+          .eq('user_info_id', userInfoId);
+
+      _userPoints = UserPoints(points: newBalance);
+      notifyListeners();
+      return true;
+    } catch (e) {
+      debugPrint('Error adding points: $e');
+      return false;
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
   }
 }

@@ -5,17 +5,19 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/appointment_model.dart';
 import '../repositories/appointment_repository.dart';
 import '../widgets/dialogs/successful_scan_dialog.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/points_provider.dart';
 
-class QrCodeScreen extends StatefulWidget {
+class QrCodeScreen extends ConsumerStatefulWidget {
   final Appointment appointment;
 
   const QrCodeScreen({Key? key, required this.appointment}) : super(key: key);
 
   @override
-  State<QrCodeScreen> createState() => _QrCodeScreenState();
+  ConsumerState<QrCodeScreen> createState() => _QrCodeScreenState();
 }
 
-class _QrCodeScreenState extends State<QrCodeScreen> {
+class _QrCodeScreenState extends ConsumerState<QrCodeScreen> {
   late Timer _pollingTimer;
   bool _hasShownDialog = false;
 
@@ -37,8 +39,15 @@ class _QrCodeScreenState extends State<QrCodeScreen> {
           _hasShownDialog = true;
           _pollingTimer.cancel();
 
+          // Update points first
+          final pointsViewModel = ref.read(pointsViewModelProvider);
+          await pointsViewModel.addPointsForAppointment(
+            widget.appointment.appointmentInfoId!,
+            widget.appointment.qrCodeData,
+          );
+
           if (mounted) {
-            // Show the success dialog and then navigate to feedback
+            // Show the success dialog with updated points
             showDialog(
               context: context,
               barrierDismissible: false, // User must tap button to proceed
