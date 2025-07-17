@@ -7,7 +7,7 @@ import '../models/disposal_service.dart';
 import '../providers/appointment_provider.dart';
 import '../providers/user_provider.dart';
 import '../widgets/schedule/service_type_selector.dart';
-import '../widgets/success_dialog.dart';
+import '../widgets/dialogs/success_dialog.dart';
 import '../widgets/schedule/waste_material_selection.dart';
 import '../widgets/schedule/pickup_details_widget.dart';
 import '../widgets/schedule/dropoff_schedule_widget.dart';
@@ -232,6 +232,7 @@ Future<void> _scheduleAppointment() async {
               'Success! Your recycling appointment is confirmed. Thank you for helping us make a difference!',
         ),
       ).then((_) {
+        ref.invalidate(userAppointmentsProvider);
         if (mounted) Navigator.pop(context);
       });
     }

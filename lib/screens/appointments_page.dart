@@ -1,118 +1,158 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:trash_track/screens/settings_screen.dart';
+import '../models/appointment_model.dart';
 import '../widgets/custom_bottom_nav_bar.dart';
-import 'appointment_details_page.dart'; // Make sure this exists and accepts a Map<String, String?>
-
-class AppointmentsPage extends StatelessWidget {
+import '../providers/appointment_provider.dart';
+import '../widgets/appointment/appointment_card.dart';
+class AppointmentsPage extends ConsumerWidget {
   const AppointmentsPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final appointments = [
-      {
-        "id": "A123",
-        "datetime": "Today at 09:00 A.M.",
-        "location": "Junkify",
-        "type": "Drop-Off",
-        "status": "Pending",
-        "waste": "12 pcs. of plastic bottles",
-        "notes": "None",
-      },
-      {
-        "id": "B456",
-        "datetime": "Wednesday at 12:00 P.M.",
-        "location": "ReClaim",
-        "type": "Pick Up",
-        "status": "N/A",
-        "waste": "12 pcs. of plastic bottles",
-        "notes": "Placed on the front gate.",
-        "address": "123 Street, Barangay ABC, Cebu City",
-        "phone": "09123456789",
-        "driverName": "Trash Track",
-        "driverNumber": "0987654321",
-      },
-    ];
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appointmentsAsync = ref.watch(userAppointmentsProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Appointments"),
-        centerTitle: true,
-        backgroundColor: Colors.white,
-        elevation: 0,
-        foregroundColor: Colors.black,
-        actions: [
-          TextButton(
-            onPressed: () {
-              // Future: Go to history
-            },
-            child: const Text("History"),
-          )
-        ],
-      ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: appointments.length,
-        itemBuilder: (context, index) {
-          final appt = appointments[index];
-          final isPickup = appt["type"] == "Pick Up";
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildHeader(context),
+            Expanded(
+              child: appointmentsAsync.when(
+                  data: (appointments) {
+                    final upcoming = appointments.where((a) =>
+                    a.appointmentStatus == AppointmentStatus.pending ||
+                        a.appointmentStatus == AppointmentStatus.confirmed
+                    ).toList();
 
-          return GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => AppointmentDetailsPage(appointment: appt),
-                ),
-              );
-            },
-            child: Container(
-              margin: const EdgeInsets.only(bottom: 15),
-              decoration: BoxDecoration(
-                color: isPickup ? Colors.grey[200] : const Color(0xFFCDD6AA),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(appt["datetime"]!, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  Text("at ${appt["location"]}"),
-                  const SizedBox(height: 6),
-                  Wrap(
-                    spacing: 8,
-                    children: [
-                      Chip(
-                        label: Text(appt["status"]!),
-                        backgroundColor: appt["status"] == "Pending"
-                            ? Colors.yellow[600]
-                            : Colors.grey,
-                        labelStyle: const TextStyle(fontSize: 12),
-                      ),
-                      Chip(
-                        label: Text(appt["type"]!),
-                        backgroundColor: isPickup ? Colors.black45 : Colors.white,
-                        labelStyle: TextStyle(
-                          fontSize: 12,
-                          color: isPickup ? Colors.white : Colors.black87,
+                    if (upcoming.isEmpty) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.event_busy, size: 64, color: Color(0xFF4B5320)),
+                            const SizedBox(height: 20),
+                            const Text(
+                              'No upcoming appointments',
+                              style: TextStyle(
+                                fontFamily: 'Mallanna',
+                                fontSize: 18,
+                                color: Color(0xFF4B5320),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
+                      );
+                    }
+
+                    return ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: upcoming.length,
+                      itemBuilder: (context, index) {
+                        final appointment = upcoming[index];
+                        return AppointmentCard(appointment: appointment);
+                      },
+                    );
+                  },
+
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, stack) => Center(
+                  child: Text(
+                    'Error loading appointments: $error',
+                    style: const TextStyle(
+                      fontFamily: 'Mallanna',
+                      color: Colors.red,
+                    ),
                   ),
-                  const SizedBox(height: 5),
-                  Text("Waste Details: ${appt["waste"]}"),
-                  if (isPickup)
-                    const Text("To be picked up by Trash Track."),
-                ],
+                ),
               ),
             ),
-          );
-        },
+          ],
+        ),
       ),
       bottomNavigationBar: CustomBottomNavBar(
-        currentIndex: 1, // or whatever index you assign to WasteService
+        currentIndex: 1,
         onTap: (int newIndex) {
-          // Already handled by the onTap inside the CustomBottomNavBar
+          // Already handled in CustomBottomNavBar
         },
       ),
     );
   }
+
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            spreadRadius: 1,
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(24.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Appointments',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                  height: 1.2,
+                  fontFamily: 'Mallanna',
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const HistoryScreen())
+                  );
+                },
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.grey[200],
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 8,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+                child: const Text(
+                  "History",
+                  style: TextStyle(
+                    fontFamily: 'Mallanna',
+                    color: Colors.black,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'View and manage your upcoming appointments here.',
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.black54,
+              height: 1.5,
+              fontFamily: 'Mallanna',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
+

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../screens/dashboard_screen.dart';
-// import '../screens/bookmark_screen.dart';
 import '../screens/settings_screen.dart';
-
+import '../screens/appointments_page.dart';
+import '../screens/bookmark_screen.dart';
 
 class CustomBottomNavBar extends StatelessWidget {
   final int currentIndex;
@@ -52,14 +52,26 @@ class CustomBottomNavBar extends StatelessWidget {
                   break;
                 case 1: // Collections
                   if (currentIndex != 1) {
-                    // Navigator.pushReplacement(
-                    //   context,
-                    //   MaterialPageRoute(
-                    //     builder: (context) => const CollectionsPage(),
-                    //   ),
-                    // );
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const CollectionsPage(),
+                      ),
+                    );
                   }
-                case 4: // Settings 
+                  break;
+                case 2: // Appointment Page
+                  if (currentIndex != 2) {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AppointmentsPage(),
+                      ),
+                    );
+                  }
+                  break;
+
+                case 4: // Collections
                   if (currentIndex != 4) {
                     Navigator.pushReplacement(
                       context,

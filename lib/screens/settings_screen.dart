@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../widgets/appointment/appointment_card.dart';
 import '../widgets/custom_bottom_nav_bar.dart';
 import '../providers/manage_profile_provider.dart';
 import '../services/manage_profile_viewmodel.dart';
+import '../models/appointment_model.dart';
+import '../providers/appointment_provider.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -370,23 +373,12 @@ class _ManageProfileScreenState extends ConsumerState<ManageProfileScreen> {
 
 
 
-class HistoryScreen extends StatelessWidget {
+class HistoryScreen extends ConsumerWidget {
   const HistoryScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final List<Map<String, String>> historyData = [
-      {
-        'title': 'Trash Disposal Success!',
-        'date': '19 Jun 2025',
-        'description': 'You have officially disposed of 2kg of recyclable trash at EcoHub Mandaue.'
-      },
-      {
-        'title': 'Points Earned!',
-        'date': '17 Jun 2025',
-        'description': 'You earned 50 points from your recycling efforts.'
-      },
-    ];
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appointmentsAsync = ref.watch(userAppointmentsProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -430,43 +422,48 @@ class HistoryScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 40), // Balance arrow icon visually
+                  const SizedBox(width: 40),
                 ],
               ),
               const SizedBox(height: 24),
+
               Expanded(
-                child: ListView.builder(
-                  itemCount: historyData.length,
-                  itemBuilder: (context, index) {
-                    final item = historyData[index];
-                    return Card(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      margin: const EdgeInsets.only(bottom: 16),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(item['title']!,
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'Mallanna',
-                                )),
-                            const SizedBox(height: 4),
-                            Text(item['date']!,
-                                style: const TextStyle(
-                                  color: Colors.grey,
-                                  fontFamily: 'Mallanna',
-                                )),
-                            const SizedBox(height: 8),
-                            Text(item['description']!,
-                                style: const TextStyle(fontFamily: 'Mallanna')),
-                          ],
+                child: appointmentsAsync.when(
+                  data: (appointments) {
+                    final historyAppointments = ref.watch(userAppointmentsProvider).maybeWhen(
+                      data: (appointments) => appointments
+                          .where((a) =>  a.appointmentStatus == AppointmentStatus.completed ||
+                            a.appointmentStatus == AppointmentStatus.cancelled)
+                          .toList(),
+                      orElse: () => [],
+                    );
+
+                    if (historyAppointments.isEmpty) {
+                      return const Center(
+                        child: Text(
+                          'No appointment history yet.',
+                          style: TextStyle(
+                            fontFamily: 'Mallanna',
+                            fontSize: 16,
+                          ),
                         ),
-                      ),
+                      );
+                    }
+
+                    return ListView.builder(
+                          itemCount: historyAppointments.length,
+                          itemBuilder: (context, index) {
+                            return AppointmentCard(appointment: historyAppointments[index]);
+                          },
                     );
                   },
+                  loading: () => const Center(child: CircularProgressIndicator()),
+                  error: (e, _) => Center(
+                    child: Text(
+                      'Error: $e',
+                      style: const TextStyle(fontFamily: 'Mallanna', color: Colors.red),
+                    ),
+                  ),
                 ),
               ),
             ],

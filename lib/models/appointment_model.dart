@@ -1,32 +1,25 @@
 import 'appointment_waste.dart';
 
-enum AppointmentStatus { pending, confirmed, completed, cancelled }
+enum AppointmentStatus {
+  pending('Pending'),
+  confirmed('Confirmed'),
+  completed('Completed'),
+  cancelled('Cancelled');
+
+  final String value;
+  const AppointmentStatus(this.value);
+
+  static AppointmentStatus fromString(String status) {
+    return AppointmentStatus.values.firstWhere(
+      (e) => e.value.toLowerCase() == status.toLowerCase(),
+      orElse: () => AppointmentStatus.pending,
+    );
+  }
+
+  String toSupabaseString() => value;
+}
 
 enum AppointmentType { pickUp, dropOff }
-
-class DriverInfo {
-  final String name;
-  final String phone;
-  final String vehicleInfo;
-
-  const DriverInfo({
-    required this.name,
-    required this.phone,
-    required this.vehicleInfo,
-  });
-
-  Map<String, dynamic> toMap() => {
-    'name': name,
-    'phone': phone,
-    'vehicle_info': vehicleInfo,
-  };
-
-  factory DriverInfo.fromMap(Map<String, dynamic> map) => DriverInfo(
-    name: map['name'] ?? 'John Doe', // Mock data
-    phone: map['phone'] ?? '+1 234-567-8900', // Mock data
-    vehicleInfo: map['vehicle_info'] ?? 'Truck #123', // Mock data
-  );
-}
 
 class Appointment {
   final String? appointmentInfoId;
@@ -44,7 +37,6 @@ class Appointment {
   final double? appointmentPriceFee;
   final List<AppointmentWaste> wasteMaterials;
   final String? qrCodeData; // New field for QR code data
-  final DriverInfo? driverInfo; // New field for driver info
 
   const Appointment({
     this.appointmentInfoId,
@@ -62,7 +54,6 @@ class Appointment {
     this.appointmentPriceFee,
     this.wasteMaterials = const [],
     this.qrCodeData,
-    this.driverInfo,
   });
 
   Map<String, dynamic> toMap() => {
@@ -78,10 +69,10 @@ class Appointment {
     'appointment_confirm_date': appointmentConfirmDate?.toIso8601String(),
     'appointment_cancel_date': appointmentCancelDate?.toIso8601String(),
     'appointment_location': appointmentLocation,
-    'appointment_status': appointmentStatus.toString().split('.').last,
+    'appointment_status': appointmentStatus.toSupabaseString(),
     'appointment_notes': appointmentNotes,
     'appointment_price_fee': appointmentPriceFee,
-    'appoinrment_qr_code': qrCodeData,
+    'appointment_qr_code': qrCodeData,
   };
 
   factory Appointment.fromMap(Map<String, dynamic> map) => Appointment(
@@ -103,10 +94,7 @@ class Appointment {
         ? DateTime.parse(map['appointment_cancel_date'])
         : null,
     appointmentLocation: map['appointment_location'],
-    appointmentStatus: AppointmentStatus.values.firstWhere(
-      (e) => e.toString().split('.').last == map['appointment_status'],
-      orElse: () => AppointmentStatus.pending,
-    ),
+    appointmentStatus: AppointmentStatus.fromString(map['appointment_status']),
     appointmentNotes: map['appointment_notes'],
     appointmentPriceFee: map['appointment_price_fee'] != null
         ? (map['appointment_price_fee'] as num).toDouble()
@@ -116,9 +104,6 @@ class Appointment {
               .map((w) => AppointmentWaste.fromMap(w as Map<String, dynamic>))
               .toList()
         : [],
-    qrCodeData: map['qr_code_data'],
-    driverInfo: map['driver_info'] != null
-        ? DriverInfo.fromMap(map['driver_info'])
-        : null,
+    qrCodeData: map['appointment_qr_code'],
   );
 }

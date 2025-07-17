@@ -6,9 +6,7 @@ import '/screens/admin_qr_scan.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AdminShopScreen extends ConsumerStatefulWidget {
-  final String serviceId;
-
-  const AdminShopScreen({super.key, required this.serviceId});
+  const AdminShopScreen({super.key});
 
   @override
   ConsumerState<AdminShopScreen> createState() => _AdminShopScreenState();
@@ -27,12 +25,6 @@ class _AdminShopScreenState extends ConsumerState<AdminShopScreen> {
 
     return shopAsync.when(
       data: (shop) {
-        if (shop == null) {
-          return const Scaffold(
-            body: Center(child: Text("Shop not found")),
-          );
-        }
-
         if (!isEditing && shopNameC.text.isEmpty) {
           shopNameC.text = shop.serviceName;
           descriptionC.text = shop.serviceDescription;
@@ -59,7 +51,7 @@ class _AdminShopScreenState extends ConsumerState<AdminShopScreen> {
               TextButton(
                 onPressed: () async {
                   if (isEditing) {
-                    await _saveChanges(context, shop.serviceId);
+                    await _saveChanges(context);
                   }
                   setState(() => isEditing = !isEditing);
                 },
@@ -137,14 +129,15 @@ class _AdminShopScreenState extends ConsumerState<AdminShopScreen> {
     );
   }
 
-  Future<void> _saveChanges(BuildContext context, String serviceId) async {
-    final supabase = Supabase.instance.client;
-    await supabase.from('disposal_service').update({
+  Future<void> _saveChanges(BuildContext context) async {
+    final patch = {
       'service_name': shopNameC.text,
       'service_description': descriptionC.text,
       'service_location': locationC.text,
       'service_img': linkC.text,
-    }).eq('service_id', serviceId);
+    };
+
+    await ref.read(adminUpdateServiceProvider)(patch); // dynamic update
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Shop details updated'), behavior: SnackBarBehavior.floating),

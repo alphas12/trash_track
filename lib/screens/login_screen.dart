@@ -104,20 +104,28 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: () async {
-                            final userType = await ref
-                              .read(loginViewModelProvider.notifier)
-                              .login(_emailController.text, _passwordController.text);
-                              if (userType == 'Admin') {
-                                Navigator.pushReplacementNamed(context, '/settings'); // change to actual admin dashboard
-                              } else if (userType == 'Disposer') {
-                                Navigator.pushReplacementNamed(context, '/dashboard');
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Unauthorized role')),
-                                );
-                              }
+                            // final userType = await ref
+                            //   .read(loginViewModelProvider.notifier)
+                            //   .login(_emailController.text, _passwordController.text);
+                            //   if (userType == 'Admin') {
+                            //     Navigator.pushReplacementNamed(context, '/settings'); // change to actual admin dashboard
+                            //   } else if (userType == 'Disposer') {
+                            //     Navigator.pushReplacementNamed(context, '/dashboard');
+                            //   } else {
+                            //     ScaffoldMessenger.of(context).showSnackBar(
+                            //       const SnackBar(content: Text('Unauthorized role')),
+                            //     );
+                            //   }
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => LoadingScreen(
+                                  email: _emailController.text.trim(),
+                                  password: _passwordController.text.trim(),
+                                ),
+                              ),
+                            );
                           },
-
                           style: ElevatedButton.styleFrom(
                             backgroundColor: oliveGreen,
                             shape: RoundedRectangleBorder(

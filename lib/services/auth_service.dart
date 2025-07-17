@@ -45,7 +45,7 @@ class AuthService {
         fname: fname,
         lname: lname,
         location: location,
-        authId: userCredId, // Store auth user ID
+        authUserId: userCredId, // Store auth user ID
       );
 
       await _client.from('user_info').insert(info.toMap());
@@ -54,7 +54,6 @@ class AuthService {
       await _client.from('user_credentials').insert({
         'user_cred_id': userCredId,
         'user_email': userEmail,
-        'user_password': password, // optional: omit if using Supabase Auth only
         'user_info_id': userInfoId,
       });
     }

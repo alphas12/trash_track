@@ -31,7 +31,7 @@ class AdminDashboardScreen extends ConsumerWidget {
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: AdminNavBar(currentIndex: 0),
+      bottomNavigationBar: const AdminNavBar(currentIndex: 0),
       body: SafeArea(
         child: Stack(
           children: [
@@ -115,15 +115,26 @@ class AdminDashboardScreen extends ConsumerWidget {
                         asyncAppointments.when(
                           data: (appointments) {
                             if (appointments.isEmpty) {
-                              return const Center(child: Text('No pending appointments.'));
+                              return const Padding(
+                                padding: EdgeInsets.only(top: 24.0),
+                                child: Center(
+                                  child: Text(
+                                    'No pending appointments today.',
+                                    style: TextStyle(fontSize: 16, color: Colors.black54),
+                                  ),
+                                ),
+                              );
                             }
+
                             return ListView.builder(
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
                               itemCount: appointments.length,
                               itemBuilder: (context, index) {
                                 final appointment = appointments[index];
-                                final formattedDate = DateFormat('MMMM d, h:mm a').format(appointment.appointmentDate);
+                                final formattedDate = DateFormat('MMMM d, h:mm a').format(
+                                  appointment.appointmentDate,
+                                );
                                 return TaskCard(
                                   id: appointment.appointmentInfoId ?? '-',
                                   user: appointment.userInfoId,
@@ -133,8 +144,19 @@ class AdminDashboardScreen extends ConsumerWidget {
                               },
                             );
                           },
-                          loading: () => const Center(child: CircularProgressIndicator()),
-                          error: (err, stack) => Center(child: Text('Error: $err')),
+                          loading: () => const Padding(
+                            padding: EdgeInsets.only(top: 32.0),
+                            child: Center(child: CircularProgressIndicator()),
+                          ),
+                          error: (err, stack) => Padding(
+                            padding: const EdgeInsets.only(top: 32.0),
+                            child: Center(
+                              child: Text(
+                                'Error loading appointments: $err',
+                                style: const TextStyle(color: Colors.red),
+                              ),
+                            ),
+                          ),
                         ),
                         const SizedBox(height: 80),
                       ],
@@ -166,8 +188,10 @@ class TaskCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color bgColor = status.toLowerCase() == 'completed' ? Colors.green[100]! : Colors.orange[100]!;
-    final Color textColor = status.toLowerCase() == 'completed' ? Colors.green[800]! : Colors.orange[800]!;
+    final Color bgColor =
+    status.toLowerCase() == 'completed' ? Colors.green[100]! : Colors.orange[100]!;
+    final Color textColor =
+    status.toLowerCase() == 'completed' ? Colors.green[800]! : Colors.orange[800]!;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6.0),

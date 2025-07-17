@@ -66,25 +66,35 @@ class DisposalServiceCard extends StatelessWidget {
             Positioned(
               top: 8,
               right: 8,
-              child: Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.5),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    print('[UI] Favorite icon tapped for service: ${service.serviceId}');
+                    if (onFavorite != null) onFavorite!();
+                  },
                   borderRadius: BorderRadius.circular(8),
-                ),
-                child: GestureDetector(
-                  onTap: onFavorite,
-                  child: Image.asset(
-                    isFavorite
-                        ? 'assets/icons/collections_active.png'
-                        : 'assets/icons/collections.png',
-                    width: 20,
-                    height: 20,
-                    color: isFavorite ? const Color(0xFF4A5F44) : Colors.white,
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.5),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Image.asset(
+                      isFavorite
+                          ? 'assets/icons/collections_active.png'
+                          : 'assets/icons/collections.png',
+                      width: 20,
+                      height: 20,
+                      color: isFavorite ? const Color(0xFF4A5F44) : Colors.white,
+                    ),
                   ),
                 ),
               ),
             ),
+
+
+
             // Content
             Positioned(
               bottom: 12,

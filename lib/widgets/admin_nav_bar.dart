@@ -34,9 +34,7 @@ class AdminNavBar extends StatelessWidget {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => AdminShopScreen(
-              serviceId: '14f9db6e-5c7e-4a49-8142-0ba524f8924c', // Pass the serviceId directly
-            ),
+            builder: (_) => AdminShopScreen(),
           ),
         );
         break;

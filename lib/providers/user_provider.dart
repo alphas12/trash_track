@@ -22,7 +22,7 @@ final userProvider = FutureProvider<UserInfoModel?>((ref) async {
       location: response['user_location'],
       phoneNum: response['user_phone_num'],
       profileImg: response['user_profile_img'],
-      authId: response['auth_user_id'],
+      authUserId: response['auth_user_id'],
     );
   }
   return null;

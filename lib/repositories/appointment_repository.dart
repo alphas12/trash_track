@@ -306,7 +306,7 @@ class AppointmentRepository {
           )
         ''')
           .eq('user_info_id', userInfoId)
-          .order('appointment_create_date', ascending: false);
+          .order('appointment_date', ascending: true);
 
       dev.log(
         'Fetched ${response.length} appointments',
@@ -336,7 +336,7 @@ class AppointmentRepository {
       await _client
           .from('appointment_info')
           .update({
-            'appointment_status': status.toString().split('.').last,
+            'appointment_status': status.toSupabaseString(),
             if (status == AppointmentStatus.confirmed)
               'appointment_confirm_date': DateTime.now().toIso8601String(),
             if (status == AppointmentStatus.cancelled)
@@ -367,24 +367,42 @@ class AppointmentRepository {
           .from('appointment_info')
           .select('''
             *,
-            user_info (*),
-            service (*),
-            avail_sched (*),
+            disposal_service (
+              service_id,
+              service_name
+            ),
             appointment_trash (
-              *,
+              weight_kg,
               service_materials (
-                *,
-                material_points (*)
+                service_materials_id,
+                disposal_service_id,
+                material_points_id,
+                material_points (
+                  material_type,
+                  points_per_kg
+                )
               )
             )
           ''')
           .eq('appointment_info_id', appointmentId)
           .single();
 
-      dev.log(
-        'Fetched appointment details successfully',
-        name: 'AppointmentRepository',
-      );
+      dev.log('Fetched response: $response', name: 'AppointmentRepository');
+
+      if (response['disposal_service'] == null) {
+        dev.log(
+          'Warning: No disposal service found for appointment',
+          name: 'AppointmentRepository',
+        );
+      }
+
+      if ((response['appointment_trash'] as List).isEmpty) {
+        dev.log(
+          'Warning: No trash items found for appointment',
+          name: 'AppointmentRepository',
+        );
+      }
+
       return response;
     } catch (e) {
       dev.log(
