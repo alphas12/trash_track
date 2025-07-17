@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../screens/dashboard_screen.dart';
 import '../../screens/feedback_screen.dart';
 
 class SuccessfulScanDialog extends StatelessWidget {
@@ -59,7 +60,14 @@ class SuccessfulScanDialog extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (_) => DashboardScreen()),
+                    (route) => false,
+              );
+            },
             child: const Text(
             'Close',
             style: TextStyle(

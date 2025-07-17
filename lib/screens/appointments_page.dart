@@ -5,11 +5,25 @@ import '../models/appointment_model.dart';
 import '../widgets/custom_bottom_nav_bar.dart';
 import '../providers/appointment_provider.dart';
 import '../widgets/appointment/appointment_card.dart';
-class AppointmentsPage extends ConsumerWidget {
+
+
+class AppointmentsPage extends ConsumerStatefulWidget {
   const AppointmentsPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AppointmentsPage> createState() => _AppointmentsPageState();
+}
+
+
+class _AppointmentsPageState extends ConsumerState<AppointmentsPage> {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    ref.refresh(userAppointmentsProvider); // Always refresh on return
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final appointmentsAsync = ref.watch(userAppointmentsProvider);
 
     return Scaffold(

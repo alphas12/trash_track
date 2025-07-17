@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dashboard_screen.dart';
 
 class FeedbackScreen extends StatefulWidget {
   final String appointmentId;
@@ -142,6 +143,14 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                       // Pop until we reach the dashboard (pop all screens in between)
                       Navigator.of(context).popUntil((route) => route.isFirst);
                     });
+
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const DashboardScreen(),
+                      ),
+                    );
+
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF4A5F44),
