@@ -34,54 +34,69 @@ class _AdminQRScanScreenState extends ConsumerState<AdminQRScanScreen> {
 
   /* ─────────────── CORE LOGIC ─────────────── */
   Future<void> _handleScan(String qr) async {
-    if (_isProcessing) return;
-    _isProcessing = true;
-    _controller.stop();
+  if (_isProcessing) return;
+  _isProcessing = true;
+  _controller.stop();
 
-    final supabase = Supabase.instance.client;
+  final supabase = Supabase.instance.client;
 
-    try {
-      // OPTIONAL: restrict by service_id
-      final service = await ref.read(adminServiceProvider.future);
-      final serviceId = service.serviceId;
+  try {
+  
+    final parts = qr.split('|');
+    final idPart = parts.firstWhere((part) => part.startsWith('ID:'),
+        orElse: () => '');
+    final appointmentId = idPart.replaceFirst('ID:', '').trim();
 
-      final List rows = await supabase
-          .from('appointment_info')
-          .select()
-          .eq('appointment_qr_code', qr)
-          .eq('service_id', serviceId) // <- uncomment if needed
-          .limit(1);
-
-      if (rows.isEmpty) {
-        _showSnack('No matching appointment found', Colors.red);
-        return;
-      }
-
-      final row = rows.first;
-
-      if (row['appointment_status'] == 'Confirmed' ||
-          row['appointment_status'] == 'Completed') {
-        _showSnack('Appointment is already ${row['appointment_status']}.', Colors.orange);
-        return;
-      }
-
-      await supabase
-          .from('appointment_info')
-          .update({'appointment_status': 'Confirmed'})
-          .eq('appointment_info_id', row['appointment_info_id']);
-
-      _showSnack('Appointment confirmed ✔️', Colors.green);
-
-      // Optionally pop back after a short delay
-      await Future.delayed(const Duration(seconds: 1));
-      if (mounted) Navigator.pop(context);
-    } catch (e) {
-      _showSnack('Error confirming appointment: $e', Colors.red);
-    } finally {
-      _isProcessing = false;
-      if (mounted) _controller.start();
+    if (appointmentId.isEmpty) {
+      _showSnack('Invalid QR Code format.', Colors.red);
+      return;
     }
+
+    final service = await ref.read(adminServiceProvider.future);
+    final serviceId = service.serviceId;
+
+    final rows = await supabase
+        .from('appointment_info')
+        .select()
+        .eq('appointment_info_id', appointmentId)
+        .eq('service_id', serviceId)
+        .limit(1);
+
+    if (rows.isEmpty) {
+      _showSnack('No matching appointment found', Colors.red);
+      return;
+    }
+
+    final row = rows.first;
+
+    if (row['appointment_status'] == 'Completed') {
+      _showSnack(
+        'Appointment is already ${row['appointment_status']}.',
+        Colors.orange,
+      );
+      return;
+    }
+
+    await supabase
+        .from('appointment_info')
+        .update({
+      'appointment_status': 'Completed',
+      'appointment_confirm_date': DateTime.now().toIso8601String(),
+    })
+        .eq('appointment_info_id', row['appointment_info_id']);
+
+    _showSnack('Appointment confirmed ✔️', Colors.green);
+
+    await Future.delayed(const Duration(seconds: 1));
+    if (mounted) Navigator.pop(context);
+  } catch (e) {
+    _showSnack('Error confirming appointment: $e', Colors.red);
+  } finally {
+    _isProcessing = false;
+    if (mounted) _controller.start();
   }
+}
+
 
   void _showSnack(String msg, Color bg) {
     if (!mounted) return;
