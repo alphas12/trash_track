@@ -42,7 +42,7 @@ class MyApp extends StatelessWidget {
         '/signup': (context) => const SignUpPage(),
         '/login': (context) => const LoginPage(),
         '/dashboard': (context) => const DashboardScreen(),
-        // '/bookmark': (context) => const CollectionsPage(),
+        '/bookmark': (context) => const CollectionsPage(),
         // '/profile': (context) => const ProfileScreen(),
         '/admin': (context) => const AdminDashboardScreen(),
         '/settings': (context) => const SettingsScreen(),

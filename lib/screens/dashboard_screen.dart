@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:trash_track/screens/disposal_shop_details_screen.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import 'disposal_shop_details_screen.dart';
 import '../providers/disposal_service_provider.dart';
+import '../providers/favorite_services_provider.dart';
 import '../widgets/disposal_service_card.dart';
 import '../widgets/custom_bottom_nav_bar.dart';
 import 'search_screen.dart';
@@ -19,14 +22,32 @@ class DashboardScreen extends ConsumerStatefulWidget {
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
+    final user = Supabase.instance.client.auth.currentUser;
+
+    if (user == null) {
+      return const Scaffold(
+        body: Center(
+          child: Text(
+            'You must be logged in to view the dashboard.',
+            style: TextStyle(
+              fontSize: 16,
+              fontFamily: 'Mallanna',
+            ),
+          ),
+        ),
+      );
+    }
+
+    final userId = user.id;
     final recommendedServices = ref.watch(dashboardRecommendedServicesProvider);
     final topServices = ref.watch(dashboardTopServicesProvider);
+    final favoriteIds = ref.watch(favoriteServicesProvider(userId));
+    final favoritesNotifier = ref.read(favoriteServicesProvider(userId).notifier);
 
     return Scaffold(
       body: SafeArea(
         child: Stack(
           children: [
-            // Green background container
             Positioned(
               top: 0,
               left: 0,
@@ -42,10 +63,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 ),
               ),
             ),
-            // Main content
             Column(
               children: [
-                // Sticky header section
                 Container(
                   color: Colors.transparent,
                   child: Column(
@@ -56,7 +75,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           padding: const EdgeInsets.all(16.0),
                           child: Stack(
                             children: [
-                              // World-cuate image in background
                               Positioned(
                                 right: 20,
                                 top: 0,
@@ -68,20 +86,16 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                   ),
                                 ),
                               ),
-                              // Content on top
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  // Title and Shop button
                                   Padding(
                                     padding: const EdgeInsets.only(right: 8.0),
                                     child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
                                         Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                          crossAxisAlignment: CrossAxisAlignment.start,
                                           children: const [
                                             Text(
                                               'Save The Planet',
@@ -125,37 +139,28 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                     ),
                                   ),
                                   const SizedBox(height: 20),
-                                  // Search Bar and QR Scanner
                                   Row(
                                     children: [
-                                      // Search Bar
                                       Expanded(
                                         child: GestureDetector(
                                           onTap: () {
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(
-                                                builder: (context) =>
-                                                    const SearchScreen(),
+                                                builder: (context) => const SearchScreen(),
                                               ),
                                             );
                                           },
                                           child: Container(
                                             height: 52,
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 16,
-                                            ),
+                                            padding: const EdgeInsets.symmetric(horizontal: 16),
                                             decoration: BoxDecoration(
                                               color: const Color(0xFFD9D9D9),
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
+                                              borderRadius: BorderRadius.circular(12),
                                             ),
                                             child: Row(
                                               children: const [
-                                                Icon(
-                                                  Icons.search,
-                                                  color: Color(0xFF4A5F44),
-                                                ),
+                                                Icon(Icons.search, color: Color(0xFF4A5F44)),
                                                 SizedBox(width: 8),
                                                 Expanded(
                                                   child: Text(
@@ -173,16 +178,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                         ),
                                       ),
                                       const SizedBox(width: 8),
-                                      // QR Code Scanner Button
                                       Container(
                                         width: 52,
                                         height: 52,
                                         padding: const EdgeInsets.all(13),
                                         decoration: BoxDecoration(
                                           color: const Color(0xFFD9D9D9),
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
+                                          borderRadius: BorderRadius.circular(12),
                                         ),
                                         child: Image.asset(
                                           'assets/images/qr_code.png',
@@ -200,48 +202,25 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     ],
                   ),
                 ),
-                // Scrollable content
                 Expanded(
                   child: SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        children: [
+                          // Recommended
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              // Recommended Section
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const Text(
-                                    'Recommended',
-                                    style: TextStyle(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                      fontFamily: 'Mallanna',
-                                    ),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              const RecommendedScreen(),
-                                        ),
-                                      );
-                                    },
-                                    child: const Text(
-                                      'See All',
-                                      style: TextStyle(
-                                        color: Color(0xFF4A5F44),
-                                        fontFamily: 'Mallanna',
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                              const Text(
+                                'Recommended',
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'Mallanna',
+                                ),
                               ),
+<<<<<<< Updated upstream
                               const SizedBox(height: 16),
                               recommendedServices.when(
                                 data: (services) {
@@ -280,115 +259,166 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                           },
                                         );
                                       }).toList(),
+=======
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const RecommendedScreen(),
+>>>>>>> Stashed changes
                                     ),
                                   );
                                 },
-                                loading: () => const Center(
-                                  child: CircularProgressIndicator(
+                                child: const Text(
+                                  'See All',
+                                  style: TextStyle(
                                     color: Color(0xFF4A5F44),
-                                  ),
-                                ),
-                                error: (error, stack) => Center(
-                                  child: Text(
-                                    'Error: $error',
-                                    style: const TextStyle(
-                                      color: Colors.red,
-                                      fontFamily: 'Mallanna',
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 32),
-                              // Top Services Section
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const Text(
-                                    'Top Services',
-                                    style: TextStyle(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                      fontFamily: 'Mallanna',
-                                    ),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              const TopServicesScreen(),
-                                        ),
-                                      );
-                                    },
-                                    child: const Text(
-                                      'See All',
-                                      style: TextStyle(
-                                        color: Color(0xFF4A5F44),
-                                        fontFamily: 'Mallanna',
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-                              topServices.when(
-                                data: (services) {
-                                  if (services.isEmpty) {
-                                    return const Center(
-                                      child: Text(
-                                        'No top services available',
-                                        style: TextStyle(
-                                          fontFamily: 'Mallanna',
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                  return Center(
-                                    child: Wrap(
-                                      alignment: WrapAlignment.center,
-                                      spacing: 16,
-                                      runSpacing: 16,
-                                      children: services.map((service) {
-                                        return DisposalServiceCard(
-                                          service: service,
-                                          onTap: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    DisposalShopDetailsScreen(
-                                                  service: service,
-                                                ),
-                                              ),
-                                            );
-                                          },
-                                        );
-                                      }).toList(),
-                                    ),
-                                  );
-                                },
-                                loading: () => const Center(
-                                  child: CircularProgressIndicator(
-                                    color: Color(0xFF4A5F44),
-                                  ),
-                                ),
-                                error: (error, stack) => Center(
-                                  child: Text(
-                                    'Error: $error',
-                                    style: const TextStyle(
-                                      color: Colors.red,
-                                      fontFamily: 'Mallanna',
-                                    ),
+                                    fontFamily: 'Mallanna',
                                   ),
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 16),
+                          recommendedServices.when(
+                            data: (services) {
+                              if (services.isEmpty) {
+                                return const Center(
+                                  child: Text(
+                                    'No recommended services available',
+                                    style: TextStyle(
+                                      fontFamily: 'Mallanna',
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                );
+                              }
+                              return Center(
+                                child: Wrap(
+                                  alignment: WrapAlignment.center,
+                                  spacing: 16,
+                                  runSpacing: 16,
+                                  children: services.map((service) {
+                                    return DisposalServiceCard(
+                                      service: service,
+                                      isFavorite: favoriteIds.contains(service.serviceId),
+                                      onFavorite: () =>
+                                          favoritesNotifier.toggleFavorite(service.serviceId),
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                DisposalShopDetailsScreen(service: service),
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  }).toList(),
+                                ),
+                              );
+                            },
+                            loading: () => const Center(
+                              child: CircularProgressIndicator(color: Color(0xFF4A5F44)),
+                            ),
+                            error: (error, stack) => Center(
+                              child: Text(
+                                'Error: $error',
+                                style: const TextStyle(
+                                  color: Colors.red,
+                                  fontFamily: 'Mallanna',
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 32),
+
+                          // Top Services
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'Top Services',
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'Mallanna',
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const TopServicesScreen(),
+                                    ),
+                                  );
+                                },
+                                child: const Text(
+                                  'See All',
+                                  style: TextStyle(
+                                    color: Color(0xFF4A5F44),
+                                    fontFamily: 'Mallanna',
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          topServices.when(
+                            data: (services) {
+                              if (services.isEmpty) {
+                                return const Center(
+                                  child: Text(
+                                    'No top services available',
+                                    style: TextStyle(
+                                      fontFamily: 'Mallanna',
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                );
+                              }
+                              return Center(
+                                child: Wrap(
+                                  alignment: WrapAlignment.center,
+                                  spacing: 16,
+                                  runSpacing: 16,
+                                  children: services.map((service) {
+                                    return DisposalServiceCard(
+                                      service: service,
+                                      isFavorite: favoriteIds.contains(service.serviceId),
+                                      onFavorite: () =>
+                                          favoritesNotifier.toggleFavorite(service.serviceId),
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                DisposalShopDetailsScreen(service: service),
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  }).toList(),
+                                ),
+                              );
+                            },
+                            loading: () => const Center(
+                              child: CircularProgressIndicator(color: Color(0xFF4A5F44)),
+                            ),
+                            error: (error, stack) => Center(
+                              child: Text(
+                                'Error: $error',
+                                style: const TextStyle(
+                                  color: Colors.red,
+                                  fontFamily: 'Mallanna',
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

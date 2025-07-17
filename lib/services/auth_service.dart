@@ -45,7 +45,7 @@ class AuthService {
         fname: fname,
         lname: lname,
         location: location,
-        authId: userCredId, // Store auth user ID
+        authUserId: userCredId, // Store auth user ID
       );
 
       await _client.from('user_info').insert(info.toMap());

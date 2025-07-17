@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 import '../models/disposal_service.dart';
 import '../providers/disposal_service_provider.dart';
+import '../providers/favorite_services_provider.dart';
 import '../widgets/disposal_service_card.dart';
 import '../widgets/filter_bar.dart';
 import 'disposal_shop_details_screen.dart';
@@ -21,9 +24,6 @@ class _TopServicesScreenState extends ConsumerState<TopServicesScreen> {
 
     return services.where((service) {
       final isOpen = ref.watch(isServiceOpenProvider(service));
-      print(
-        'Service ${service.serviceName} is ${isOpen ? 'open' : 'closed'}',
-      ); // Debug print
       return _filterStatus == 'open' ? isOpen : !isOpen;
     }).toList();
   }
@@ -101,7 +101,23 @@ class _TopServicesScreenState extends ConsumerState<TopServicesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final user = Supabase.instance.client.auth.currentUser;
+
+    if (user == null) {
+      return const Scaffold(
+        body: Center(
+          child: Text(
+            'Please log in to view your top services.',
+            style: TextStyle(fontFamily: 'Mallanna'),
+          ),
+        ),
+      );
+    }
+
+    final userId = user.id;
     final topServices = ref.watch(topServicesProvider);
+    final favorites = ref.watch(favoriteServicesProvider(userId));
+    final favoritesNotifier = ref.read(favoriteServicesProvider(userId).notifier);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -177,6 +193,7 @@ class _TopServicesScreenState extends ConsumerState<TopServicesScreen> {
                         child: DisposalServiceCard(
                           service: service,
                           isCompact: false,
+                          isFavorite: favorites.contains(service.serviceId),
                           onTap: () {
                             Navigator.push(
                               context,
@@ -185,6 +202,9 @@ class _TopServicesScreenState extends ConsumerState<TopServicesScreen> {
                                     DisposalShopDetailsScreen(service: service),
                               ),
                             );
+                          },
+                          onFavorite: () {
+                            favoritesNotifier.toggleFavorite(service.serviceId);
                           },
                         ),
                       );

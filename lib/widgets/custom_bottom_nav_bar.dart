@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../screens/dashboard_screen.dart';
-// import '../screens/bookmark_screen.dart';
+import '../screens/bookmark_screen.dart';
 import '../screens/settings_screen.dart';
 
 
@@ -52,12 +52,12 @@ class CustomBottomNavBar extends StatelessWidget {
                   break;
                 case 1: // Collections
                   if (currentIndex != 1) {
-                    // Navigator.pushReplacement(
-                    //   context,
-                    //   MaterialPageRoute(
-                    //     builder: (context) => const CollectionsPage(),
-                    //   ),
-                    // );
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const CollectionsPage(),
+                      ),
+                    );
                   }
                 case 4: // Settings 
                   if (currentIndex != 4) {

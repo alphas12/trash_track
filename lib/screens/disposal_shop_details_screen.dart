@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 import '../models/disposal_service.dart';
 import '../providers/disposal_service_provider.dart';
+import '../providers/favorite_services_provider.dart';
 import 'schedule_appointment_page.dart';
 
 class DisposalShopDetailsScreen extends ConsumerStatefulWidget {
@@ -17,7 +20,6 @@ class DisposalShopDetailsScreen extends ConsumerStatefulWidget {
 
 class _DisposalShopDetailsScreenState
     extends ConsumerState<DisposalShopDetailsScreen> {
-  bool isFavorited = false;
 
   String _formatOperatingHours() {
     final now = DateTime.now();
@@ -30,19 +32,37 @@ class _DisposalShopDetailsScreenState
     if (todayHours == null) return 'Closed Today';
     if (!todayHours.isOpen) return 'Closed Today';
 
-    // Parse the 24-hour times
     final openFormat = DateFormat('HH:mm');
     final displayFormat = DateFormat('h:mm a');
 
     final openTime = openFormat.parse(todayHours.openTime);
     final closeTime = openFormat.parse(todayHours.closeTime);
 
-    // Format into 12-hour format with AM/PM
     return '${todayHours.dayName}, ${displayFormat.format(openTime)} - ${displayFormat.format(closeTime)}';
   }
 
   @override
   Widget build(BuildContext context) {
+    final user = Supabase.instance.client.auth.currentUser;
+
+    if (user == null) {
+      return const Scaffold(
+        body: Center(
+          child: Text(
+            'You must be logged in to view this page.',
+            style: TextStyle(
+              fontSize: 16,
+              fontFamily: 'Mallanna',
+            ),
+          ),
+        ),
+      );
+    }
+
+    final userId = user.id;
+    final favoriteServices = ref.watch(favoriteServicesProvider(userId));
+    final isFavorited = favoriteServices.contains(widget.service.serviceId);
+
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -128,9 +148,9 @@ class _DisposalShopDetailsScreenState
                   ),
                   GestureDetector(
                     onTap: () {
-                      setState(() {
-                        isFavorited = !isFavorited;
-                      });
+                      ref
+                          .read(favoriteServicesProvider(userId).notifier)
+                          .toggleFavorite(widget.service.serviceId);
                     },
                     child: Image.asset(
                       isFavorited
@@ -143,7 +163,8 @@ class _DisposalShopDetailsScreenState
                 ],
               ),
               const SizedBox(height: 4),
-              // Operating Hours Status
+
+              // Operating Hours
               Row(
                 children: [
                   Icon(
@@ -166,7 +187,6 @@ class _DisposalShopDetailsScreenState
                   ),
                 ],
               ),
-
               const SizedBox(height: 8),
 
               // Location
@@ -182,17 +202,12 @@ class _DisposalShopDetailsScreenState
                   ),
                 ],
               ),
-
               const SizedBox(height: 8),
 
-              // Service Availability
+              // Availability
               Row(
                 children: [
-                  Icon(
-                    Icons.local_shipping,
-                    size: 16,
-                    color: const Color(0xFF6A8126),
-                  ),
+                  const Icon(Icons.local_shipping, size: 16, color: Color(0xFF6A8126)),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
@@ -205,7 +220,6 @@ class _DisposalShopDetailsScreenState
                   ),
                 ],
               ),
-
               const SizedBox(height: 8),
 
               // Materials Accepted
@@ -225,29 +239,29 @@ class _DisposalShopDetailsScreenState
                     .map((sm) => sm.materialPoints.materialType)
                     .toSet()
                     .map((materialType) {
-                      return Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF4A5F44).withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: const Color(0xFF4A5F44),
-                            width: 1,
-                          ),
-                        ),
-                        child: Text(
-                          materialType,
-                          style: const TextStyle(
-                            color: Color(0xFF4A5F44),
-                            fontSize: 14,
-                            fontFamily: 'Mallanna',
-                          ),
-                        ),
-                      );
-                    })
+                  return Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF4A5F44).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: const Color(0xFF4A5F44),
+                        width: 1,
+                      ),
+                    ),
+                    child: Text(
+                      materialType,
+                      style: const TextStyle(
+                        color: Color(0xFF4A5F44),
+                        fontSize: 14,
+                        fontFamily: 'Mallanna',
+                      ),
+                    ),
+                  );
+                })
                     .toList(),
               ),
 
@@ -269,7 +283,7 @@ class _DisposalShopDetailsScreenState
 
               const SizedBox(height: 24),
 
-              // Shop Now Button (Full Width)
+              // Schedule Button
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(

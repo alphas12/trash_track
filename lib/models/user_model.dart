@@ -3,7 +3,7 @@ class UserInfoModel {
   final String fname;
   final String lname;
   final String location;
-  final String authId; 
+  final String authUserId;
   final String? phoneNum;
   final String? profileImg;
 
@@ -14,7 +14,7 @@ class UserInfoModel {
     required this.location,
     this.phoneNum,
     this.profileImg,
-    required this.authId,
+    required this.authUserId,
 
   });
 
@@ -26,8 +26,13 @@ class UserInfoModel {
       'user_location': location,
       'user_phone_num': phoneNum,
       'user_profile_img': profileImg,
+<<<<<<< Updated upstream
       'auth_user_id': authId
 
+=======
+      'auth_user_id': authUserId
+      
+>>>>>>> Stashed changes
     };
   }
 }

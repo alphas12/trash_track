@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 import '../providers/disposal_service_provider.dart';
+import '../providers/favorite_services_provider.dart';
 import '../widgets/disposal_service_card.dart';
 import '../widgets/material_filter_bar.dart';
 import 'disposal_shop_details_screen.dart';
@@ -37,6 +40,21 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final user = Supabase.instance.client.auth.currentUser;
+
+    if (user == null) {
+      return const Scaffold(
+        body: Center(
+          child: Text(
+            'Please log in to search and bookmark services.',
+            style: TextStyle(fontFamily: 'Mallanna'),
+          ),
+        ),
+      );
+    }
+
+    final userId = user.id;
+
     final searchResults = ref.watch(
       searchServicesProvider(
         SearchParams(
@@ -46,6 +64,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         ),
       ),
     );
+
+    final favorites = ref.watch(favoriteServicesProvider(userId));
+    final favoritesNotifier = ref.read(favoriteServicesProvider(userId).notifier);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -180,6 +201,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                         child: DisposalServiceCard(
                           service: service,
                           isCompact: false,
+                          isFavorite: favorites.contains(service.serviceId),
                           onTap: () {
                             Navigator.push(
                               context,
@@ -188,6 +210,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                                     DisposalShopDetailsScreen(service: service),
                               ),
                             );
+                          },
+                          onFavorite: () {
+                            favoritesNotifier.toggleFavorite(service.serviceId);
                           },
                         ),
                       );
