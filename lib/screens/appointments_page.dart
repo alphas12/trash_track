@@ -72,7 +72,7 @@ class AppointmentsPage extends ConsumerWidget {
         ),
       ),
       bottomNavigationBar: CustomBottomNavBar(
-        currentIndex: 1,
+        currentIndex: 2,
         onTap: (int newIndex) {
           // Already handled in CustomBottomNavBar
         },

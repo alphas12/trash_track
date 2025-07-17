@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 class FeedbackScreen extends StatefulWidget {
-  const FeedbackScreen({super.key});
+  final String appointmentId;
+
+  const FeedbackScreen({super.key, required this.appointmentId});
 
   @override
   State<FeedbackScreen> createState() => _FeedbackScreenState();
@@ -59,7 +61,11 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                             ),
                           ],
                         ),
-                        child: const Icon(Icons.arrow_back, color: Colors.black, size: 24),
+                        child: const Icon(
+                          Icons.arrow_back,
+                          color: Colors.black,
+                          size: 24,
+                        ),
                       ),
                     ),
                   ),
@@ -98,10 +104,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
               // Optional comments section
               const Text(
                 'Suggestions or Recommendations? (Optional)',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontFamily: 'Mallanna',
-                ),
+                style: TextStyle(fontSize: 16, fontFamily: 'Mallanna'),
               ),
               const SizedBox(height: 8),
               TextField(
@@ -125,9 +128,20 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Placeholder logic
-                    print('Rating: $_rating');
-                    print('Comment: ${_commentController.text}');
+                    // Show success snackbar
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Thank you for your feedback!'),
+                        backgroundColor: Color(0xFF4B5320),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+
+                    // Wait for snackbar to show before navigating
+                    Future.delayed(const Duration(seconds: 2), () {
+                      // Pop until we reach the dashboard (pop all screens in between)
+                      Navigator.of(context).popUntil((route) => route.isFirst);
+                    });
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF4A5F44),

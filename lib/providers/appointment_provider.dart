@@ -50,3 +50,6 @@ final supabaseClientProvider = Provider<SupabaseClient>((ref) {
   return Supabase.instance.client;
 });
 
+final loginViewModelProvider = Provider((ref) {
+  return ref.watch(supabaseClientProvider);
+});

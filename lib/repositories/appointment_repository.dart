@@ -151,15 +151,7 @@ class AppointmentRepository {
 
       // Insert waste materials
       if (wasteMaterials.isNotEmpty) {
-        final wasteData = wasteMaterials
-            .map(
-              (w) => {
-                'appointment_info_id': newAppointmentId,
-                'service_materials_id': w.serviceMaterialId,
-                'weight_kg': w.weightKg,
-              },
-            )
-            .toList();
+
 
         for (final w in wasteMaterials) {
           await _client.from('appointment_trash').insert({
@@ -328,9 +320,7 @@ class AppointmentRepository {
   }
 
   /// Update appointment status
-  Future<void> updateAppointmentStatus(
-    String appointmentId,
-    AppointmentStatus status,
+  Future<void> updateAppointmentStatus( String appointmentId, AppointmentStatus status, 
   ) async {
     try {
       await _client
@@ -459,4 +449,20 @@ class AppointmentRepository {
         return 'Pending'; // Default to pending if not specified
     }
   }
+
+  Future<String?> fetchAppointmentStatus(String appointmentId) async {
+    try {
+      final result = await _client
+          .from('appointment_info')
+          .select('status')
+          .eq('appointment_info_id', appointmentId)
+          .maybeSingle();
+
+      return result?['status'];
+    } catch (e) {
+      print('Error fetching status: $e');
+      return null;
+    }
+  }
+
 }
