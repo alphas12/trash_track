@@ -1,181 +1,293 @@
 import 'package:flutter/material.dart';
-import 'package:trash_track/screens/appointments_page.dart';
-import 'package:trash_track/screens/qr_confirmation_page.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/appointment_model.dart';
+import '../providers/appointment_provider.dart';
+import '../widgets/appointment/points_weight_summary.dart';
+import '../widgets/appointment/location_details_section.dart';
+import '../widgets/appointment/material_summary_section.dart';
+import '../services/driver_info_section.dart';
+import '../widgets/dialogs/cancel_confirmation_dialog.dart';
+import '../widgets/appointment/appointment_header_section.dart';
+import 'qr_code_screen.dart';
 
-import '../widgets/custom_bottom_nav_bar.dart';
-
-class AppointmentDetailsPage extends StatelessWidget {
+class AppointmentDetailsPage extends ConsumerWidget {
   final Map<String, String?> appointment;
 
   const AppointmentDetailsPage({super.key, required this.appointment});
 
-  @override
-  Widget build(BuildContext context) {
-    final isPickup = appointment["type"] == "Pick Up";
-    final id = appointment["id"] ?? "N/A";
+  Future<void> _handleCancel(BuildContext context, WidgetRef ref) async {
+    final shouldCancel = await showDialog<bool>(
+      context: context,
+      builder: (context) => CancelConfirmationDialog(
+        onConfirm: () async {
+          try {
+            final appointmentRepo = ref.read(appointmentRepositoryProvider);
+            final appointmentId = appointment["appointment_info_id"];
 
-    return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(context),
-              const SizedBox(height: 20),
-              Text(
-                isPickup
-                    ? "Waste Pick Up to ReClaim"
-                    : "Waste Drop-off at Junkify",
-                style: const TextStyle(
-                    fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF4B5320)),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                isPickup
-                    ? "on Wednesday at 12:00 P.M."
-                    : "Today at 09:00 A.M.",
-              ),
-              const SizedBox(height: 10),
-              _buildStatusChip(isPickup ? "N/A" : "Pending"),
-              const SizedBox(height: 10),
-              _buildInfoRow("Waste Details:", "12 pcs. of plastic bottles"),
-              _buildInfoRow("Additional Note:",
-                  isPickup ? "Placed on the front gate..." : "None"),
-              if (isPickup) ...[
-                _buildInfoRow("Pick Up Address:",
-                    "123 Street, Barangay ABC, Cebu City"),
-                _buildInfoRow("Mobile Number:", "09123456789"),
-                const SizedBox(height: 8),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text("Driver Name: Trash Track"),
-                      Text("Driver Number: 0987654321"),
-                    ],
-                  ),
+            if (appointmentId == null) {
+              throw Exception("Appointment ID is missing");
+            }
+
+            await appointmentRepo.updateAppointmentStatus(
+              appointmentId,
+              AppointmentStatus.cancelled,
+            );
+
+            ref.invalidate(userAppointmentsProvider);
+
+            if (context.mounted) {
+
+              await Future.delayed(const Duration(milliseconds: 300));
+
+              Navigator.of(context).pop(); // Close dialog
+              Navigator.of(context).pop(); // Close detail page
+            }
+          } catch (e) {
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Error cancelling appointment: $e'),
+                  backgroundColor: Colors.red,
                 ),
-              ],
-              const Spacer(),
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => QRConfirmationPage(appointmentId: "1"),
-                          ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF4B5320),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text(
-                        "Confirm",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12), // spacing between buttons
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const AppointmentsPage(),
-                          ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red[400],
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text(
-                        "Cancel",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 30),
-
-            ],
-          ),
-        ),
-      ),
-      bottomNavigationBar: CustomBottomNavBar(
-        currentIndex: 1, // or whatever index you assign to WasteService
-        onTap: (int newIndex) {
-          // Already handled by the onTap inside the CustomBottomNavBar
+              );
+            }
+          }
         },
       ),
     );
+
+    // fallback pop if dialog returned true but was dismissed outside
+    if (shouldCancel == true && context.mounted) {
+      Navigator.of(context).pop();
+    }
   }
 
-  Widget _buildHeader(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-        IconButton(
-          icon: const Icon(Icons.edit),
-          onPressed: () {
-            // Navigate to edit form
-          },
-        ),
-      ],
-    );
+  Future<void> _handleConfirmation(BuildContext context, WidgetRef ref) async {
+    try {
+      final appointmentRepo = ref.read(appointmentRepositoryProvider);
+      final appointmentId = appointment["appointment_info_id"];
+
+      if (appointmentId == null) {
+        throw Exception("Appointment ID is missing");
+      }
+
+      await appointmentRepo.updateAppointmentStatus(
+        appointmentId,
+        AppointmentStatus.confirmed,
+      );
+
+      await appointmentRepo.finalizeAppointmentWithQr(appointmentId);
+
+      ref.invalidate(userAppointmentsProvider);
+
+      final updatedAppointment = await appointmentRepo.getAppointment(appointmentId);
+
+      if (context.mounted) {
+
+        await Future.delayed(const Duration(milliseconds: 300));
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => QrCodeScreen(appointment: updatedAppointment),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error confirming appointment: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
-  Widget _buildStatusChip(String label) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: label == "Pending" ? Colors.yellow[700] : Colors.black26,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        label,
-        style: const TextStyle(fontSize: 12, color: Colors.white),
-      ),
-    );
-  }
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isPickup = appointment["appointment_type"] == "Pick-Up";
+    final serviceType = appointment["appointment_type"] ?? "";
 
-  Widget _buildInfoRow(String label, String content) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: RichText(
-        text: TextSpan(
-          style: const TextStyle(color: Colors.black),
-          children: [
-            TextSpan(
-                text: "$label\n",
-                style:
-                const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-            TextSpan(text: content, style: const TextStyle(fontSize: 14)),
-          ],
-        ),
+    return Scaffold(
+      backgroundColor: Colors.grey[100],
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            child: Column(
+              children: [
+                const SizedBox(height: 70), // Spacer to push down below button
+                Container(
+                  margin: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
+                  ),
+                  child: Consumer(
+                    builder: (context, ref, _) {
+                      final detailsAsync = ref.watch(
+                        appointmentDetailsProvider(
+                          appointment["appointment_info_id"]!,
+                        ),
+                      );
+                      return detailsAsync.when(
+                        data: (details) {
+                          final wastes = details['appointment_trash'] as List<dynamic>;
+                          final disposalService = details['disposal_service'];
+
+                          final Map<String, Map<String, dynamic>> materialSummary = {};
+                          double totalCalculatedWeight = 0.0;
+                          double totalCalculatedPoints = 0.0;
+
+                          for (final item in wastes) {
+                            final materialType = item['service_materials']?['material_points']?['material_type'] as String?;
+                            final weight = (item['weight_kg'] as num?)?.toDouble() ?? 0.0;
+                            final pointsPerKg = item['service_materials']?['material_points']?['points_per_kg'] as num? ?? 0.0;
+                            final points = weight * pointsPerKg;
+
+                            if (materialType != null) {
+                              materialSummary.update(
+                                materialType,
+                                    (value) => {
+                                  'weight': (value['weight'] as double) + weight,
+                                  'points': (value['points'] as double) + points,
+                                },
+                                ifAbsent: () => {
+                                  'weight': weight,
+                                  'points': points,
+                                },
+                              );
+                              totalCalculatedWeight += weight;
+                              totalCalculatedPoints += points;
+                            }
+                          }
+
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              AppointmentHeaderSection(
+                                serviceName: disposalService?['service_name'] ?? "Unknown Service",
+                                serviceType: serviceType,
+                                appointmentDate: appointment["appointment_date"] ?? "N/A",
+                                status: appointment["appointment_status"] ?? "Pending",
+                              ),
+                              const SizedBox(height: 20),
+                              PointsWeightSummary(
+                                totalPoints: totalCalculatedPoints,
+                                totalWeight: totalCalculatedWeight,
+                              ),
+                              const SizedBox(height: 20),
+                              LocationDetailsSection(
+                                address: appointment["appointment_location"] ?? "N/A",
+                                isPickup: isPickup,
+                              ),
+                              const SizedBox(height: 16),
+                              MaterialSummarySection(
+                                materialSummary: materialSummary,
+                                notes: appointment["appointment_notes"] ?? "None",
+                              ),
+                              if (appointment["appointment_type"] == "Pick-Up") ...[
+                                DriverInfoSection(useMockData: true),
+                              ],
+                            ],
+                          );
+                        },
+                        loading: () => const Center(child: CircularProgressIndicator()),
+                        error: (e, _) => const Text("Error loading appointment details"),
+                      );
+                    },
+                  ),
+                ),
+                if (appointment["appointment_status"] == "Pending")
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () => _handleConfirmation(context, ref),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF4B5320),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: const Text(
+                              "Confirm",
+                              style: TextStyle(
+                                color: Color(0xFFFEFAE0),
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () => _handleCancel(context, ref),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red[400],
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: const Text(
+                              "Cancel",
+                              style: TextStyle(
+                                color: Color(0xFFFEFAE0),
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+
+          // ✅ Back Button Positioned
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 16.0, top: 8.0),
+              child: GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        spreadRadius: 2,
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.arrow_back,
+                    color: Colors.black,
+                    size: 20,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
