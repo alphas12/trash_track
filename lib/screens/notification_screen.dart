@@ -49,6 +49,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    
     return Scaffold(
       // The body is wrapped in SafeArea to avoid system intrusions (like the notch)
       body: SafeArea(
@@ -114,6 +115,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           ),
         ),
       ),
+      bottomNavigationBar: CustomBottomNavBar(
+        currentIndex: 3,
+        onTap: (index) {
+          // Handle navigation based on the index
+          // For example, you can use a switch case to navigate to different screen
+        },
+      ),
     );
   }
 }
@@ -135,10 +143,9 @@ class NotificationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Define colors based on whether the notification is new or not
-    final Color backgroundColor = isNew ? const Color(0xFFD7E5CA) : const Color(0xFFE0E0E0);
-    final Color titleColor = isNew ? const Color(0xFF4F6F52) : const Color(0xFF424242);
-    final Color messageColor = isNew ? const Color(0xFF618264) : const Color(0xFF616161);
+    final Color backgroundColor = isNew ? const Color(0xFFE3F2FD) : Colors.white;
+    final Color titleColor = isNew ? const Color(0xFF1976D2) : const Color(0xFF333333);
+    final Color messageColor = isNew ? const Color(0xFF1976D2) : const Color(0xFF555555);
 
     return Container(
       padding: const EdgeInsets.all(16.0),
