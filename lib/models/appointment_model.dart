@@ -11,7 +11,7 @@ enum AppointmentStatus {
 
   static AppointmentStatus fromString(String status) {
     return AppointmentStatus.values.firstWhere(
-      (e) => e.value.toLowerCase() == status.toLowerCase(),
+          (e) => e.value.toLowerCase() == status.toLowerCase(),
       orElse: () => AppointmentStatus.pending,
     );
   }
@@ -101,8 +101,8 @@ class Appointment {
         : null,
     wasteMaterials: map['appointment_trash'] != null
         ? (map['appointment_trash'] as List)
-              .map((w) => AppointmentWaste.fromMap(w as Map<String, dynamic>))
-              .toList()
+        .map((w) => AppointmentWaste.fromMap(w as Map<String, dynamic>))
+        .toList()
         : [],
     qrCodeData: map['appointment_qr_code'],
   );
