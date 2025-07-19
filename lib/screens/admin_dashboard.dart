@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../widgets/admin_nav_bar.dart';
 import '../widgets/appointment_card.dart';
-import '/screens/admin_qr_scan.dart';
 import '../providers/admin_appointment_provider.dart';
 import 'package:intl/intl.dart';
 

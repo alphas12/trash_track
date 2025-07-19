@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-// import '../widgets/custom_bottom_nav_bar.dart';
+import '../widgets/custom_bottom_nav_bar.dart';
 
 // A model class to represent a single notification
 class NotificationItem {
@@ -16,7 +16,6 @@ class NotificationItem {
   });
 }
 
-// The main screen that displays the list of notifications
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
 
@@ -25,7 +24,6 @@ class NotificationsScreen extends StatefulWidget {
 }
 
 class _NotificationsScreenState extends State<NotificationsScreen> {
-  // Sample list of notifications. In a real app, this would come from an API or database.
   final List<NotificationItem> _notifications = [
     NotificationItem(
       title: 'Reminder!',

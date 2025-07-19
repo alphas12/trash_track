@@ -4,13 +4,7 @@ import '../models/appointment_model.dart';
 class AdminAppointmentRepository {
   final SupabaseClient _supabase = Supabase.instance.client;
 
-  // Map enum → exact text stored in the DB
-  static const _statusMap = {
-    AppointmentStatus.pending: 'Pending',
-    AppointmentStatus.confirmed: 'Confirmed',
-    AppointmentStatus.completed: 'Completed',
-    AppointmentStatus.cancelled: 'Cancelled',
-  };
+
 
   // Get today's appointments for a service
   Future<List<Appointment>> getTodayAppointments(String serviceId) async {
