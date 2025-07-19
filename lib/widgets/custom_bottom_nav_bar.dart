@@ -3,6 +3,7 @@ import '../screens/dashboard_screen.dart';
 import '../screens/settings_screen.dart';
 import '../screens/appointments_page.dart';
 import '../screens/bookmark_screen.dart';
+import '../screens/notification_screen.dart';
 
 class CustomBottomNavBar extends StatelessWidget {
   final int currentIndex;
@@ -70,7 +71,16 @@ class CustomBottomNavBar extends StatelessWidget {
                     );
                   }
                   break;
-
+                case 3: // Notifications
+                  if (currentIndex != 3) {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const NotificationsScreen(),
+                      ),
+                    );
+                  }
+                  break;
                 case 4: // Collections
                   if (currentIndex != 4) {
                     Navigator.pushReplacement(

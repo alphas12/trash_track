@@ -114,6 +114,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           ),
         ),
       ),
+      bottomNavigationBar: CustomBottomNavBar(
+        currentIndex: 3,
+        onTap: (index) {
+          // Handle navigation based on the index
+          // For example, you can use a switch case to navigate to different screen
+        },
+      ),
     );
   }
 }

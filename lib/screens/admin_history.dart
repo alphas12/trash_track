@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import '../widgets/admin_nav_bar.dart';
 import '/screens/admin_qr_scan.dart';
 import '../models/appointment_model.dart';
@@ -37,35 +38,59 @@ class _AdminHistoryScreenState extends ConsumerState<AdminHistoryScreen>
           ),
         ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Column(
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('ID: ${appointment.appointmentInfoId}',
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 4),
-              Text('Date: ${appointment.appointmentDate.toLocal().toString().substring(0, 16)}'),
-              const SizedBox(height: 4),
-              Text('Location: ${appointment.appointmentLocation}'),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'ID: ${appointment.appointmentInfoId}',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Name: ${appointment.userFullName ?? "Unknown User"}',
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Date: ${DateFormat('MMM dd, yyyy hh:mm a').format(appointment.appointmentDate.toLocal())}',
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Location: ${appointment.appointmentLocation}',
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: bgColor,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  appointment.appointmentStatus.value,
+                  style: TextStyle(
+                    color: textColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
             ],
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: bgColor,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              appointment.appointmentStatus.name,
-              style: TextStyle(
-                color: textColor,
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
-              ),
-            ),
-          )
         ],
       ),
     );
@@ -73,22 +98,20 @@ class _AdminHistoryScreenState extends ConsumerState<AdminHistoryScreen>
 
   @override
   Widget build(BuildContext context) {
-    final pendingAsync = ref.watch(adminPendingAppointmentsProvider);
-    final completedAsync = ref.watch(adminCompletedAppointmentsProvider);
+    final pendingAsync = ref.watch(adminPendingAppointmentsStreamProvider);
+    final completedAsync = ref.watch(adminCompletedAppointmentsStreamProvider);
 
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: const Padding(
-          padding: EdgeInsets.only(left: 8.0),
-          child: Text(
-            'Disposal History',
-            style: TextStyle(
-              fontFamily: 'Mallanna',
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
+        automaticallyImplyLeading: false, // Removes back button
+        title: const Text(
+          'Disposal History',
+          style: TextStyle(
+            fontFamily: 'Mallanna',
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
           ),
         ),
       ),
@@ -128,27 +151,49 @@ class _AdminHistoryScreenState extends ConsumerState<AdminHistoryScreen>
               controller: _tabController,
               children: [
                 pendingAsync.when(
-                  data: (appointments) => ListView.builder(
-                    itemCount: appointments.length,
-                    itemBuilder: (context, index) => _buildCard(
-                      appointments[index],
-                      Colors.orange[100]!,
-                      Colors.orange[800]!,
-                    ),
-                  ),
-                  loading: () => const Center(child: CircularProgressIndicator()),
+                  data: (appointments) => appointments.isEmpty
+                      ? const Center(
+                          child: Text(
+                            'No pending appointments',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black54,
+                            ),
+                          ),
+                        )
+                      : ListView.builder(
+                          itemCount: appointments.length,
+                          itemBuilder: (context, index) => _buildCard(
+                            appointments[index],
+                            Colors.orange[100]!,
+                            Colors.orange[800]!,
+                          ),
+                        ),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
                   error: (e, st) => Center(child: Text('Error: $e')),
                 ),
                 completedAsync.when(
-                  data: (appointments) => ListView.builder(
-                    itemCount: appointments.length,
-                    itemBuilder: (context, index) => _buildCard(
-                      appointments[index],
-                      Colors.green[100]!,
-                      Colors.green[800]!,
-                    ),
-                  ),
-                  loading: () => const Center(child: CircularProgressIndicator()),
+                  data: (appointments) => appointments.isEmpty
+                      ? const Center(
+                          child: Text(
+                            'No completed appointments',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black54,
+                            ),
+                          ),
+                        )
+                      : ListView.builder(
+                          itemCount: appointments.length,
+                          itemBuilder: (context, index) => _buildCard(
+                            appointments[index],
+                            Colors.green[100]!,
+                            Colors.green[800]!,
+                          ),
+                        ),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
                   error: (e, st) => Center(child: Text('Error: $e')),
                 ),
               ],
@@ -156,24 +201,6 @@ class _AdminHistoryScreenState extends ConsumerState<AdminHistoryScreen>
           ),
         ],
       ),
-      floatingActionButton: Container(
-        height: 70,
-        width: 70,
-        margin: const EdgeInsets.only(top: 20),
-        child: FloatingActionButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const AdminQRScanScreen()),
-            );
-          },
-          backgroundColor: const Color(0xFF4A5F44),
-          shape: const CircleBorder(),
-          elevation: 4,
-          child: const Icon(Icons.qr_code_scanner, color: Colors.white, size: 32),
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: const AdminNavBar(currentIndex: 1),
     );
   }
