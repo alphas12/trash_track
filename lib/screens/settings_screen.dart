@@ -346,10 +346,11 @@ class _ManageProfileScreenState extends ConsumerState<ManageProfileScreen> {
                       backgroundColor: WidgetStateProperty.all(const Color(0xFF4A5F44)),
                     ),
                     onPressed: () async {
-                      setState(() => isEditing = !isEditing);
-                      if (!isEditing) {
+                      if (isEditing) {
                         await controller.updateUserInfo(context);
                       }
+
+                      setState(() => isEditing = !isEditing);
                     },
                     child: Text(
                       isEditing ? 'Save' : 'Edit',
