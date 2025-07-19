@@ -11,7 +11,7 @@ class EcoShopRepository {
         .eq('shop_id', shopId)
         .single();
 
-    if (response == null) return null;
+    // if (response == null) return null;
     return EcoShop.fromJson(response);
   }
 
@@ -20,7 +20,7 @@ class EcoShopRepository {
         .from('eco_shop')
         .select();
 
-    if (response == null || response is! List) return [];
+    // if (response == null || response is! List) return [];
 
     return response
         .map<EcoShop>((json) => EcoShop.fromJson(json))

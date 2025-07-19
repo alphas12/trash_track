@@ -3,7 +3,7 @@ import '../screens/admin_dashboard.dart';
 import '../screens/admin_history.dart';
 import '../screens/admin_shop.dart';
 import '../screens/admin_settings.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+// import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AdminNavBar extends StatelessWidget {
   final int currentIndex;
@@ -81,7 +81,7 @@ class AdminNavBar extends StatelessWidget {
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? const Color(0xFF4A5F44).withOpacity(0.1)
+                        ? const Color(0xFF4A5F44).withValues(alpha: 0.1)
                         : Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
                   ),

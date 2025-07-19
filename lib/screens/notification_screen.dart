@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../widgets/custom_bottom_nav_bar.dart';
+// import '../widgets/custom_bottom_nav_bar.dart';
 
 // A model class to represent a single notification
 class NotificationItem {

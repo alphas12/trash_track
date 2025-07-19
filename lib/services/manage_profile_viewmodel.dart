@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../models/manage_profile_model.dart';
+// import '../models/manage_profile_model.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
@@ -47,11 +47,11 @@ class ManageProfileViewModel extends ChangeNotifier {
         .eq('user_info_id', userInfoId)
         .maybeSingle();
 
-    fnameController.text = info!['user_fname'] ?? '';
-    lnameController.text = info!['user_lname'] ?? '';
-    contactController.text = info!['user_phone_num'] ?? '';
-    locationController.text = info!['user_location'] ?? '';
-    _uploadedImageUrl = info!['user_profile_img'] ?? '';
+    fnameController.text = info?['user_fname'] ?? '';
+    lnameController.text = info?['user_lname'] ?? '';
+    contactController.text = info?['user_phone_num'] ?? '';
+    locationController.text = info?['user_location'] ?? '';
+    _uploadedImageUrl = info?['user_profile_img'] ?? '';
     notifyListeners();
   }
   

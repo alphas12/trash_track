@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../services/signup_viewmodel.dart';
+// import '../services/signup_viewmodel.dart';
 import 'package:trash_track/screens/loading_screen.dart';
 import '../providers/auth_provider.dart';
 
@@ -42,12 +42,12 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                   onPressed: () => Navigator.pop(context),
                 ),
                 const SizedBox(height: 10),
-                const Center(
-                  child: Text(
-                    "Sign up",
-                    style: TextStyle(fontSize: 16, color: Colors.black54),
-                  ),
-                ),
+                // const Center(
+                //   child: Text(
+                //     "Sign up",
+                //     style: TextStyle(fontSize: 16, color: Colors.black54),
+                //   ),
+                // ),
                 const SizedBox(height: 20),
                 const Text(
                   "Almost\nthere!",
@@ -145,8 +145,8 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
           suffixIcon: IconButton(
             icon: Icon(
               (isConfirm ? _obscureConfirmPassword : _obscurePassword)
-                  ? Icons.visibility_off
-                  : Icons.visibility,
+                  ? Icons.visibility
+                  : Icons.visibility_off,
             ),
             onPressed: () {
               setState(() {

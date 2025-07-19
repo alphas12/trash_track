@@ -57,7 +57,7 @@ class DisposalServiceCard extends StatelessWidget {
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [Colors.transparent, Colors.black.withOpacity(0.9)],
+                    colors: [Colors.transparent, Colors.black.withValues(alpha: 0.9)],
                   ),
                 ),
               ),
@@ -77,7 +77,7 @@ class DisposalServiceCard extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.5),
+                      color: Colors.black.withValues(alpha: 0.5),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Image.asset(
@@ -207,7 +207,7 @@ class DisposalServiceCard extends StatelessWidget {
                                 decoration: BoxDecoration(
                                   color: const Color(
                                     0xFF4A5F44,
-                                  ).withOpacity(0.2),
+                                  ).withValues(alpha: 0.2),
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
                                     color: const Color(0xFF4A5F44),

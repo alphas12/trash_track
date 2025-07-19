@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../widgets/custom_bottom_nav_bar.dart';
 import '../providers/manage_profile_provider.dart';
-import '../services/manage_profile_viewmodel.dart';
+// import '../services/manage_profile_viewmodel.dart';
 import '../providers/points_provider.dart';
-import '../services/change_password_viewmodel.dart';
+// import '../services/change_password_viewmodel.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/appointment/appointment_card.dart';
 import '../providers/appointment_provider.dart';
@@ -249,7 +249,7 @@ class _ManageProfileScreenState extends ConsumerState<ManageProfileScreen> {
                           borderRadius: BorderRadius.circular(12),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
+                              color: Colors.black.withValues(alpha: 0.1),
                               spreadRadius: 2,
                               blurRadius: 8,
                               offset: const Offset(0, 2),
@@ -402,7 +402,7 @@ class HistoryScreen extends ConsumerWidget {
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
+                            color: Colors.black.withValues(alpha: 0.1),
                             spreadRadius: 2,
                             blurRadius: 8,
                             offset: const Offset(0, 2),
@@ -605,7 +605,7 @@ class _PointsScreenState extends ConsumerState<PointsScreen> {
                       elevation: 4,
                       child: ListTile(
                         leading: CircleAvatar(
-                          backgroundColor: const Color(0xFF4A5F44).withOpacity(0.1),
+                          backgroundColor: const Color(0xFF4A5F44).withValues(alpha: 0.1),
                           child: Icon(reward['icon'], color: const Color(0xFF4A5F44)),
                         ),
                         title: Text(
@@ -758,7 +758,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
+                              color: Colors.black.withValues(alpha: 0.1),
                               spreadRadius: 2,
                               blurRadius: 8,
                               offset: const Offset(0, 2),
@@ -936,7 +936,7 @@ class DeleteAccountScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
+                              color: Colors.black.withValues(alpha: 0.1),
                               spreadRadius: 2,
                               blurRadius: 8,
                               offset: const Offset(0, 2),
@@ -1099,7 +1099,7 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                           borderRadius: BorderRadius.circular(12),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
+                              color: Colors.black.withValues(alpha: 0.1),
                               spreadRadius: 2,
                               blurRadius: 8,
                               offset: const Offset(0, 2),

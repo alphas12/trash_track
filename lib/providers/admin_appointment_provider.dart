@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/appointment_model.dart';
 import '../repositories/admin_appointment_repository.dart';
-import 'auth_provider.dart'; // Assumes you have this
+// import 'auth_provider.dart'; // Assumes you have this
 import 'admin_disposal_provider.dart'; // Where service_id is fetched
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -13,7 +13,7 @@ final adminAllAppointmentsProvider = FutureProvider<List<Appointment>>((ref) asy
   final repo = ref.read(adminAppointmentRepoProvider);
 
   final serviceAsync = await ref.watch(adminServiceProvider.future);
-  if (serviceAsync == null || serviceAsync.serviceId.isEmpty) {
+  if (serviceAsync.serviceId.isEmpty) {
     throw Exception('No service_id found for admin');
   }
 

@@ -113,7 +113,7 @@ class _DisposalShopDetailsScreenState
                           borderRadius: BorderRadius.circular(12),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
+                              color: Colors.black.withValues(alpha: 0.1),
                               spreadRadius: 2,
                               blurRadius: 8,
                               offset: const Offset(0, 2),
@@ -245,7 +245,7 @@ class _DisposalShopDetailsScreenState
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF4A5F44).withOpacity(0.1),
+                      color: const Color(0xFF4A5F44).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
                         color: const Color(0xFF4A5F44),

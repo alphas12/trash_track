@@ -37,7 +37,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 24),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF4A5F44).withOpacity(0.1),
+                  color: const Color(0xFF4A5F44).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Column(
@@ -88,7 +88,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       spreadRadius: 2,
                       blurRadius: 10,
                       offset: const Offset(0, 2),
@@ -147,7 +147,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       spreadRadius: 2,
                       blurRadius: 10,
                       offset: const Offset(0, 2),
@@ -183,7 +183,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF4A5F44).withOpacity(0.3),
+                      color: const Color(0xFF4A5F44).withValues(alpha: 0.3),
                       spreadRadius: 0,
                       blurRadius: 12,
                       offset: const Offset(0, 4),

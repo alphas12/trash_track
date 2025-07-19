@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/admin_disposal_provider.dart';
 import '../widgets/admin_nav_bar.dart';
 import '/screens/admin_qr_scan.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+// import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AdminShopScreen extends ConsumerStatefulWidget {
   const AdminShopScreen({super.key});
