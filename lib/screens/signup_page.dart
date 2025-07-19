@@ -173,20 +173,14 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
   if (_formKey.currentState!.validate()) {
     final viewModel = ref.read(signUpViewModelProvider);
 
-    final isSuccess = await viewModel.signUp(
+    await viewModel.signUp(
       email: _emailController.text.trim(),
       password: _passwordController.text,
       fname: _fnameController.text.trim(),
       lname: _lnameController.text.trim(),
       location: _locationController.text.trim(),
     );
-    
 
-    if (!isSuccess && viewModel.errorMessage != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(viewModel.errorMessage!)),
-      );
-    }
     // If signup was successful (no error message), navigate to loading screen
     if (viewModel.errorMessage == null && mounted) {
       Navigator.pushReplacement(
@@ -200,7 +194,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
       );
     }
   }
-  }
+}
 
 
 }

@@ -26,27 +26,10 @@ class _LoadingScreenState extends ConsumerState<LoadingScreen> {
 
     Future.microtask(() async {
       final loginNotifier = ref.read(loginViewModelProvider.notifier);
-      final loginResult = await loginNotifier.login(widget.email, widget.password);
+
+      final userType = await loginNotifier.login(widget.email, widget.password);
 
       if (!mounted) return;
-
-      if (loginResult == null) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Invalid email or password')),
-        );
-        return;
-      }
-
-      final (userType, accountStatus) = loginResult;
-
-      if (accountStatus != 'Active') {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Account has been deleted')),
-        );
-        return;
-      }
 
       if (userType == 'Admin') {
         Navigator.pushReplacementNamed(context, '/admin');
