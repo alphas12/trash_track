@@ -14,4 +14,16 @@ class EcoShopRepository {
     if (response == null) return null;
     return EcoShop.fromJson(response);
   }
+
+  Future<List<EcoShop>> getAllShops() async {
+    final response = await supabase
+        .from('eco_shop')
+        .select();
+
+    if (response == null || response is! List) return [];
+
+    return response
+        .map<EcoShop>((json) => EcoShop.fromJson(json))
+        .toList();
+  }
 }

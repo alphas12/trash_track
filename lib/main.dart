@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:trash_track/screens/admin_dashboard.dart';
+import 'package:trash_track/screens/eco_shop_screen.dart';
 // import 'package:trash_track/screens/bookmark_screen.dart';
 import 'package:trash_track/screens/notification_screen.dart';
 // import 'screens/eco_shop_screen.dart';
@@ -32,18 +33,19 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
 
-      initialRoute: '/intro',
-      routes: {
-        '/intro': (context) => const IntroScreen(),
-        '/welcome': (context) => const WelcomeScreen(),
-        '/signup': (context) => const SignUpPage(),
-        '/login': (context) => const LoginPage(),
-        '/dashboard': (context) => const DashboardScreen(),
-        '/notification': (context) => const NotificationsScreen(),
-        '/admin': (context) => const AdminDashboardScreen(),
-        '/settings': (context) => const SettingsScreen(),
-
-      },
+      home: const EcoShopScreen(),
+      // initialRoute: '/intro',
+      // routes: {
+      //   '/intro': (context) => const IntroScreen(),
+      //   '/welcome': (context) => const WelcomeScreen(),
+      //   '/signup': (context) => const SignUpPage(),
+      //   '/login': (context) => const LoginPage(),
+      //   '/dashboard': (context) => const DashboardScreen(),
+      //   '/notification': (context) => const NotificationsScreen(),
+      //   '/admin': (context) => const AdminDashboardScreen(),
+      //   '/settings': (context) => const SettingsScreen(),
+      //
+      // },
     );
   }
 }
