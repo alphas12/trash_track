@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../widgets/admin_nav_bar.dart';
+import '../widgets/appointment_card.dart';
 import '/screens/admin_qr_scan.dart';
 import '../providers/admin_appointment_provider.dart';
 import 'package:intl/intl.dart';
@@ -10,27 +11,9 @@ class AdminDashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final asyncAppointments = ref.watch(adminPendingAppointmentsProvider);
+    final asyncAppointments = ref.watch(adminTodayAppointmentsProvider);
 
     return Scaffold(
-      floatingActionButton: Container(
-        height: 70,
-        width: 70,
-        margin: const EdgeInsets.only(top: 20),
-        child: FloatingActionButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const AdminQRScanScreen()),
-            );
-          },
-          backgroundColor: const Color(0xFF4A5F44),
-          shape: const CircleBorder(),
-          elevation: 4,
-          child: const Icon(Icons.qr_code_scanner, color: Colors.white, size: 32),
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: const AdminNavBar(currentIndex: 0),
       body: SafeArea(
         child: Column(
@@ -90,6 +73,26 @@ class AdminDashboardScreen extends ConsumerWidget {
               ),
             ),
 
+            // Sticky "Today" header
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Today',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Mallanna',
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                ],
+              ),
+            ),
+            
             // Scrollable appointments below
             Expanded(
               child: SingleChildScrollView(
@@ -97,16 +100,6 @@ class AdminDashboardScreen extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Today',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Mallanna',
-                      ),
-                    ),
-                    const SizedBox(height: 8),
                     asyncAppointments.when(
                       data: (appointments) {
                         if (appointments.isEmpty) {
@@ -115,7 +108,10 @@ class AdminDashboardScreen extends ConsumerWidget {
                             child: Center(
                               child: Text(
                                 'No pending appointments today.',
-                                style: TextStyle(fontSize: 16, color: Colors.black54),
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.black54,
+                                ),
                               ),
                             ),
                           );
@@ -127,14 +123,17 @@ class AdminDashboardScreen extends ConsumerWidget {
                           itemCount: appointments.length,
                           itemBuilder: (context, index) {
                             final appointment = appointments[index];
-                            final formattedDate = DateFormat('MMMM d, h:mm a').format(
-                              appointment.appointmentDate,
-                            );
-                            return TaskCard(
+                            final formattedDate = DateFormat(
+                              'MMMM d, h:mm a',
+                            ).format(appointment.appointmentDate);
+                            return AppointmentCard(
                               id: appointment.appointmentInfoId ?? '-',
-                              user: appointment.userInfoId,
+                              userName:
+                                  appointment.userFullName ?? 'Unknown User',
                               datetime: formattedDate,
-                              status: appointment.appointmentStatus.name,
+                              location: appointment.appointmentLocation,
+                              status: appointment.appointmentStatus.value,
+                              showActions: false,
                             );
                           },
                         );
@@ -155,79 +154,6 @@ class AdminDashboardScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 80),
                   ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class TaskCard extends StatelessWidget {
-  final String id;
-  final String user;
-  final String datetime;
-  final String status;
-
-  const TaskCard({
-    super.key,
-    required this.id,
-    required this.user,
-    required this.datetime,
-    required this.status,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final Color bgColor =
-    status.toLowerCase() == 'completed' ? Colors.green[100]! : Colors.orange[100]!;
-    final Color textColor =
-    status.toLowerCase() == 'completed' ? Colors.green[800]! : Colors.orange[800]!;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6.0),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('ID: $id', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 4),
-                Text('Name: $user', style: const TextStyle(fontSize: 14)),
-                const SizedBox(height: 4),
-                Text('Time: $datetime', style: const TextStyle(fontSize: 14)),
-              ],
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: bgColor,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                status,
-                style: TextStyle(
-                  color: textColor,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
                 ),
               ),
             ),

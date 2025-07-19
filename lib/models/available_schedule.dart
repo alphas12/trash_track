@@ -1,4 +1,3 @@
-import 'disposal_service.dart';
 
 class AvailableSchedule {
   final String availScheduleId;

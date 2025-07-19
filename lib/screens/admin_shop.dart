@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/admin_disposal_provider.dart';
 import '../widgets/admin_nav_bar.dart';
 import '/screens/admin_qr_scan.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+
 
 class AdminShopScreen extends ConsumerStatefulWidget {
   const AdminShopScreen({super.key});
@@ -25,6 +25,7 @@ class _AdminShopScreenState extends ConsumerState<AdminShopScreen> {
 
     return shopAsync.when(
       data: (shop) {
+        // Initialize controllers only once when not editing and controllers are empty
         if (!isEditing && shopNameC.text.isEmpty) {
           shopNameC.text = shop.serviceName;
           descriptionC.text = shop.serviceDescription;
@@ -33,83 +34,77 @@ class _AdminShopScreenState extends ConsumerState<AdminShopScreen> {
         }
 
         return Scaffold(
-          appBar: AppBar(
-            elevation: 0,
-            title: const Padding(
-              padding: EdgeInsets.only(left: 8.0),
-              child: Text(
-                'Shop Management',
-                style: TextStyle(
-                  fontFamily: 'Mallanna',
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () async {
-                  if (isEditing) {
-                    await _saveChanges(context);
-                  }
-                  setState(() => isEditing = !isEditing);
-                },
-                child: Text(
-                  isEditing ? 'Save' : 'Edit',
-                  style: const TextStyle(
-                    fontFamily: 'Mallanna',
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF4A5F44),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          body: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: ListView(
+          body: SafeArea(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 8),
-                const Text(
-                  'Edit your Shop Details here.',
-                  style: TextStyle(
-                    fontFamily: 'Mallanna',
-                    fontSize: 16,
-                    color: Colors.black54,
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(32.0, 16.0, 32.0, 0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Shop Management',
+                        style: TextStyle(
+                          fontFamily: 'Mallanna',
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          if (isEditing) {
+                            await _saveChanges(context);
+                          }
+                          setState(() => isEditing = !isEditing);
+                        },
+                        child: Text(
+                          isEditing ? 'Save' : 'Edit',
+                          style: const TextStyle(
+                            fontFamily: 'Mallanna',
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF4A5F44),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 16),
-                _buildInput('Shop Name', shopNameC),
-                _buildInput('Description', descriptionC, maxLines: 3),
-                _buildInput('Location', locationC),
-                _buildInput('Image URL', linkC),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Edit your Shop Details here.',
+                        style: TextStyle(
+                          fontFamily: 'Mallanna',
+                          fontSize: 16,
+                          color: Colors.black54,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      _buildInput('Shop Name', shopNameC),
+                      _buildInput('Description', descriptionC, maxLines: 3),
+                      _buildInput('Location', locationC),
+                      _buildInput('Image URL', linkC),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
-          floatingActionButton: Container(
-            height: 70,
-            width: 70,
-            margin: const EdgeInsets.only(top: 20),
-            child: FloatingActionButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const AdminQRScanScreen()),
-                );
-              },
-              backgroundColor: const Color(0xFF4A5F44),
-              shape: const CircleBorder(),
-              elevation: 4,
-              child: const Icon(Icons.qr_code_scanner, color: Colors.white, size: 32),
-            ),
-          ),
-          floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
           bottomNavigationBar: AdminNavBar(currentIndex: 3),
         );
       },
-      loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
-      error: (e, _) => Scaffold(body: Center(child: Text('Error: $e'))),
+      loading: () => const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      ),
+      error: (e, _) => Scaffold(
+        body: Center(child: Text('Error: $e')),
+      ),
     );
   }
 

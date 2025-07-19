@@ -11,7 +11,7 @@ enum AppointmentStatus {
 
   static AppointmentStatus fromString(String status) {
     return AppointmentStatus.values.firstWhere(
-          (e) => e.value.toLowerCase() == status.toLowerCase(),
+      (e) => e.value.toLowerCase() == status.toLowerCase(),
       orElse: () => AppointmentStatus.pending,
     );
   }
@@ -24,6 +24,7 @@ enum AppointmentType { pickUp, dropOff }
 class Appointment {
   final String? appointmentInfoId;
   final String userInfoId;
+  final String? userFullName; // Added field for user's full name
   final String serviceId;
   final AppointmentType appointmentType;
   final String? availSchedId;
@@ -41,6 +42,7 @@ class Appointment {
   const Appointment({
     this.appointmentInfoId,
     required this.userInfoId,
+    this.userFullName,
     required this.serviceId,
     required this.appointmentType,
     this.availSchedId,
@@ -75,35 +77,47 @@ class Appointment {
     'appointment_qr_code': qrCodeData,
   };
 
-  factory Appointment.fromMap(Map<String, dynamic> map) => Appointment(
-    appointmentInfoId: map['appointment_info_id'],
-    userInfoId: map['user_info_id'],
-    serviceId: map['service_id'], // service_id is a String
-    appointmentType: map['appointment_type'] == 'Pick-Up'
-        ? AppointmentType.pickUp
-        : AppointmentType.dropOff,
-    availSchedId: map['avail_sched_id'],
-    appointmentDate: DateTime.parse(map['appointment_date']),
-    appointmentCreateDate: map['appointment_create_date'] != null
-        ? DateTime.parse(map['appointment_create_date'])
-        : null,
-    appointmentConfirmDate: map['appointment_confirm_date'] != null
-        ? DateTime.parse(map['appointment_confirm_date'])
-        : null,
-    appointmentCancelDate: map['appointment_cancel_date'] != null
-        ? DateTime.parse(map['appointment_cancel_date'])
-        : null,
-    appointmentLocation: map['appointment_location'],
-    appointmentStatus: AppointmentStatus.fromString(map['appointment_status']),
-    appointmentNotes: map['appointment_notes'],
-    appointmentPriceFee: map['appointment_price_fee'] != null
-        ? (map['appointment_price_fee'] as num).toDouble()
-        : null,
-    wasteMaterials: map['appointment_trash'] != null
-        ? (map['appointment_trash'] as List)
-        .map((w) => AppointmentWaste.fromMap(w as Map<String, dynamic>))
-        .toList()
-        : [],
-    qrCodeData: map['appointment_qr_code'],
-  );
+  factory Appointment.fromMap(Map<String, dynamic> map) {
+    final userInfo = map['user_info'] as List?;
+    String? userFullName;
+
+    if (userInfo != null && userInfo.isNotEmpty) {
+      final userData = userInfo.first as Map<String, dynamic>;
+      userFullName = "${userData['user_fname']} ${userData['user_lname']}";
+    }
+    return Appointment(
+      appointmentInfoId: map['appointment_info_id'],
+      userInfoId: map['user_info_id'],
+      userFullName: userFullName,
+      serviceId: map['service_id'],
+      appointmentType: map['appointment_type'] == 'Pick-Up'
+          ? AppointmentType.pickUp
+          : AppointmentType.dropOff,
+      availSchedId: map['avail_sched_id'],
+      appointmentDate: DateTime.parse(map['appointment_date']),
+      appointmentCreateDate: map['appointment_create_date'] != null
+          ? DateTime.parse(map['appointment_create_date'])
+          : null,
+      appointmentConfirmDate: map['appointment_confirm_date'] != null
+          ? DateTime.parse(map['appointment_confirm_date'])
+          : null,
+      appointmentCancelDate: map['appointment_cancel_date'] != null
+          ? DateTime.parse(map['appointment_cancel_date'])
+          : null,
+      appointmentLocation: map['appointment_location'],
+      appointmentStatus: AppointmentStatus.fromString(
+        map['appointment_status'],
+      ),
+      appointmentNotes: map['appointment_notes'],
+      appointmentPriceFee: map['appointment_price_fee'] != null
+          ? (map['appointment_price_fee'] as num).toDouble()
+          : null,
+      wasteMaterials: map['appointment_trash'] != null
+          ? (map['appointment_trash'] as List)
+                .map((w) => AppointmentWaste.fromMap(w as Map<String, dynamic>))
+                .toList()
+          : [],
+      qrCodeData: map['appointment_qr_code'],
+    );
+  }
 }
