@@ -99,7 +99,7 @@ class CustomBottomNavBar extends StatelessWidget {
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: isSelected
-                    ? const Color(0xFF4A5F44).withOpacity(0.1)
+                    ? const Color(0xFF4A5F44).withValues(alpha:  0.1)
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(12),
               ),

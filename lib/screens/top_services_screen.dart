@@ -34,7 +34,7 @@ class _TopServicesScreenState extends ConsumerState<TopServicesScreen> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             spreadRadius: 1,
             blurRadius: 10,
             offset: const Offset(0, 4),
@@ -54,7 +54,7 @@ class _TopServicesScreenState extends ConsumerState<TopServicesScreen> {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     spreadRadius: 2,
                     blurRadius: 8,
                     offset: const Offset(0, 2),
@@ -138,7 +138,7 @@ class _TopServicesScreenState extends ConsumerState<TopServicesScreen> {
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF4A5F44).withOpacity(0.1),
+                              color: const Color(0xFF4A5F44).withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(16),
                             ),
                             child: const Icon(
@@ -183,7 +183,7 @@ class _TopServicesScreenState extends ConsumerState<TopServicesScreen> {
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
+                              color: Colors.black.withValues(alpha: 0.05),
                               spreadRadius: 1,
                               blurRadius: 4,
                               offset: const Offset(0, 2),

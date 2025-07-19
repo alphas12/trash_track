@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:trash_track/screens/eco_shop_screen.dart';
+import 'package:trash_track/screens/scan_screen.dart';
 import 'disposal_shop_details_screen.dart';
 import '../providers/disposal_service_provider.dart';
 import '../providers/favorite_services_provider.dart';
@@ -192,19 +193,31 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                         ),
                                       ),
                                       const SizedBox(width: 8),
-                                      Container(
-                                        width: 52,
-                                        height: 52,
-                                        padding: const EdgeInsets.all(13),
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFFD9D9D9),
-                                          borderRadius: BorderRadius.circular(
-                                            12,
+                                      GestureDetector(
+                                        onTap: () {
+                                          // Navigate to ScanScreen on tap
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  const ScanScreen(),
+                                            ),
+                                          );
+                                        },
+                                        child: Container(
+                                          width: 52,
+                                          height: 52,
+                                          padding: const EdgeInsets.all(13),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFD9D9D9),
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
                                           ),
-                                        ),
-                                        child: Image.asset(
-                                          'assets/images/qr_code.png',
-                                          color: const Color(0xFF4A5F44),
+                                          child: Image.asset(
+                                            'assets/images/qr_code.png',
+                                            color: const Color(0xFF4A5F44),
+                                          ),
                                         ),
                                       ),
                                     ],

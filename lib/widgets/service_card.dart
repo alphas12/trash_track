@@ -50,7 +50,7 @@ class ServiceCard extends StatelessWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [Colors.transparent, Colors.black.withOpacity(0.9)],
+                  colors: [Colors.transparent, Colors.black.withValues(alpha: .9)],
                 ),
               ),
             ),
@@ -61,7 +61,7 @@ class ServiceCard extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.5),
+                  color: Colors.black.withValues(alpha: .5),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: GestureDetector(

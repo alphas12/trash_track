@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../models/disposal_service.dart';
+// import '../models/disposal_service.dart';
 import '../providers/favorite_services_provider.dart';
 import '../providers/disposal_service_provider.dart';
 import '../widgets/custom_bottom_nav_bar.dart';
@@ -109,7 +109,7 @@ class CollectionsPage extends ConsumerWidget {
                             Container(
                               padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF4A5F44).withOpacity(0.1),
+                                color: const Color(0xFF4A5F44).withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(16),
                               ),
                               child: Image.asset(
