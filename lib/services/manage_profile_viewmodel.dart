@@ -65,39 +65,31 @@ class ManageProfileViewModel extends ChangeNotifier {
       .eq('user_cred_id', userId)
       .maybeSingle();
 
-  final picker = ImagePicker();
-  final picked = await picker.pickImage(source: ImageSource.gallery);
-  if (picked == null) return;
-
-  final file = File(picked.path);
-  if (!file.existsSync()) {
-    debugPrint('File does not exist');
-    return;
-  }  
-
   final userInfoId = response?['user_info_id'];
   if (userInfoId == null) return;
 
-  final fileName = picked.path.split('/').last;
-  final storagePath = 'profile-pics/$userInfoId/$fileName';
+  // Only upload if a new image was picked
+  if (pickedImage != null) {
+    final fileName = pickedImage!.path.split('/').last;
+    final storagePath = 'profile-pics/$userInfoId/$fileName';
 
-  try {
-    await _client.storage
-      .from('profile-pics')
-      .upload(
-        storagePath,
-        file,
-        fileOptions: const FileOptions(upsert: true),
-      );
-    final publicUrl = _client.storage
-      .from('profile-pics')
-      .getPublicUrl(storagePath);
+    try {
+      await _client.storage
+        .from('profile-pics')
+        .upload(
+          storagePath,
+          pickedImage!,
+          fileOptions: const FileOptions(upsert: true),
+        );
+      final publicUrl = _client.storage
+        .from('profile-pics')
+        .getPublicUrl(storagePath);
 
-    _uploadedImageUrl = publicUrl;
-    debugPrint('Upload successful: $publicUrl');
-    setChanged(true);
-  } on StorageException catch (e) {
-    debugPrint('Upload failed: ${e.message}');
+      _uploadedImageUrl = publicUrl;
+      debugPrint('Upload successful: $publicUrl');
+    } on StorageException catch (e) {
+      debugPrint('Upload failed: ${e.message}');
+    }
   }
 
   final updatePayload = {
@@ -109,12 +101,7 @@ class ManageProfileViewModel extends ChangeNotifier {
     'updated_at': DateTime.now().toIso8601String(),
   };
 
-  // Only add photo if it exists
-  // if (_uploadedImageUrl != null) {
-  //   updatePayload['user_profile_img'] = _uploadedImageUrl!;
-  // }
-
-  final updateResult = await _client
+  await _client
       .from('user_info')
       .update(updatePayload)
       .eq('user_info_id', userInfoId);
@@ -125,43 +112,11 @@ class ManageProfileViewModel extends ChangeNotifier {
     );
   }
 
-  setChanged(true); 
-  }
+  pickedImage = null; // clear image after upload
+  setChanged(true);
+  notifyListeners();
+}
 
-  // Future<void> pickImage() async {
-  //   final userId = _client.auth.currentUser?.id;
-  //   if (userId == null) return;
-    
-  //   final picker = ImagePicker();
-  //   final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
-  //   if(pickedFile != null) {
-  //     final pickedImage = File(pickedFile.path);
-  //     final fileName = pickedFile.path.split('/').last;
-  //     final storagePath = 'profile-pics/$userId/$fileName';
-  //     notifyListeners();
-   
-  //     try {
-  //       await _client.storage
-  //         .from('profile-pics')
-  //         .upload(
-  //           storagePath,
-  //           pickedImage,
-  //           fileOptions: const FileOptions(upsert: true),
-  //         );
-  //       debugPrint('Upload successful');
-  //     } on StorageException catch (e) {
-  //       debugPrint('Upload failed: ${e.message}');
-  //     }
-  //     final publicUrl = _client.storage
-  //       .from('profile-pics')
-  //       .getPublicUrl(storagePath);
-
-  //     _uploadedImageUrl = publicUrl;
-  //     setChanged(true);
-  //     notifyListeners();
-  //   }
-  // }
   Future<void> pickImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);

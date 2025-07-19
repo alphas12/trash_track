@@ -11,26 +11,41 @@ import '../widgets/appointment/appointment_card.dart';
 import '../providers/appointment_provider.dart';
 import '../models/appointment_model.dart';
 
-class SettingsScreen extends StatefulWidget {
+import '../services/delete_account_viewmodel.dart';
+import '../providers/delete_account_provider.dart';
+import '../providers/settings_provider.dart';
+
+
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-class _SettingsScreenState extends State<SettingsScreen> {
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   final int _selectedIndex = 4;
-
-  void _onItemTapped(int index) {
-    setState(() {
-      index = _selectedIndex;
-    });
-  }
-
   bool _showPrivacyOptions = false;
 
   @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      ref.read(settingsViewModelProvider.notifier).fetchUserInfo();
+    });
+  }
+
+  void _onItemTapped(int index) {
+    if (index == _selectedIndex) return;
+    // Navigate to different screens based on the index
+    // You can implement this part to suit your nav setup
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final viewModel = ref.watch(settingsViewModelProvider);
+    final user = viewModel.userInfo;
+
     return Scaffold(
       bottomNavigationBar: CustomBottomNavBar(
         currentIndex: _selectedIndex,
@@ -53,17 +68,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
               const SizedBox(height: 24),
               Row(
                 children: [
-                  const CircleAvatar(
+                  CircleAvatar(
                     radius: 36,
-                    backgroundImage: AssetImage('assets/images/default_profile.png'),
+                    backgroundImage: user?.profileImg != null
+                        ? NetworkImage(user!.profileImg!)
+                        : const AssetImage('assets/images/default_profile.png')
+                            as ImageProvider,
                   ),
                   const SizedBox(width: 16),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Sam Russel C. Mahayag',
-                        style: TextStyle(
+                      Text(
+                        user != null
+                            ? '${user.fname} ${user.lname}'
+                            : 'Loading...',
+                        style: const TextStyle(
                           fontFamily: 'Mallanna',
                           fontSize: 16,
                         ),
@@ -73,7 +93,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         onTap: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (_) => const ManageProfileScreen()),
+                            MaterialPageRoute(
+                                builder: (_) => const ManageProfileScreen()),
                           );
                         },
                         child: const Text(
@@ -92,11 +113,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               const SizedBox(height: 32),
               _buildSettingsTile('History', () {
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const HistoryScreen()));
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const HistoryScreen()),
+                );
               }),
               const Divider(thickness: 1, height: 1),
               _buildSettingsTile('Points', () {
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const PointsScreen()));
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const PointsScreen()),
+                );
               }),
               const Divider(thickness: 1, height: 1),
               ListTile(
@@ -108,7 +135,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ),
                 trailing: Icon(
-                  _showPrivacyOptions ? Icons.expand_less : Icons.expand_more,
+                  _showPrivacyOptions
+                      ? Icons.expand_less
+                      : Icons.expand_more,
                   color: Colors.black,
                 ),
                 onTap: () {
@@ -130,7 +159,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const ChangePasswordScreen()),
+                          MaterialPageRoute(
+                              builder: (_) => const ChangePasswordScreen()),
                         );
                       },
                     ),
@@ -144,7 +174,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const DeleteAccountScreen()),
+                          MaterialPageRoute(
+                              builder: (_) => const DeleteAccountScreen()),
                         );
                       },
                     ),
@@ -158,27 +189,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const PrivacyPolicyScreen()),
+                          MaterialPageRoute(
+                              builder: (_) => const PrivacyPolicyScreen()),
                         );
                       },
                     ),
                     const Divider(thickness: 1, height: 1),
                   ],
                 ),
-                crossFadeState:
-                _showPrivacyOptions ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+                crossFadeState: _showPrivacyOptions
+                    ? CrossFadeState.showSecond
+                    : CrossFadeState.showFirst,
                 duration: const Duration(milliseconds: 300),
               ),
-              const Divider(thickness: 1, height: 1),
+              const Divider(thickness: 2, height: 1),
               _buildSettingsTile(
                 'Log Out',
-                    () async {
+                () async {
                   await Supabase.instance.client.auth.signOut();
-
                   if (context.mounted) {
-                    Navigator.pushNamedAndRemoveUntil(context, '/welcome', (route) => false);
+                    Navigator.pushNamedAndRemoveUntil(
+                        context, '/welcome', (route) => false);
                   }
                 },
+                textColor: Colors.red,
               ),
               const Divider(thickness: 1, height: 1),
             ],
@@ -188,7 +222,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildSettingsTile(String title, VoidCallback onTap, {Color? textColor}) {
+  Widget _buildSettingsTile(String title, VoidCallback onTap,
+      {Color? textColor}) {
     return Column(
       children: [
         ListTile(
@@ -278,7 +313,7 @@ class _ManageProfileScreenState extends ConsumerState<ManageProfileScreen> {
                       bottom: 4,
                       child: GestureDetector(
                         onTap: () async {
-                          await controller.pickImage(); // just picks image and stores it
+                          await controller.pickImage(); // just picks image then...
                           setState(() {}); // trigger UI update to show new image
                         },
                         child: Container(
@@ -311,10 +346,11 @@ class _ManageProfileScreenState extends ConsumerState<ManageProfileScreen> {
                       backgroundColor: WidgetStateProperty.all(const Color(0xFF4A5F44)),
                     ),
                     onPressed: () async {
-                      setState(() => isEditing = !isEditing);
-                      if (!isEditing) {
+                      if (isEditing) {
                         await controller.updateUserInfo(context);
                       }
+
+                      setState(() => isEditing = !isEditing);
                     },
                     child: Text(
                       isEditing ? 'Save' : 'Edit',
@@ -909,11 +945,13 @@ class PrivacyPolicyScreen extends StatelessWidget {
   }
 }
 
-class DeleteAccountScreen extends StatelessWidget {
+class DeleteAccountScreen extends ConsumerWidget {
   const DeleteAccountScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final viewModel = ref.read(deleteAccountViewModelProvider);
+    
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -976,23 +1014,30 @@ class DeleteAccountScreen extends StatelessWidget {
               ),
               const Spacer(),
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   // TODO: Add delete logic
-                  showDialog(
-                    context: context,
-                    builder: (_) => AlertDialog(
-                      title: const Text('Account Deleted'),
-                      content: const Text('Your account has been deleted successfully.'),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.popUntil(context, (route) => route.isFirst);
-                          },
-                          child: const Text('OK'),
-                        ),
-                      ],
-                    ),
-                  );
+                  try {
+                    await viewModel.updateUserStatus();
+                    showDialog(
+                      context: context,
+                      builder: (_) => AlertDialog(
+                        title: const Text('Account Deleted'),
+                        content: const Text('Your account has been deleted successfully.'),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.popUntil(context, (route) => route.isFirst);
+                            },
+                            child: const Text('OK'),
+                          ),
+                        ],
+                      ),
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(e.toString())),
+                    );
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red,

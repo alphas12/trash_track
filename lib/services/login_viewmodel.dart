@@ -12,7 +12,7 @@ class LoginViewModel extends ChangeNotifier {
   bool isLoading = false;
   String? errorMessage;
 
-  Future<String?> login(String email, String password) async {
+  Future<(String userType, String accountStatus)?> login(String email, String password) async {
     isLoading = true;
     errorMessage = null;
     notifyListeners();
@@ -32,16 +32,23 @@ class LoginViewModel extends ChangeNotifier {
 
       if (userId == null) return null;
 
-      final userType = await Supabase.instance.client
+      final userData = await Supabase.instance.client
         .from('user_credentials')
-        .select('user_type')
+        .select('user_type, account_status')
         .eq('user_cred_id', userId)
         .maybeSingle();
 
-      return userType?['user_type'];
+      if (userData == null) return null;
+
+      final userType = userData['user_type'] as String;
+      final accountStatus = userData['account_status'] as String;
+
+      return (userType, accountStatus);
 
     } catch (e) {
       errorMessage = "Login failed. Please check your credentials.";
+      return null;
+
     } finally {
       isLoading = false;
       notifyListeners();
