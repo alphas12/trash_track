@@ -106,13 +106,13 @@ class _EcoShopScreenState extends ConsumerState<EcoShopScreen> {
                                       mainAxisSize: MainAxisSize.min,
                                       children: const [
                                         Icon(
-                                          Icons.shopping_cart,
+                                          Icons.delete,
                                           color: Color(0xFFFEFAE0),
                                           size: 28,
                                         ),
                                         SizedBox(height: 4),
                                         Text(
-                                          'Shop',
+                                          'Recycle',
                                           style: TextStyle(
                                             fontFamily: 'Mallanna',
                                             color: Color(0xFFFEFAE0),

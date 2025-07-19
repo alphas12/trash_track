@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:trash_track/screens/eco_shop_screen.dart';
 import 'disposal_shop_details_screen.dart';
 import '../providers/disposal_service_provider.dart';
 import '../providers/favorite_services_provider.dart';
@@ -115,25 +116,32 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                             ),
                                           ],
                                         ),
-                                        Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: const [
-                                            Icon(
-                                              Icons.shopping_cart,
-                                              color: Color(0xFFFEFAE0),
-                                              size: 28,
-                                            ),
-                                            SizedBox(height: 4),
-                                            Text(
-                                              'Shop',
-                                              style: TextStyle(
-                                                fontFamily: 'Mallanna',
+                                        GestureDetector(
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(builder: (context) => EcoShopScreen()),
+                                            );
+                                          },
+                                          child: Column(
+                                            children: const [
+                                              Icon(
+                                                Icons.shopping_cart,
                                                 color: Color(0xFFFEFAE0),
-                                                fontSize: 16,
+                                                size: 28,
                                               ),
-                                            ),
-                                          ],
-                                        ),
+                                              SizedBox(height: 4),
+                                              Text(
+                                                'Shop',
+                                                style: TextStyle(
+                                                  fontFamily: 'Mallanna',
+                                                  color: Color(0xFFFEFAE0),
+                                                  fontSize: 16,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        )
                                       ],
                                     ),
                                   ),
