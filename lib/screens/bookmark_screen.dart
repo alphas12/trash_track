@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../models/disposal_service.dart';
 import '../providers/favorite_services_provider.dart';
 import '../providers/disposal_service_provider.dart';
 import '../widgets/custom_bottom_nav_bar.dart';
@@ -37,7 +39,9 @@ class CollectionsPage extends ConsumerWidget {
     return Scaffold(
       bottomNavigationBar: CustomBottomNavBar(
         currentIndex: 1,
-        onTap: (index) {},
+        onTap: (index) {
+          // TODO: Navigation
+        },
       ),
       body: SafeArea(
         child: Padding(
