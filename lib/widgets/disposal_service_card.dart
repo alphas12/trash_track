@@ -86,7 +86,7 @@ class DisposalServiceCard extends StatelessWidget {
                           : 'assets/icons/collections.png',
                       width: 20,
                       height: 20,
-                      color: isFavorite ? const Color(0xFF4A5F44) : Colors.white,
+                      color: isFavorite ? Colors.white : const Color(0xFF4A5F44),
                     ),
                   ),
                 ),
