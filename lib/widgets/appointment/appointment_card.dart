@@ -102,7 +102,8 @@ class AppointmentCard extends ConsumerWidget {
     final hour = date.hour % 12 == 0 ? 12 : date.hour % 12;
     final amPm = date.hour >= 12 ? 'PM' : 'AM';
     final minutes = date.minute.toString().padLeft(2, '0');
-    return "${date.day} ${months[date.month - 1]} at $hour:$minutes $amPm";
+    final year = date.year != DateTime.now().year ? " ${date.year}" : "";
+    return "${date.day} ${months[date.month - 1]}$year at $hour:$minutes $amPm";
   }
 
   String _formatStatus(AppointmentStatus status) {

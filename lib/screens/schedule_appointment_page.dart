@@ -31,7 +31,9 @@ class _ScheduleAppointmentPageState
     with SingleTickerProviderStateMixin {
   TabController? _tabController;
   AppointmentType? selectedType;
-  DateTime selectedDate = DateTime.now();
+  DateTime selectedDate = DateTime.now().add(
+    const Duration(days: 1),
+  ); // Start with tomorrow's date
   AvailableSchedule? selectedSchedule;
   List<AppointmentWaste> wasteMaterials = [];
   String? userLocation;
@@ -189,6 +191,7 @@ class _ScheduleAppointmentPageState
         );
       }).toList();
 
+      print('Creating appointment with date: ${selectedDate.toString()}');
       final appointment = Appointment(
         appointmentInfoId: '',
         serviceId: widget.service.serviceId,
@@ -196,28 +199,34 @@ class _ScheduleAppointmentPageState
         availSchedId: selectedSchedule?.availScheduleId,
         appointmentDate: selectedType == AppointmentType.pickUp
             ? selectedSchedule!.availDate
-            : selectedDate,
+            : selectedDate, // Use selectedDate directly for drop-off
         appointmentLocation: userLocation ?? widget.service.serviceLocation,
         appointmentStatus: AppointmentStatus.pending,
         appointmentNotes: _notesController.text.trim(),
         appointmentType: selectedType!,
-        appointmentPriceFee: selectedType == AppointmentType.pickUp ? 50.0 : 0.0,
+        appointmentPriceFee: selectedType == AppointmentType.pickUp
+            ? 50.0
+            : 0.0,
         appointmentCreateDate: DateTime.now(),
       );
 
-      // 🧠 Timeout for Supabase
+      // Timeout for Supabase
       final createdAppointment = await ref
-          .read(createAppointmentProvider({
-            'appointment': appointment,
-            'waste': wastes,
-          }).future)
+          .read(
+            createAppointmentProvider({
+              'appointment': appointment,
+              'waste': wastes,
+            }).future,
+          )
           .timeout(const Duration(seconds: 15));
 
-      // ✅ Finalize QR code
+      // Finalize QR code
       await ref
-          .read(finalizeAppointmentProvider(
-            createdAppointment.appointmentInfoId!,
-          ).future)
+          .read(
+            finalizeAppointmentProvider(
+              createdAppointment.appointmentInfoId!,
+            ).future,
+          )
           .timeout(const Duration(seconds: 10));
 
       // --- MODIFICATION START: Add points to user ---
@@ -236,7 +245,7 @@ class _ScheduleAppointmentPageState
             .from('user_info')
             .update({'user_points': newPoints})
             .eq('user_info_id', userInfo.userInfoId);
-            
+
         // Invalidate the user provider to refresh the user's data across the app
         ref.invalidate(userProvider);
       } catch (e) {
@@ -262,7 +271,8 @@ class _ScheduleAppointmentPageState
         });
       }
     } catch (e) {
-      if (mounted) Navigator.of(context, rootNavigator: true).pop(); // hide loader
+      if (mounted)
+        Navigator.of(context, rootNavigator: true).pop(); // hide loader
 
       setState(() {
         error = 'Error: ${e.toString()}';

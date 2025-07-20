@@ -67,7 +67,6 @@ class Appointment {
         : 'Drop-Off',
     'avail_sched_id': availSchedId,
     'appointment_date': appointmentDate.toIso8601String(),
-    'appointment_create_date': appointmentCreateDate?.toIso8601String(),
     'appointment_confirm_date': appointmentConfirmDate?.toIso8601String(),
     'appointment_cancel_date': appointmentCancelDate?.toIso8601String(),
     'appointment_location': appointmentLocation,

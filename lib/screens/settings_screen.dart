@@ -47,6 +47,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final user = viewModel.userInfo;
 
     return Scaffold(
+      backgroundColor: Colors.white,
       bottomNavigationBar: CustomBottomNavBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
@@ -555,6 +556,7 @@ class _PointsScreenState extends ConsumerState<PointsScreen> {
     final points = viewModel.userPoints.points;
 
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24.0),

@@ -20,7 +20,6 @@ class DisposalShopDetailsScreen extends ConsumerStatefulWidget {
 
 class _DisposalShopDetailsScreenState
     extends ConsumerState<DisposalShopDetailsScreen> {
-
   String _formatOperatingHours() {
     final now = DateTime.now();
     final currentDay = now.weekday;
@@ -50,10 +49,7 @@ class _DisposalShopDetailsScreenState
         body: Center(
           child: Text(
             'You must be logged in to view this page.',
-            style: TextStyle(
-              fontSize: 16,
-              fontFamily: 'Mallanna',
-            ),
+            style: TextStyle(fontSize: 16, fontFamily: 'Mallanna'),
           ),
         ),
       );
@@ -64,6 +60,7 @@ class _DisposalShopDetailsScreenState
     final isFavorited = favoriteServices.contains(widget.service.serviceId);
 
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
@@ -191,13 +188,27 @@ class _DisposalShopDetailsScreenState
 
               // Location
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.location_on, size: 16, color: Colors.grey),
+                  const Padding(
+                    padding: EdgeInsets.only(top: 2),
+                    child: Icon(
+                      Icons.location_on,
+                      size: 16,
+                      color: Colors.grey,
+                    ),
+                  ),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
                       widget.service.serviceLocation,
-                      style: const TextStyle(fontFamily: 'Mallanna'),
+                      style: const TextStyle(
+                        fontFamily: 'Mallanna',
+                        fontSize: 14,
+                        height: 1.3,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
@@ -207,7 +218,11 @@ class _DisposalShopDetailsScreenState
               // Availability
               Row(
                 children: [
-                  const Icon(Icons.local_shipping, size: 16, color: Color(0xFF6A8126)),
+                  const Icon(
+                    Icons.local_shipping,
+                    size: 16,
+                    color: Color(0xFF6A8126),
+                  ),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
@@ -239,29 +254,29 @@ class _DisposalShopDetailsScreenState
                     .map((sm) => sm.materialPoints.materialType)
                     .toSet()
                     .map((materialType) {
-                  return Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF4A5F44).withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: const Color(0xFF4A5F44),
-                        width: 1,
-                      ),
-                    ),
-                    child: Text(
-                      materialType,
-                      style: const TextStyle(
-                        color: Color(0xFF4A5F44),
-                        fontSize: 14,
-                        fontFamily: 'Mallanna',
-                      ),
-                    ),
-                  );
-                })
+                      return Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF4A5F44).withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: const Color(0xFF4A5F44),
+                            width: 1,
+                          ),
+                        ),
+                        child: Text(
+                          materialType,
+                          style: const TextStyle(
+                            color: Color(0xFF4A5F44),
+                            fontSize: 14,
+                            fontFamily: 'Mallanna',
+                          ),
+                        ),
+                      );
+                    })
                     .toList(),
               ),
 

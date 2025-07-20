@@ -9,6 +9,7 @@ class CancelConfirmationDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      backgroundColor: Colors.white,
       title: const Text(
         'Cancel Appointment',
         style: TextStyle(
@@ -26,7 +27,7 @@ class CancelConfirmationDialog extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
           child: const Text(
             'No',
-            style: TextStyle(color: Colors.grey, fontFamily: 'Mallanna'),
+            style: TextStyle(color: Colors.grey),
           ),
         ),
         TextButton(
@@ -36,7 +37,7 @@ class CancelConfirmationDialog extends StatelessWidget {
           },
           child: const Text(
             'Yes, Cancel',
-            style: TextStyle(color: Colors.red, fontFamily: 'Mallanna'),
+            style: TextStyle(color: Colors.red),
           ),
         ),
       ],

@@ -21,7 +21,7 @@ class DropoffDetailsSection extends StatelessWidget {
   bool _isWithinOperatingHours(DateTime dateTime) {
     // In ISO format, Monday is 1 and Sunday is 7
     final dayOfWeek = dateTime.weekday; // 1 = Monday, 7 = Sunday
-    
+
     // Find operating hours for this day
     final operatingDay = service.operatingHours.firstWhere(
       (h) => h.operatingDays == dayOfWeek && h.isOpen,
@@ -63,7 +63,7 @@ class DropoffDetailsSection extends StatelessWidget {
   }
 
   String _formatReadableDate(DateTime dateTime) {
-    return DateFormat('MMMM d, yyyy – h:mm a').format(dateTime);
+    return DateFormat('MMMM d, yyyy, h:mm a').format(dateTime);
   }
 
   @override
@@ -82,10 +82,7 @@ class DropoffDetailsSection extends StatelessWidget {
         const SizedBox(height: 10),
         const Text(
           "Date & Time",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontFamily: 'Mallanna',
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Mallanna'),
         ),
         const SizedBox(height: 10),
         // Date & Time Picker
@@ -115,11 +112,12 @@ class DropoffDetailsSection extends StatelessWidget {
                 lastDate: DateTime.now().add(const Duration(days: 30)),
                 selectableDayPredicate: (DateTime date) {
                   // Only allow days that have operating hours
-                  return service.operatingHours
-                      .any((oh) => oh.operatingDays == date.weekday && oh.isOpen);
+                  return service.operatingHours.any(
+                    (oh) => oh.operatingDays == date.weekday && oh.isOpen,
+                  );
                 },
               );
-              
+
               if (pickedDate != null) {
                 final dayHours = service.operatingHours.firstWhere(
                   (h) => h.operatingDays == pickedDate.weekday && h.isOpen,
@@ -131,9 +129,9 @@ class DropoffDetailsSection extends StatelessWidget {
                   initialTime: TimeOfDay.fromDateTime(selectedDate),
                   builder: (context, child) {
                     return MediaQuery(
-                      data: MediaQuery.of(context).copyWith(
-                        alwaysUse24HourFormat: false,
-                      ),
+                      data: MediaQuery.of(
+                        context,
+                      ).copyWith(alwaysUse24HourFormat: false),
                       child: child!,
                     );
                   },
@@ -171,7 +169,10 @@ class DropoffDetailsSection extends StatelessWidget {
                 fontFamily: 'Mallanna',
               ),
             ),
-            trailing: const Icon(Icons.calendar_today, color: Color(0xFF4B5320)),
+            trailing: const Icon(
+              Icons.calendar_today,
+              color: Color(0xFF4B5320),
+            ),
           ),
         ),
       ],

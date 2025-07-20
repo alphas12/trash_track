@@ -54,7 +54,7 @@ class WelcomeScreen extends StatelessWidget {
                                 ),
                               ),
                               child: Text(
-                                "Sign up",
+                                "Sign Up",
                                 style: TextStyle(
                                   color: const Color(0xFFFEFAE0),
                                   fontSize: constraints.maxWidth * 0.06, // Responsive font size
@@ -69,7 +69,7 @@ class WelcomeScreen extends StatelessWidget {
                               Navigator.pushNamed(context, '/login');
                             },
                             child: Text(
-                              "Login",
+                              "Log In",
                               style: TextStyle(
                                 fontSize: constraints.maxWidth * 0.055, // Responsive font size
                                 fontWeight: FontWeight.w600,

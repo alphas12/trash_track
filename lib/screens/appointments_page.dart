@@ -70,7 +70,7 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage> {
                     );
                   },
 
-                loading: () => const Center(child: CircularProgressIndicator()),
+                loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFF4A5F44))),
                 error: (error, stack) => Center(
                   child: Text(
                     'Error loading appointments: $error',

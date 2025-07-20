@@ -151,8 +151,6 @@ class AppointmentRepository {
 
       // Insert waste materials
       if (wasteMaterials.isNotEmpty) {
-
-
         for (final w in wasteMaterials) {
           await _client.from('appointment_trash').insert({
             'appointment_info_id': newAppointmentId,
@@ -320,7 +318,9 @@ class AppointmentRepository {
   }
 
   /// Update appointment status
-  Future<void> updateAppointmentStatus( String appointmentId, AppointmentStatus status, 
+  Future<void> updateAppointmentStatus(
+    String appointmentId,
+    AppointmentStatus status,
   ) async {
     try {
       await _client
@@ -431,8 +431,8 @@ class AppointmentRepository {
         minute,
       );
     }
-    // For drop-off appointments, use the current date and time
-    return DateTime.now();
+    // For drop-off appointments, use the selected appointment date
+    return appointment.appointmentDate;
   }
 
   String getAppointmentStatus(AppointmentStatus? status) {
@@ -464,5 +464,4 @@ class AppointmentRepository {
       return null;
     }
   }
-
 }

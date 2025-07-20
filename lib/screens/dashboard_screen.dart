@@ -44,6 +44,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
 
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Stack(
           children: [

@@ -37,6 +37,7 @@ class CollectionsPage extends ConsumerWidget {
     final favoritesNotifier = ref.read(favoriteServicesProvider(userId).notifier);
 
     return Scaffold(
+      backgroundColor: Colors.white,
       bottomNavigationBar: CustomBottomNavBar(
         currentIndex: 1,
         onTap: (index) {

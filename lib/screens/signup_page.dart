@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-// import '../services/signup_viewmodel.dart';
 import 'package:trash_track/screens/loading_screen.dart';
 import '../providers/auth_provider.dart';
 
@@ -41,13 +40,6 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                   icon: const Icon(Icons.arrow_back),
                   onPressed: () => Navigator.pop(context),
                 ),
-                const SizedBox(height: 10),
-                // const Center(
-                //   child: Text(
-                //     "Sign up",
-                //     style: TextStyle(fontSize: 16, color: Colors.black54),
-                //   ),
-                // ),
                 const SizedBox(height: 20),
                 const Text(
                   "Almost\nthere!",
@@ -88,7 +80,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                     ),
                     child: viewModel.isLoading
                         ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text("Sign up", style: TextStyle(fontSize: 16, letterSpacing: 1.2, color: Colors.white)),
+                        : const Text("Sign Up", style: TextStyle(fontSize: 16, letterSpacing: 1.2, color: Colors.white)),
                   ),
                 ),
                 Align(
@@ -97,7 +89,10 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                         onPressed: () {
                           Navigator.pushNamed(context, '/login');
                         },
-                        child: const Text("Already have an account?"),
+                        child: const Text(
+                              "Don't have an account?",
+                              style: TextStyle(color: Color(0xFF4B5320)),
+                        ),
                       ),
                     ),
               ],
