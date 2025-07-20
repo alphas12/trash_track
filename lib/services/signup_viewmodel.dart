@@ -9,7 +9,7 @@ class SignUpViewModel extends ChangeNotifier {
   final Ref ref;
   SignUpViewModel(this.ref);
 
-  final SupabaseClient _client = Supabase.instance.client;
+  // final SupabaseClient _client = Supabase.instance.client;
 
 
   bool isLoading = false;
@@ -29,9 +29,19 @@ class SignUpViewModel extends ChangeNotifier {
 
     try {
 
-       final SupabaseClient _client = Supabase.instance.client;
+      final SupabaseClient _client = Supabase.instance.client;
+      final authService = ref.read(authServiceProvider);
+
+      await authService.signUpWithCredentials(
+        email: email.trim(),
+        password: password,
+        fname: fname,
+        lname: lname,
+        location: location,
+      );
 
       final user = _client.auth.currentUser;
+
       if (user == null) return false;
 
       final response = await _client
@@ -44,15 +54,6 @@ class SignUpViewModel extends ChangeNotifier {
         errorMessage = "Account has been deleted";
         return false;
       }
-
-      final authService = ref.read(authServiceProvider);
-      await authService.signUpWithCredentials(
-        email: email.trim(),
-        password: password,
-        fname: fname,
-        lname: lname,
-        location: location,
-      );
 
       return true;
 
