@@ -163,6 +163,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
           if (value == null || value.isEmpty) return '$label is required';
           if (!isConfirm) return null;
           if (value != _passwordController.text) return 'Passwords do not match';
+          if (value.length < 6) return 'Password should be at least 6 characters';
           return null;
         },
       ),
