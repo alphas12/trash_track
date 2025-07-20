@@ -136,117 +136,141 @@ class _ScheduleAppointmentPageState
     });
   }
 
-Future<void> _scheduleAppointment() async {
-  if (!mounted) return;
-  print('🚀 Starting appointment scheduling...');
+  Future<void> _scheduleAppointment() async {
+    if (!mounted) return;
+    print('🚀 Starting appointment scheduling...');
 
-  final userInfo = await ref.read(userProvider.future);
-  final user = Supabase.instance.client.auth.currentUser;
+    final userInfo = await ref.read(userProvider.future);
+    final user = Supabase.instance.client.auth.currentUser;
 
-  if (user == null || userInfo == null) {
-    setState(() => error = 'Please sign in to schedule an appointment');
-    return;
-  }
-
-  // 🔎 Validation
-  if (selectedType == null) {
-    setState(() => error = 'Please select a service type');
-    return;
-  }
-  if (wasteMaterials.isEmpty) {
-    setState(() => error = 'Please add at least one waste material');
-    return;
-  }
-  if (selectedType == AppointmentType.pickUp) {
-    if (selectedSchedule == null) {
-      setState(() => error = 'Please select a schedule');
+    if (user == null || userInfo == null) {
+      setState(() => error = 'Please sign in to schedule an appointment');
       return;
     }
-    if (userLocation == null || userLocation!.isEmpty) {
-      setState(() => error = 'Please provide a pickup location');
+
+    // 🔎 Validation
+    if (selectedType == null) {
+      setState(() => error = 'Please select a service type');
       return;
     }
-  }
-
-  setState(() {
-    isLoading = true;
-    error = null;
-  });
-
-  // ✅ Show loading indicator
-  showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (_) => const Center(child: CircularProgressIndicator()),
-  );
-
-  try {
-    final wastes = wasteMaterials.map((waste) {
-      return AppointmentWaste(
-        appointmentInfoId: '',
-        serviceMaterialId: waste.serviceMaterialId!,
-        weightKg: waste.weightKg!,
-      );
-    }).toList();
-
-    final appointment = Appointment(
-      appointmentInfoId: '',
-      serviceId: widget.service.serviceId,
-      userInfoId: userInfo.userInfoId,
-      availSchedId: selectedSchedule?.availScheduleId,
-      appointmentDate: selectedType == AppointmentType.pickUp
-          ? selectedSchedule!.availDate
-          : selectedDate,
-      appointmentLocation: userLocation ?? widget.service.serviceLocation,
-      appointmentStatus: AppointmentStatus.pending,
-      appointmentNotes: _notesController.text.trim(),
-      appointmentType: selectedType!,
-      appointmentPriceFee: selectedType == AppointmentType.pickUp ? 50.0 : 0.0,
-      appointmentCreateDate: DateTime.now(),
-    );
-
-    // 🧠 Timeout for Supabase
-    final createdAppointment = await ref
-        .read(createAppointmentProvider({
-          'appointment': appointment,
-          'waste': wastes,
-        }).future)
-        .timeout(const Duration(seconds: 15));
-
-    // ✅ Finalize QR code
-    await ref
-        .read(finalizeAppointmentProvider(
-          createdAppointment.appointmentInfoId!,
-        ).future)
-        .timeout(const Duration(seconds: 10));
-
-    // Hide loader
-    if (mounted) Navigator.of(context, rootNavigator: true).pop();
-
-    // Show success dialog
-    if (mounted) {
-      showDialog(
-        context: context,
-        builder: (context) => const SuccessDialog(
-          message:
-              'Success! Your recycling appointment is confirmed. Thank you for helping us make a difference!',
-        ),
-      ).then((_) {
-        ref.invalidate(userAppointmentsProvider);
-        if (mounted) Navigator.pop(context);
-      });
+    if (wasteMaterials.isEmpty) {
+      setState(() => error = 'Please add at least one waste material');
+      return;
     }
-  } catch (e) {
-    if (mounted) Navigator.of(context, rootNavigator: true).pop(); // hide loader
+    if (selectedType == AppointmentType.pickUp) {
+      if (selectedSchedule == null) {
+        setState(() => error = 'Please select a schedule');
+        return;
+      }
+      if (userLocation == null || userLocation!.isEmpty) {
+        setState(() => error = 'Please provide a pickup location');
+        return;
+      }
+    }
 
     setState(() {
-      error = 'Error: ${e.toString()}';
-      isLoading = false;
+      isLoading = true;
+      error = null;
     });
-    print('Exception during scheduling: $e');
-  }
-}
 
+    // ✅ Show loading indicator
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      final wastes = wasteMaterials.map((waste) {
+        return AppointmentWaste(
+          appointmentInfoId: '',
+          serviceMaterialId: waste.serviceMaterialId!,
+          weightKg: waste.weightKg!,
+        );
+      }).toList();
+
+      final appointment = Appointment(
+        appointmentInfoId: '',
+        serviceId: widget.service.serviceId,
+        userInfoId: userInfo.userInfoId,
+        availSchedId: selectedSchedule?.availScheduleId,
+        appointmentDate: selectedType == AppointmentType.pickUp
+            ? selectedSchedule!.availDate
+            : selectedDate,
+        appointmentLocation: userLocation ?? widget.service.serviceLocation,
+        appointmentStatus: AppointmentStatus.pending,
+        appointmentNotes: _notesController.text.trim(),
+        appointmentType: selectedType!,
+        appointmentPriceFee: selectedType == AppointmentType.pickUp ? 50.0 : 0.0,
+        appointmentCreateDate: DateTime.now(),
+      );
+
+      // 🧠 Timeout for Supabase
+      final createdAppointment = await ref
+          .read(createAppointmentProvider({
+            'appointment': appointment,
+            'waste': wastes,
+          }).future)
+          .timeout(const Duration(seconds: 15));
+
+      // ✅ Finalize QR code
+      await ref
+          .read(finalizeAppointmentProvider(
+            createdAppointment.appointmentInfoId!,
+          ).future)
+          .timeout(const Duration(seconds: 10));
+
+      // --- MODIFICATION START: Add points to user ---
+      try {
+        // Fetch the latest user points directly from the database to avoid model issues
+        final pointsResponse = await Supabase.instance.client
+            .from('user_info')
+            .select('user_points')
+            .eq('user_info_id', userInfo.userInfoId)
+            .single();
+
+        final currentPoints = (pointsResponse['user_points'] ?? 0) as int;
+        final newPoints = currentPoints + 5;
+
+        await Supabase.instance.client
+            .from('user_info')
+            .update({'user_points': newPoints})
+            .eq('user_info_id', userInfo.userInfoId);
+            
+        // Invalidate the user provider to refresh the user's data across the app
+        ref.invalidate(userProvider);
+      } catch (e) {
+        // Log the error but don't block the success flow
+        print('Error updating user points: $e');
+      }
+      // --- MODIFICATION END ---
+
+      // Hide loader
+      if (mounted) Navigator.of(context, rootNavigator: true).pop();
+
+      // Show success dialog
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => const SuccessDialog(
+            message:
+                'Success! Your recycling appointment is confirmed. You earned 5 points! Thank you for helping us make a difference!',
+          ),
+        ).then((_) {
+          ref.invalidate(userAppointmentsProvider);
+          if (mounted) Navigator.pop(context);
+        });
+      }
+    } catch (e) {
+      if (mounted) Navigator.of(context, rootNavigator: true).pop(); // hide loader
+
+      setState(() {
+        error = 'Error: ${e.toString()}';
+        isLoading = false;
+      });
+      print('Exception during scheduling: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -306,7 +330,6 @@ Future<void> _scheduleAppointment() async {
                   onRemove: (index) => _removeMaterial(index),
                   onAdd: _addMaterial,
                 ),
-
                 const Divider(height: 30),
                 selectedType == AppointmentType.pickUp &&
                         widget.service.serviceAvailability.contains('Pick-Up')
@@ -331,7 +354,6 @@ Future<void> _scheduleAppointment() async {
                           });
                         },
                       ),
-
                 const Divider(height: 30),
                 AdditionalNotesField(controller: _notesController),
                 const Divider(height: 30),
