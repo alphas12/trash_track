@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart'; // ADD THIS IMPORT
 import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
@@ -11,7 +12,6 @@ import 'package:tflite_flutter/tflite_flutter.dart';
 import '../models/disposal_service.dart';
 import '../providers/disposal_service_provider.dart';
 import 'disposal_shop_details_screen.dart';
-
 
 // MODIFICATION: Changed to ConsumerStatefulWidget to access Riverpod providers
 class ScanScreen extends ConsumerStatefulWidget {
@@ -30,6 +30,15 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
   // ─────────────────────── image picking ─────────────────────
   final ImagePicker _picker = ImagePicker();
   File? _selectedImage;
+
+  // ─────────────────── Face Detection Model ──────────────────
+  // Create an instance of the face detector
+  final FaceDetector _faceDetector = FaceDetector(
+    options: FaceDetectorOptions(
+      performanceMode: FaceDetectorMode.fast, // Use fast mode for quick checks
+    ),
+  );
+  bool _isDetectingFaces = false;
 
   // ─────────────────────── tflite model ──────────────────────
   static const _modelPath = 'assets/models/GarbageClassification.tflite';
@@ -84,6 +93,14 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
     _loadModel();
   }
 
+  @override
+  void dispose() {
+    // It's important to release the resources used by the detectors
+    _interpreter?.close();
+    _faceDetector.close();
+    super.dispose();
+  }
+
   Future<void> _loadModel() async {
     try {
       final options = InterpreterOptions();
@@ -121,32 +138,86 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
     );
 
     if (continueToCamera == true) {
-      await _pickFromCamera();
+      await _processPickedImage(ImageSource.camera);
     }
   }
 
-  Future<void> _pickFromCamera() async {
-    final XFile? picked = await _picker.pickImage(source: ImageSource.camera);
-    if (picked == null) return;
-    setState(() {
-      _selectedImage = File(picked.path);
-      _prediction = null;
-      _wasteType = null;
-      _wasteDescription = null;
-    });
-    _handleIdentify();
+  Future<void> _pickFromGallery() async {
+    await _processPickedImage(ImageSource.gallery);
   }
 
-  Future<void> _pickFromGallery() async {
-    final XFile? picked = await _picker.pickImage(source: ImageSource.gallery);
+  /// NEW: A unified method to handle picking, face detection, and classification
+  Future<void> _processPickedImage(ImageSource source) async {
+    if (_isDetectingFaces) return;
+
+    final XFile? picked = await _picker.pickImage(source: source);
     if (picked == null) return;
+
     setState(() {
-      _selectedImage = File(picked.path);
-      _prediction = null;
-      _wasteType = null;
-      _wasteDescription = null;
+      _isDetectingFaces = true;
+      _selectedImage = File(picked.path); // Show image immediately
+      _prediction = null; // Clear previous prediction
     });
-    _handleIdentify();
+
+    // Show a loading indicator while checking for faces
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text("Analyzing image...", style: TextStyle(color: Colors.white, fontSize: 16)),
+          ],
+        ),
+      ),
+    );
+
+    final imageFile = File(picked.path);
+    final hasFace = await _checkForFaces(imageFile);
+
+    if (mounted) Navigator.of(context).pop(); // Dismiss loading dialog
+
+    if (hasFace) {
+      if (mounted) {
+        await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Face Detected'),
+            content: const Text(
+                'An animal or human face was detected. Please use a picture of the waste item only.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
+      _removeImage(); // Clear the invalid image
+    } else {
+      // No face detected, proceed with garbage classification
+      _handleIdentify();
+    }
+
+    setState(() {
+      _isDetectingFaces = false;
+    });
+  }
+
+  /// NEW: This method checks an image file for any faces.
+  Future<bool> _checkForFaces(File imageFile) async {
+    try {
+      final inputImage = InputImage.fromFile(imageFile);
+      final List<Face> faces = await _faceDetector.processImage(inputImage);
+      return faces.isNotEmpty;
+    } catch (e) {
+      debugPrint("Error detecting faces: $e");
+      return false; // Assume no faces if there's an error
+    }
   }
 
   void _removeImage() {
@@ -187,7 +258,6 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
     }
   }
 
-  // --- NEW METHOD ---
   // This function fetches services, finds a match, and navigates.
   Future<void> _findShopAndNavigate() async {
     if (_prediction == null) return;
@@ -215,11 +285,9 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
         }
       }
 
-      // Dismiss the loading dialog
       if (mounted) Navigator.of(context).pop();
 
       if (matchingService != null) {
-        // If a match is found, navigate to its details screen
         if (mounted) {
           Navigator.push(
             context,
@@ -230,7 +298,6 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
           );
         }
       } else {
-        // If no match is found, show a dialog
         if (mounted) {
           showDialog(
             context: context,
@@ -249,7 +316,6 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
         }
       }
     } catch (e) {
-      // Dismiss the loading dialog and show an error
       if (mounted) Navigator.of(context).pop();
       if (mounted) {
         showDialog(
@@ -319,7 +385,6 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
             Padding(
               padding: const EdgeInsets.only(right: 8.0),
               child: TextButton(
-                // MODIFICATION: Call the new navigation function
                 onPressed: _findShopAndNavigate,
                 child: const Text(
                   'Find Shop',
@@ -347,7 +412,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
                 if (_selectedImage != null) ...[
                   imagePreview(),
                   const SizedBox(height: 24),
-                  if (_running)
+                  if (_running || _isDetectingFaces)
                     const CircularProgressIndicator()
                   else if (_prediction != null)
                     Container(
@@ -358,7 +423,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
+                            color: Colors.black.withValues(alpha: 0.05),
                             blurRadius: 10,
                           ),
                         ],
@@ -442,7 +507,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
               width: 28,
               height: 28,
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.65),
+                color: Colors.black.withValues(alpha: 0.65),
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.close, size: 16, color: Colors.white),
@@ -461,7 +526,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
@@ -492,6 +557,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
             children: [
               Expanded(
                 child: ElevatedButton(
+                  // MODIFIED: Use the new unified handler
                   onPressed: _handleScan,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF5D6B4C),
@@ -513,6 +579,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
               const SizedBox(width: 16),
               Expanded(
                 child: ElevatedButton(
+                  // MODIFIED: Use the new unified handler
                   onPressed: _pickFromGallery,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFD9D9D9),
