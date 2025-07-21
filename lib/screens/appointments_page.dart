@@ -6,14 +6,12 @@ import '../widgets/custom_bottom_nav_bar.dart';
 import '../providers/appointment_provider.dart';
 import '../widgets/appointment/appointment_card.dart';
 
-
 class AppointmentsPage extends ConsumerStatefulWidget {
   const AppointmentsPage({super.key});
 
   @override
   ConsumerState<AppointmentsPage> createState() => _AppointmentsPageState();
 }
-
 
 class _AppointmentsPageState extends ConsumerState<AppointmentsPage> {
   @override
@@ -34,43 +32,55 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage> {
             _buildHeader(context),
             Expanded(
               child: appointmentsAsync.when(
-                  data: (appointments) {
-                    final upcoming = appointments.where((a) =>
-                    a.appointmentStatus == AppointmentStatus.pending ||
-                        a.appointmentStatus == AppointmentStatus.confirmed
-                    ).toList();
+                data: (appointments) {
+                  final now = DateTime.now();
+                  final upcoming = appointments
+                      .where(
+                        (a) =>
+                            (a.appointmentStatus == AppointmentStatus.pending ||
+                                a.appointmentStatus ==
+                                    AppointmentStatus.confirmed) &&
+                            !a.appointmentDate.isBefore(DateTime(now.year, now.month, now.day)),
+                      )
+                      .toList();
 
-                    if (upcoming.isEmpty) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.event_busy, size: 64, color: Color(0xFF4B5320)),
-                            const SizedBox(height: 20),
-                            const Text(
-                              'No upcoming appointments',
-                              style: TextStyle(
-                                fontFamily: 'Mallanna',
-                                fontSize: 18,
-                                color: Color(0xFF4B5320),
-                              ),
+                  if (upcoming.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.event_busy,
+                            size: 64,
+                            color: Color(0xFF4B5320),
+                          ),
+                          const SizedBox(height: 20),
+                          const Text(
+                            'No upcoming appointments',
+                            style: TextStyle(
+                              fontFamily: 'Mallanna',
+                              fontSize: 18,
+                              color: Color(0xFF4B5320),
                             ),
-                          ],
-                        ),
-                      );
-                    }
-
-                    return ListView.builder(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: upcoming.length,
-                      itemBuilder: (context, index) {
-                        final appointment = upcoming[index];
-                        return AppointmentCard(appointment: appointment);
-                      },
+                          ),
+                        ],
+                      ),
                     );
-                  },
+                  }
 
-                loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFF4A5F44))),
+                  return ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: upcoming.length,
+                    itemBuilder: (context, index) {
+                      final appointment = upcoming[index];
+                      return AppointmentCard(appointment: appointment);
+                    },
+                  );
+                },
+
+                loading: () => const Center(
+                  child: CircularProgressIndicator(color: Color(0xFF4A5F44)),
+                ),
                 error: (error, stack) => Center(
                   child: Text(
                     'Error loading appointments: $error',
@@ -129,7 +139,7 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const HistoryScreen())
+                    MaterialPageRoute(builder: (_) => const HistoryScreen()),
                   );
                 },
                 style: TextButton.styleFrom(
@@ -169,4 +179,3 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage> {
     );
   }
 }
-

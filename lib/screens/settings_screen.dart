@@ -3,15 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../widgets/custom_bottom_nav_bar.dart';
 import '../providers/manage_profile_provider.dart';
-// import '../services/manage_profile_viewmodel.dart';
 import '../providers/points_provider.dart';
-// import '../services/change_password_viewmodel.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/appointment/appointment_card.dart';
 import '../providers/appointment_provider.dart';
 import '../models/appointment_model.dart';
 
-import '../services/delete_account_viewmodel.dart';
 import '../providers/delete_account_provider.dart';
 import '../providers/settings_provider.dart';
 
@@ -265,7 +262,6 @@ class _ManageProfileScreenState extends ConsumerState<ManageProfileScreen> {
   Widget build(BuildContext context) {
     final viewModel = ref.watch(profileViewModelProvider);
     final controller = ref.read(profileViewModelProvider.notifier);
-    final uploadedImageUrl = viewModel.uploadedImageUrl;
  
     return Scaffold(
       backgroundColor: Colors.white,

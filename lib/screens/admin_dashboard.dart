@@ -10,6 +10,7 @@ class AdminDashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Use the auto-refreshing stream of pending appointments
     final asyncAppointments = ref.watch(adminTodayAppointmentsProvider);
 
     return Scaffold(
@@ -91,7 +92,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                 ],
               ),
             ),
-            
+
             // Scrollable appointments below
             Expanded(
               child: SingleChildScrollView(
@@ -132,7 +133,6 @@ class AdminDashboardScreen extends ConsumerWidget {
                               datetime: formattedDate,
                               location: appointment.appointmentLocation,
                               status: appointment.appointmentStatus.value,
-                              showActions: false,
                             );
                           },
                         );

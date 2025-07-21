@@ -142,7 +142,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             alignment: Alignment.centerRight,
                             child: TextButton(
                               onPressed: () {},
-                              child: const Text('Forgot your password?'),
+                              child: const Text(
+                                'Forgot your password?',
+                                style: TextStyle(color: Color(0xFF4B5320)),
+                              ),
                             ),
                           ),
                           const Spacer(),

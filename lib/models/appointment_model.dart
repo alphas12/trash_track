@@ -77,12 +77,29 @@ class Appointment {
   };
 
   factory Appointment.fromMap(Map<String, dynamic> map) {
-    final userInfo = map['user_info'] as List?;
     String? userFullName;
 
-    if (userInfo != null && userInfo.isNotEmpty) {
-      final userData = userInfo.first as Map<String, dynamic>;
-      userFullName = "${userData['user_fname']} ${userData['user_lname']}";
+    // Check for nested user_info from join query
+    if (map['user_info'] != null) {
+      final userData = map['user_info'] as Map<String, dynamic>?;
+      if (userData != null) {
+        final firstName = userData['user_fname'] as String? ?? '';
+        final lastName = userData['user_lname'] as String? ?? '';
+        if (firstName.isNotEmpty || lastName.isNotEmpty) {
+          userFullName = '$firstName $lastName'.trim();
+        }
+      }
+    }
+    // Check for user data from user field
+    else if (map['user'] != null) {
+      final userData = map['user'] as Map<String, dynamic>?;
+      if (userData != null) {
+        final firstName = userData['user_fname'] as String? ?? '';
+        final lastName = userData['user_lname'] as String? ?? '';
+        if (firstName.isNotEmpty || lastName.isNotEmpty) {
+          userFullName = '$firstName $lastName'.trim();
+        }
+      }
     }
     return Appointment(
       appointmentInfoId: map['appointment_info_id'],

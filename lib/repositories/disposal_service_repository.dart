@@ -185,17 +185,4 @@ class DisposalServiceRepository {
       throw Exception('Failed to search services: $e');
     }
   }
-
-  // Helper function to parse time string (HH:mm) to DateTime
-  DateTime _parseTimeString(String timeStr) {
-    final now = DateTime.now();
-    final parts = timeStr.split(':');
-    return DateTime(
-      now.year,
-      now.month,
-      now.day,
-      int.parse(parts[0]),
-      int.parse(parts[1]),
-    );
-  }
 }

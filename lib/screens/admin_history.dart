@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../widgets/admin_nav_bar.dart';
-import '/screens/admin_qr_scan.dart';
 import '../models/appointment_model.dart';
 import '../providers/admin_appointment_provider.dart';
 
@@ -102,7 +101,9 @@ class _AdminHistoryScreenState extends ConsumerState<AdminHistoryScreen>
     final completedAsync = ref.watch(adminCompletedAppointmentsStreamProvider);
 
     return Scaffold(
+      backgroundColor: Colors.grey[100],
       appBar: AppBar(
+        backgroundColor: Colors.grey[100],
         elevation: 0,
         automaticallyImplyLeading: false, // Removes back button
         title: const Text(

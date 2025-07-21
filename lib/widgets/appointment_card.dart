@@ -6,8 +6,6 @@ class AppointmentCard extends StatelessWidget {
   final String datetime;
   final String location;
   final String status;
-  final VoidCallback? onMarkAsCompleted;
-  final bool showActions;
 
   const AppointmentCard({
     super.key,
@@ -16,8 +14,6 @@ class AppointmentCard extends StatelessWidget {
     required this.datetime,
     required this.location,
     required this.status,
-    this.onMarkAsCompleted,
-    this.showActions = false,
   });
 
   @override
@@ -90,23 +86,6 @@ class AppointmentCard extends StatelessWidget {
                 ),
               ],
             ),
-            if (showActions && onMarkAsCompleted != null) ...[
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  ElevatedButton.icon(
-                    onPressed: onMarkAsCompleted,
-                    icon: const Icon(Icons.check_circle_outline),
-                    label: const Text('Mark as Completed'),
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      backgroundColor: Colors.green,
-                    ),
-                  ),
-                ],
-              ),
-            ],
           ],
         ),
       ),

@@ -14,19 +14,40 @@ final appointmentRepoProvider = Provider((ref) {
   return AppointmentRepository(Supabase.instance.client);
 });
 
-// Get today's appointments
-final adminTodayAppointmentsProvider = FutureProvider<List<Appointment>>((
-  ref,
-) async {
-  final repo = ref.read(adminAppointmentRepoProvider);
-  final service = await ref.watch(adminServiceProvider.future);
+// Get today's appointments - streamed and auto-refreshed
+final adminTodayAppointmentsProvider =
+    StreamProvider.autoDispose<List<Appointment>>((ref) async* {
+      final repo = ref.read(adminAppointmentRepoProvider);
+      final service = await ref.watch(adminServiceProvider.future);
 
-  if (service.serviceId.isEmpty) {
-    throw Exception('No service_id found for admin');
-  }
+      if (service.serviceId.isEmpty) {
+        throw Exception('No service_id found for admin');
+      }
 
-  return repo.getTodayAppointments(service.serviceId);
-});
+      // Set up a periodic refresh
+      while (true) {
+        try {
+          final allAppointments = await repo.getTodayAppointments(
+            service.serviceId,
+          );
+
+          // Filter to only show pending appointments
+          final pendingAppointments = allAppointments
+              .where(
+                (appointment) =>
+                    appointment.appointmentStatus == AppointmentStatus.pending,
+              )
+              .toList();
+
+          yield pendingAppointments;
+        } catch (e) {
+          yield [];
+        }
+
+        // Refresh every second
+        await Future.delayed(const Duration(seconds: 1));
+      }
+    });
 
 // Get all appointments
 final adminAllAppointmentsProvider = FutureProvider<List<Appointment>>((

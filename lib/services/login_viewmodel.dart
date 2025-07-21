@@ -53,6 +53,5 @@ class LoginViewModel extends ChangeNotifier {
       isLoading = false;
       notifyListeners();
     }
-    return null;
   }
 }

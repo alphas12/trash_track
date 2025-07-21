@@ -25,7 +25,6 @@ class WasteMaterialSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final usedTypes = wasteMaterials.map((w) => w.serviceMaterialId).toSet();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
